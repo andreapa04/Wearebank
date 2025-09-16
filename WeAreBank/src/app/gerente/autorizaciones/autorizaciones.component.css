@@ -1,0 +1,52 @@
+.gerente-container {
+  padding: 2rem;
+  min-height: 100vh;
+}
+
+.gerente-container h1 {
+  color: #5D5B9D;
+  margin-bottom: 1rem;
+}
+
+.autorizaciones-section h2 {
+  color: #6361A2;
+  margin-bottom: 1rem;
+}
+
+.autorizaciones-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+}
+
+.autorizaciones-table th {
+  background-color: #5D5B9D;
+  color: white;
+  padding: 0.8rem;
+}
+
+.autorizaciones-table td {
+  padding: 0.8rem;
+  border: 1px solid #B2B0D5;
+}
+
+.status-pendiente {
+  color: #716FAF;
+  font-weight: bold;
+}
+
+.status-aprobado {
+  color: #5D5B9D;
+  font-weight: bold;
+}
+
+.status-rechazado {
+  color: #A33;
+  font-weight: bold;
+}
+
+footer {
+  text-align: center;
+  margin-top: 2rem;
+  color: #6361A2;
+}

@@ -1,0 +1,45 @@
+.gerente-container {
+  padding: 2rem;
+  min-height: 100vh;
+}
+
+.gerente-container h1 {
+  color: #5D5B9D;
+}
+
+.cuenta-operation {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background-color: #8988C1;
+  border-radius: 8px;
+}
+
+.cuenta-operation h3 {
+  color: #5D5B9D;
+  margin-bottom: 1rem;
+}
+
+.operation-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.operation-btn {
+  background-color: #6361A2;
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.operation-btn:hover {
+  background-color: #5D5B9D;
+}
+
+footer {
+  text-align: center;
+  margin-top: 2rem;
+  color: #6361A2;
+}
