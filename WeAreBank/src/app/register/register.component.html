@@ -1,0 +1,111 @@
+<div class="register-container">
+  <h1># Crea tu cuenta en WeAreBank</h1>
+
+  <form (ngSubmit)="enviarSolicitud()" class="register-form">
+    <fieldset>
+      <legend>Datos personales</legend>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="nombre">Nombre</label>
+          <input type="text" id="nombre" title="nombre" name="nombre" placeholder="Nombre" class="form-input">
+        </div>
+        
+        <div class="form-group">
+          <label for="apellidoPaterno">Apellido Paterno</label>
+          <input type="text" id="apellidoPaterno" title="apellidoPaterno" name="apellidoPaterno" placeholder="Apellido Paterno" class="form-input">
+        </div>
+        
+        <div class="form-group">
+          <label for="apellidoMaterno">Apellido Materno</label>
+          <input type="text" id="apellidoMaterno" title="apellidoMaterno" name="apellidoMaterno" placeholder="Apellido Materno" class="form-input">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fecha de nacimiento</label>
+          <div class="date-inputs">
+            <input type="number" title="fechaNacimiento" name="dia" placeholder="DD" min="1" max="31" class="form-input small">
+            <input type="number" title="fechaNacimiento" name="mes" placeholder="MM" min="1" max="12" class="form-input small">
+            <input type="number" title="fechaNacimiento" name="anio" placeholder="AAAA" min="1900" max="2023" class="form-input medium">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="curp">CURP</label>
+          <input type="text" id="curp" title="curp" name="curp" placeholder="CURP" class="form-input">
+        </div>
+        
+        <div class="form-group">
+          <label for="rfc">RFC</label>
+          <input type="text" id="rfc" title="rfc" name="rfc" placeholder="RFC" class="form-input">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Dirección</legend>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="calleNumero">Calle y número</label>
+          <input type="text" id="calleNumero" title="calleNumero" name="calleNumero" placeholder="Calle y número" class="form-input">
+        </div>
+        
+        <div class="form-group">
+          <label for="colonia">Colonia</label>
+          <input type="text" id="colonia" title="colonia" name="colonia" placeholder="Colonia" class="form-input">
+        </div>
+        
+        <div class="form-group">
+          <label for="ciudad">Ciudad</label>
+          <input type="text" id="ciudad" title="ciudad" name="ciudad" placeholder="Ciudad" class="form-input">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="codigoPostal">Código postal</label>
+          <input type="text" id="codigoPostal" title="codigoPostal" name="codigoPostal" placeholder="Código postal" class="form-input">
+        </div>
+        
+        <div class="form-group">
+          <label for="estado">Estado</label>
+          <input type="text" id="estado" title="estado" name="estado" placeholder="Estado" class="form-input">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Documentos</legend>
+      <div class="form-group">
+        <label><strong>Sube un documento PDF de tu INE</strong> 📄</label>
+        <input type="file" accept=".pdf" class="form-input">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Contacto</legend>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="telefono">Teléfono</label>
+          <input type="tel" id="telefono" title="telefono" name="telefono" placeholder="Teléfono" class="form-input">
+        </div>
+        
+        <div class="form-group">
+          <label for="email">Correo electrónico</label>
+          <input type="email" id="email" title="email" name="email" placeholder="Correo electrónico" class="form-input">
+        </div>
+        
+        <div class="form-group">
+          <label for="contrasena">Contraseña</label>
+          <input type="password" id="contrasena" title="contrasena" name="contrasena" placeholder="Contraseña" class="form-input">
+        </div>
+      </div>
+    </fieldset>
+
+    <button type="submit" class="submit-button">Enviar solicitud</button>
+  </form>
+</div>

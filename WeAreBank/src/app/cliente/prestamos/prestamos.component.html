@@ -1,0 +1,54 @@
+<section>
+  <h2>Solicitudes de préstamo</h2>
+  
+  <h3>Mis solicitudes</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Plazo</th>
+        <th>Estado</th>
+        <th>Monto solicitado</th>
+        <th>Fecha de solicitud</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr title="Solicitudes">
+        <td>Plazo</td>
+        <td>Estado</td>
+        <td>Monto Solicitado</td>
+        <td>Fecha Solicitud</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>Solicitar préstamo</h2>
+  
+  <div class="form-group">
+    <label for="tipoPrestamo">Tipo de préstamo:</label>
+    <select id="tipoPrestamo">
+      <option value="">Seleccionar</option>
+      <option value="personal">Personal</option>
+      <option value="hipotecario">Hipotecario</option>
+      <option value="automotriz">Automotriz</option>
+    </select>
+  </div>
+  
+  <div class="form-group">
+    <label for="montoPrestamo">Monto:</label>
+    <input type="number" id="montoPrestamo">
+  </div>
+  
+  <div class="form-group">
+    <label for="plazoPrestamo">Plazo: (Meses)</label>
+    <input type="number" id="plazoPrestamo">
+  </div>
+  
+  <div class="form-group">
+    <label for="ingresosMensuales">Ingresos Mens.:</label>
+    <input type="number" id="ingresosMensuales" >
+  </div>
+  
+  <button (click)="solicitarPrestamo()">Solicitar</button>
+</section>

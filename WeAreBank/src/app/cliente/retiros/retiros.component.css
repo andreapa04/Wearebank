@@ -1,0 +1,22 @@
+.container {
+  margin: 20px;
+}
+.monto-btns button {
+  margin: 5px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background: #f3f3f3;
+}
+.monto-btns button.active {
+  background-color: #9c8ec4;
+  color: white;
+}
+.submit {
+  margin-top: 20px;
+  background-color: #9c8ec4;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+}
