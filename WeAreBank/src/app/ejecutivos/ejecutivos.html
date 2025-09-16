@@ -3,18 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro en WeAreBank</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-</head>
-<body>
-    <div class="container">
-        <header>
-            <span class="registro">Registro</span>
-            <h1>Crea tu cuenta en WeAreBank</h1>
-        </header>
-            <span class="footer-text">registroGerente/Cliente</span>
-        </footer>
-    </div>
+    <title>Dashboard WeAreBank</title>
+    <link rel="stylesheet" href="ejecutivos.css">
+    </head>
+    <body>
+    <header class="top-header">
+        <img src="../public/assets/logo.png" alt="Logo de WeAreBank">
+        <div class="user-greeting">Bienvenid@ {{ usuario }}</div>
+    </header>
+
+    <nav class="navegacion">
+        <ul>
+            <li><a (click)="showSection('dashboard')" [class.active]="currentSection === 'dashboard'">Inicio</a></li>
+            <li><a (click)="showSection('administrar-cuentas')" [class.active]="currentSection === 'administrar-cuentas'">Administrar cuentas</a></li>
+            <li><a (click)="showSection('solicitudes-pendientes')" [class.active]="currentSection === 'solicitudes-pendientes'">Solicitudes pendientes</a></li>
+            <li><a (click)="showSection('consultas')" [class.active]="currentSection === 'consultas'">Consultas</a></li>
+        </ul>
+    </nav>
+
+    <main class="dashboard-content">
+        <section *ngIf="currentSection === 'dashboard'">
+            <div class="metrics">
+                <div class="metric-item">Clientes activos: 120</div>
+                <div class="metric-item">Préstamos otorgados: 45</div>
+                <div class="metric-item">Solicitudes este mes: 30</div>
+            </div>
+            <div class="chart-container">
+                <img src="path/to/your-chart.png" alt="Gráfico de Solicitudes Mensuales">
+            </div>
+        </section>
+
+        <section *ngIf="currentSection === 'administrar-cuentas'">
+            <h2 class="section-title">Agregar Cliente</h2>
+            <h2 class="section-title">Abrir Préstamo</h2>
+            <h2 class="section-title">Abrir Crédito</h2>
+            <h2 class="section-title">Consultar Cartera</h2>
+            
+            <table class="data-table">
+                <caption>Table 1</caption>
+                <thead>
+                    <tr>
+                        <th>ID Clientes</th>
+                        <th>Nombre completo</th>
+                        <th>No. Cuenta</th>
+                        <th>Producto</th>
+                        <th>Saldo Actual</th>
+                        <th>Estado</th>
+                        <th>Último Movimiento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>001</td>
+                        <td>Juan Pérez López</td>
+                        <td>1234567890</td>
+                        <td>Cuenta Ahorro</td>
+                        <td>$75,230.50</td>
+                        <td>Activo</td>
+                        <td>2025-09-08</td>
+                    </tr>
+                    <tr>
+                        <td>002</td>
+                        <td>María Gómez Torres</td>
+                        <td>2234567891</td>
+                        <td>Cuenta Nómina</td>
+                        <td>$5,450.00</td>
+                        <td>Activa</td>
+                        <td>2025-09-01</td>
+                    </tr>
+                    <tr>
+                        <td>003</td>
+                        <td>Carlos Ruíz Ortega</td>
+                        <td>3234567892</td>
+                        <td>Crédito Hipotecario</td>
+                        <td>$100,000.00</td>
+                        <td>Activa</td>
+                        <td>2025-09-30</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        </main>
+
+    <footer class="main-footer">
+        Todos los derechos reservados. {{ currentYear }} ©
+    </footer>
+    <script src="ejecutivos.js"></script>
 </body>
 </html>

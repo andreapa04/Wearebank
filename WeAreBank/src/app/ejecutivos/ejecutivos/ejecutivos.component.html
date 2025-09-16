@@ -1,0 +1,100 @@
+<header class="top-header">
+    <img src="../public/assets/logo.png" alt="Logo de WeAreBank">
+    <div class="user-greeting">Bienvenid@ {{ usuario }}</div>
+</header>
+
+<nav class="navegacion">
+    <ul>
+        <li><a (click)="showSection('dashboard')" [class.active]="currentSection === 'dashboard'">Inicio</a></li>
+        <li><a (click)="showSection('administrar-cuentas')" [class.active]="currentSection === 'administrar-cuentas'">Administrar cuentas</a></li>
+        <li><a (click)="showSection('solicitudes-pendientes')" [class.active]="currentSection === 'solicitudes-pendientes'">Solicitudes pendientes</a></li>
+        <li><a (click)="showSection('consultas')" [class.active]="currentSection === 'consultas'">Consultas</a></li>
+    </ul>
+</nav>
+
+<main class="dashboard-content">
+    <section *ngIf="currentSection === 'dashboard'">
+        </section>
+
+    <section *ngIf="currentSection === 'administrar-cuentas'">
+        </section>
+
+    <section *ngIf="currentSection === 'solicitudes-pendientes'">
+        </section>
+
+    <section *ngIf="currentSection === 'consultas'">
+        <h2 class="section-title">Consulta de Clientes</h2>
+        <div class="search-container">
+            <input type="text" placeholder="Buscar">
+            <button class="search-button">🔍</button>
+        </div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID Cliente</th>
+                    <th>Nombre</th>
+                    <th>Apellidos</th>
+                    <th>CURP</th>
+                    <th>RFC</th>
+                    <th>Dirección</th>
+                    <th>Teléfono</th>
+                    <th>Correo</th>
+                    <th>Estado</th>
+                    <th>Ejecutivo asignado</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>001</td>
+                    <td>Juan</td>
+                    <td>Pérez</td>
+                    <td>PEXJ900101HDF</td>
+                    <td>PEXJ900101</td>
+                    <td>Calle Falsa 123, CDMX</td>
+                    <td>555-123-4567</td>
+                    <td>mailito.juan.perez@mail.com</td>
+                    <td>Activo</td>
+                    <td>Ana López</td>
+                </tr>
+                </tbody>
+        </table>
+        
+        <h2 class="section-title">Consultar Movimientos</h2>
+        <div class="search-container">
+            <input type="text" placeholder="Buscar">
+            <button class="search-button">🔍</button>
+        </div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID Movimiento</th>
+                    <th>Fecha</th>
+                    <th>Cuenta</th>
+                    <th>Cliente</th>
+                    <th>Tipo de movimiento</th>
+                    <th>Monto</th>
+                    <th>Saldo después</th>
+                    <th>Ejecutivo</th>
+                    <th>Comentarios</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>001</td>
+                    <td>01/09/2025</td>
+                    <td>8148498</td>
+                    <td>Juan Pérez</td>
+                    <td>Depósito</td>
+                    <td>$5,500</td>
+                    <td>$15,090</td>
+                    <td>Ana López</td>
+                    <td>Depósito en ventanilla</td>
+                </tr>
+                </tbody>
+        </table>
+    </section>
+</main>
+
+<footer class="main-footer">
+    Todos los derechos reservados. {{ currentYear }} ©
+</footer>
