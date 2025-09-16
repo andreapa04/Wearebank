@@ -13,16 +13,17 @@ import { filter } from 'rxjs/operators';
 export class AppComponent {
   title = 'WeAreBank';
   showNavbar: boolean = false;
+  userType: 'cliente' | 'gerente' | null = null;
 
-  // Lista de rutas donde debe mostrarse el navbar
+  // Lista de rutas para cada tipo de usuario
   private clientRoutes = [
-    '/cliente',
-    '/consultas',
-    '/retiros', 
-    '/transferencias',
-    '/pagos',
-    '/prestamos',
-    '/creditos'
+    '/cliente', '/consultas', '/retiros', '/transferencias', 
+    '/pagos', '/prestamos', '/creditos'
+  ];
+
+  private gerenteRoutes = [
+    '/gerente', '/gerente/autorizaciones', '/gerente/cuentas',
+    '/gerente/gestion-permisos', '/gerente/solicitudes'
   ];
 
   constructor(private router: Router) {
@@ -31,10 +32,19 @@ export class AppComponent {
         filter((event): event is NavigationEnd => event instanceof NavigationEnd)
       )
       .subscribe((event: NavigationEnd) => {
-        // Mostrar navbar si la ruta actual está en la lista de rutas de cliente
-        this.showNavbar = this.clientRoutes.some(route => 
-          event.urlAfterRedirects.startsWith(route)
-        );
+        const currentUrl = event.urlAfterRedirects;
+        
+        // Determinar tipo de usuario basado en la ruta
+        if (this.clientRoutes.some(route => currentUrl.startsWith(route))) {
+          this.showNavbar = true;
+          this.userType = 'cliente';
+        } else if (this.gerenteRoutes.some(route => currentUrl.startsWith(route))) {
+          this.showNavbar = true;
+          this.userType = 'gerente';
+        } else {
+          this.showNavbar = false;
+          this.userType = null;
+        }
       });
   }
 
@@ -43,7 +53,7 @@ export class AppComponent {
     this.router.navigate(['/login']);
   }
 
-  // Método para verificar si una ruta está activa (para resaltar en el navbar)
+  // Método para verificar si una ruta está activa
   isActiveRoute(route: string): boolean {
     return this.router.url === route || this.router.url.startsWith(route + '/');
   }

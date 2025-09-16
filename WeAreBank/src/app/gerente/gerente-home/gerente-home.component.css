@@ -1,0 +1,289 @@
+.gerente-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.gerente-container h1 {
+  color: #6361A2;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2.5rem;
+}
+
+.gerente-menu {
+  background-color: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.gerente-menu h2 {
+  color: #6361A2;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.gerente-menu ul {
+  list-style: none;
+  padding: 0;
+}
+
+.gerente-menu li {
+  margin-bottom: 0.5rem;
+}
+
+.gerente-menu a {
+  color: #6361A2;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.gerente-menu a:hover,
+.gerente-menu a.active {
+  color: #6361A2;
+  text-decoration: underline;
+}
+
+.gerente-menu a.active {
+  font-weight: bold;
+}
+
+hr {
+  border: none;
+  border-top: 2px solid #ddd;
+  margin: 2rem 0;
+}
+
+/* Tablas */
+.ejecutivos-table,
+.autorizaciones-table,
+.solicitudes-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.ejecutivos-table th,
+.autorizaciones-table th,
+.solicitudes-table th {
+  color: white;
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+}
+
+.ejecutivos-table td,
+.autorizaciones-table td,
+.solicitudes-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.ejecutivos-table tr:hover,
+.autorizaciones-table tr:hover,
+.solicitudes-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Botones */
+.detail-btn {
+  background-color: #6361A2;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.detail-btn:hover {
+  background-color: #6361A2;
+}
+
+/* Estados */
+.status-pendiente {
+  color: #5D5B9D;
+  font-weight: 600;
+}
+
+.status-aprobado {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.status-rechazado {
+  color: #8988C1;
+  font-weight: 600;
+}
+
+/* Formularios */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.form-group input {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+/* Tabla de permisos */
+.permisos-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.permisos-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #eee;
+}
+
+.permisos-table tr:last-child td {
+  border-bottom: none;
+}
+
+.save-btn {
+  background-color: #8988C1;
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  margin-top: 1rem;
+  transition: background-color 0.3s;
+}
+
+.save-btn:hover {
+  background-color: #8988C1;
+}
+
+/* Menú horizontal */
+.horizontal-menu {
+  display: flex;
+  gap: 2rem;
+  margin: 1rem 0;
+}
+
+.horizontal-menu a {
+  color: #8988C1;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.horizontal-menu a:hover,
+.horizontal-menu a.active {
+  background-color: #8988C1;
+  color: white;
+}
+
+/* Operaciones de cuentas */
+.cuentas-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.cuenta-operation {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.cuenta-operation h3 {
+  color: #8988C1;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.operation-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.operation-btn {
+  background-color: #8988C1;
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.operation-btn:hover {
+  background-color: #8988C1;
+}
+
+/* Footer */
+footer {
+  margin-top: auto;
+  text-align: center;
+  padding: 2rem 0;
+  color: #666;
+  border-top: 1px solid #ddd;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .gerente-container {
+    padding: 1rem;
+  }
+  
+  .horizontal-menu {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .operation-buttons {
+    flex-direction: column;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .ejecutivos-table,
+  .autorizaciones-table,
+  .solicitudes-table {
+    font-size: 0.9rem;
+  }
+  
+  .ejecutivos-table th,
+  .autorizaciones-table th,
+  .solicitudes-table th,
+  .ejecutivos-table td,
+  .autorizaciones-table td,
+  .solicitudes-table td {
+    padding: 0.5rem;
+  }
+}

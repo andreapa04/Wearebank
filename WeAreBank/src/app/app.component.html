@@ -1,6 +1,7 @@
 <div class="app-container">
-  <header *ngIf="showNavbar">
-    <h1>WeAreBank</h1>
+  <!-- Navbar para Cliente -->
+  <header *ngIf="showNavbar && userType === 'cliente'">
+    <h1>WeAreBank - Portal Cliente</h1>
     
     <nav>
       <a [routerLink]="['/cliente']" 
@@ -17,6 +18,25 @@
          [class.active]="isActiveRoute('/prestamos')">Préstamos</a> |
       <a [routerLink]="['/creditos']" 
          [class.active]="isActiveRoute('/creditos')">Créditos</a> |
+      <a href="#" (click)="logout($event)">Cerrar Sesión</a>
+    </nav>
+  </header>
+
+  <!-- Navbar para Gerente -->
+  <header *ngIf="showNavbar && userType === 'gerente'" class="gerente-header">
+    <h1>WeAreBank - Portal Gerente</h1>
+    
+    <nav>
+      <a [routerLink]="['/gerente']" 
+         [class.active]="isActiveRoute('/gerente')">Inicio</a> |
+      <a [routerLink]="['/gerente/autorizaciones']" 
+         [class.active]="isActiveRoute('/gerente/autorizaciones')">Autorizaciones</a> |
+      <a [routerLink]="['/gerente/cuentas']" 
+         [class.active]="isActiveRoute('/gerente/cuentas')">Cuentas</a> |
+      <a [routerLink]="['/gerente/gestion-permisos']" 
+         [class.active]="isActiveRoute('/gerente/gestion-permisos')">Gestión Permisos</a> |
+      <a [routerLink]="['/gerente/solicitudes']" 
+         [class.active]="isActiveRoute('/gerente/solicitudes')">Solicitudes</a> |
       <a href="#" (click)="logout($event)">Cerrar Sesión</a>
     </nav>
   </header>
