@@ -1,0 +1,28 @@
+<div class="container">
+  <h2>Realizar retiro</h2>
+
+  <label>Cuenta:</label>
+  <select>
+    <option>Seleccionar</option>
+  </select>
+
+  <label>Monto:</label>
+  <div class="monto-btns">
+    <button (click)="seleccionarMonto(100)">$100</button>
+    <button (click)="seleccionarMonto(500)">$500</button>
+    <button (click)="seleccionarMonto(1000)" [class.active]="montoSeleccionado === 1000">$1000</button>
+    <button (click)="seleccionarMonto(1500)">$1500</button>
+    <button (click)="seleccionarMonto(2000)">$2000</button>
+    <button>Otro</button>
+    <input type="number" [(ngModel)]="montoOtro" placeholder="$200" />
+  </div>
+
+  <div>
+    <input type="checkbox" [(ngModel)]="retiroSinTarjeta" /> Retiro sin tarjeta (código cajero)
+  </div>
+  <div>
+    <input type="checkbox" [(ngModel)]="transferenciaCuenta" /> Transferencia a cuenta propia
+  </div>
+
+  <button class="submit" (click)="retirar()">Retirar</button>
+</div>

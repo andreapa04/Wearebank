@@ -1,0 +1,46 @@
+<div class="login-container">
+  <div class="login-header">
+    <h1>WeAreBank</h1>
+    <h2>Inicia sesión</h2>
+  </div>
+
+  <div class="login-form">
+    <div class="form-group">
+      <label for="usuario">Ingresa usuario</label>
+      <input 
+        type="text" 
+        id="usuario" 
+        title="usuario" 
+        placeholder="Usuario"
+        class="form-input">
+    </div>
+
+    <div class="form-group">
+      <label for="contrasena">Ingresa contraseña</label>
+      <input 
+        type="password" 
+        id="contrasena" 
+        title="contrasena" 
+        placeholder="Contraseña"
+        class="form-input">
+    </div>
+
+    <div class="form-options">
+      <label class="checkbox-label">
+        <input type="checkbox" title="recordarme">
+        <span>Recuerdame</span>
+      </label>
+      
+      <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+    </div>
+
+    <div class="button-group">
+    <button (click)="iniciarSesion()" class="login-button">Iniciar sesión</button>
+    <a routerLink="/register" class="register-button">Crear cuenta</a>
+    </div>
+
+    <div class="login-footer">
+      <p>Al iniciar sesión, aceptas nuestros Términos y Condiciones</p>
+    </div>
+  </div>
+</div>

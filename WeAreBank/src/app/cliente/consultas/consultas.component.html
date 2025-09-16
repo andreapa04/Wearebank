@@ -1,0 +1,39 @@
+<div class="container">
+  <h2>Cuentas disponibles</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Cuenta</th>
+        <th>Tipo</th>
+        <th>Saldo disponible</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let cuenta of cuentas">
+        <td>{{ cuenta.numero }}</td>
+        <td>{{ cuenta.tipo }}</td>
+        <td>${{ cuenta.saldo }}</td>
+        <td><a href="#">Detalles</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Movimientos recientes</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Descripción</th>
+        <th>Fecha</th>
+        <th>Monto</th>
+        <th>Cuenta</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngIf="movimientos.length === 0">
+        <td colspan="4">No hay movimientos recientes</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,54 @@
+<section>
+  <h2>Solicitudes de crédito</h2>
+  
+  <h3>Mis solicitudes</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Plazo</th>
+        <th>Estado</th>
+        <th>Monto solicitado</th>
+        <th>Fecha de solicitud</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr Solicitudes>
+        <td>Plazo</td>
+        <td>Estado</td>
+        <td>Monto Solicitado</td>
+        <td>Fecha Solicitud</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>Solicitar crédito</h2>
+  
+  <div class="form-group">
+    <label for="tipoCredito">Tipo de Crédito:</label>
+    <select id="tipoCredito" >
+      <option value="">Seleccionar</option>
+      <option value="revolvente">Revolvente</option>
+      <option value="personal">Personal</option>
+      <option value="hipotecario">Hipotecario</option>
+    </select>
+  </div>
+  
+  <div class="form-group">
+    <label for="montoCredito">Monto:</label>
+    <input type="number" id="montoCredito">
+  </div>
+  
+  <div class="form-group">
+    <label for="plazoCredito">Plazo: (Meses)</label>
+    <input type="number" id="plazoCredito">
+  </div>
+  
+  <div class="form-group">
+    <label for="ingresosMensualesCredito">Ingresos Mens.:</label>
+    <input type="number" id="ingresosMensualesCredito" >
+  </div>
+  
+  <button (click)="solicitarCredito()">Solicitar</button>
+</section>
