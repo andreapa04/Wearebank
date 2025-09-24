@@ -28,12 +28,12 @@ export const routes: Routes = [
 
   // Rutas de cliente
   { path: 'cliente', component: ClienteComponent },
-  { path: 'consultas', component: ConsultasComponent },
-  { path: 'retiros', component: RetirosComponent },
-  { path: 'transferencias', component: TransferenciasComponent },
-  { path: 'pagos', component: PagosComponent },
-  { path: 'prestamos', component: PrestamosComponent },
-  { path: 'creditos', component: CreditosComponent },
+  { path: 'cliente/consultas', component: ConsultasComponent },
+  { path: 'cliente/retiros', component: RetirosComponent },
+  { path: 'cliente/transferencias', component: TransferenciasComponent },
+  { path: 'cliente/pagos', component: PagosComponent },
+  { path: 'cliente/prestamos', component: PrestamosComponent },
+  { path: 'cliente/creditos', component: CreditosComponent },
   { path: 'cliente/navbar', component: NavbarComponent }, // 👈 Navbar cliente
 
   // Rutas de gerente
@@ -46,7 +46,6 @@ export const routes: Routes = [
 
   // Rutas de ejecutivo
   { path: 'ejecutivo', component: EjecutivosComponent},
-
   // Ruta por defecto
   { path: '**', redirectTo: '/login' }
 ];
