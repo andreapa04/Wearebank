@@ -1,10 +1,13 @@
 // ejecutivos.component.ts
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-ejecutivos',
   templateUrl: './ejecutivos.component.html',
-  styleUrls: ['./ejecutivos.component.css']
+  styleUrls: ['./ejecutivos.component.css'],
+  standalone: true,
+  imports: [CommonModule]
 })
 export class EjecutivosComponent implements OnInit {
 

@@ -78,30 +78,32 @@
 
               <!-- Grid Lines -->
               <div class="chart-grid">
-                <div class="grid-line" *ngFor="let i of [0,1,2,3,4,5]"></div>
+                @for (i of [0,1,2,3,4,5]; track i) {
+                  <div class="grid-line"></div>
+                }
               </div>
 
               <!-- Bars -->
               <div class="chart-bars">
-                <div
-                  *ngFor="let data of chartData; let i = index"
-                  class="bar-wrapper">
-                  <div
-                    class="bar"
-                    [style.height.%]="data.value"
-                    [style.background-color]="data.color"
-                    [attr.data-value]="data.value">
+                @for (data of chartData; track data.label; let i = $index) {
+                  <div class="bar-wrapper">
+                    <div
+                      class="bar"
+                      [style.height.%]="data.value"
+                      [style.background-color]="data.color"
+                      [attr.data-value]="data.value">
+                    </div>
                   </div>
-                </div>
+                }
               </div>
 
             </div>
 
             <!-- X-Axis Labels -->
             <div class="x-axis-labels">
-              <span
-                *ngFor="let data of chartData"
-                class="x-label">{{ data.label }}</span>
+              @for (data of chartData; track data.label) {
+                <span class="x-label">{{ data.label }}</span>
+              }
             </div>
 
           </div>
