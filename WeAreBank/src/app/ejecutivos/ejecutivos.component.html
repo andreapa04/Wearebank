@@ -1,6 +1,6 @@
 <!-- ejecutivos.component.html -->
 <div class="dashboard-container">
-  
+
   <!-- Header -->
   <header class="header">
     <div class="logo-section">
@@ -9,60 +9,60 @@
         <span class="logo-text">WeAreBank</span>
       </div>
     </div>
-    
+
     <nav class="navigation">
       <a href="#" class="nav-item active" (click)="onNavClick('aplicaciones')">Aplicaciones Móviles</a>
       <a href="#" class="nav-item" (click)="onNavClick('solicitudes')">Solicitudes</a>
       <a href="#" class="nav-item" (click)="onNavClick('contactos')">Contactos</a>
     </nav>
-    
+
     <div class="user-section">
-      <span class="welcome-text">Bienvenid@ (usuario)</span>
+      <span class="welcome-text">Bienvenido (usuario)</span>
     </div>
   </header>
 
   <!-- Main Content Area -->
   <main class="main-content">
     <div class="content-wrapper">
-      
+
       <!-- Left Panel - Statistics -->
       <section class="stats-panel">
         <div class="stats-container">
-          
+
           <div class="stat-item">
             <div class="stat-content">
               <span class="stat-label">Clientes activos:</span>
               <span class="stat-value">{{ clientesActivos }}</span>
             </div>
           </div>
-          
+
           <div class="stat-item">
             <div class="stat-content">
               <span class="stat-label">Préstamos otorgados:</span>
               <span class="stat-value">{{ prestamosOtorgados }}</span>
             </div>
           </div>
-          
+
           <div class="stat-item">
             <div class="stat-content">
               <span class="stat-label">Solicitudes este mes:</span>
               <span class="stat-value">{{ solicitudesEsteMes }}</span>
             </div>
           </div>
-          
+
         </div>
       </section>
 
       <!-- Right Panel - Chart -->
       <section class="chart-panel">
         <div class="chart-container">
-          
+
           <div class="chart-header">
             <h3 class="chart-title">Estadísticas Mensuales</h3>
           </div>
-          
+
           <div class="chart-area">
-            
+
             <!-- Y-Axis Labels -->
             <div class="y-axis-labels">
               <span class="y-label">100</span>
@@ -72,21 +72,21 @@
               <span class="y-label">20</span>
               <span class="y-label">0</span>
             </div>
-            
+
             <!-- Chart Content -->
             <div class="chart-content">
-              
+
               <!-- Grid Lines -->
               <div class="chart-grid">
                 <div class="grid-line" *ngFor="let i of [0,1,2,3,4,5]"></div>
               </div>
-              
+
               <!-- Bars -->
               <div class="chart-bars">
-                <div 
-                  *ngFor="let data of chartData; let i = index" 
+                <div
+                  *ngFor="let data of chartData; let i = index"
                   class="bar-wrapper">
-                  <div 
+                  <div
                     class="bar"
                     [style.height.%]="data.value"
                     [style.background-color]="data.color"
@@ -94,20 +94,20 @@
                   </div>
                 </div>
               </div>
-              
+
             </div>
-            
+
             <!-- X-Axis Labels -->
             <div class="x-axis-labels">
-              <span 
-                *ngFor="let data of chartData" 
+              <span
+                *ngFor="let data of chartData"
                 class="x-label">{{ data.label }}</span>
             </div>
-            
+
           </div>
         </div>
       </section>
-      
+
     </div>
   </main>
 
@@ -117,5 +117,5 @@
       <p class="footer-text">Todos los derechos reservados 2025 ©</p>
     </div>
   </footer>
-  
+
 </div>
