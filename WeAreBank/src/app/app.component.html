@@ -6,17 +6,17 @@
     <nav>
       <a [routerLink]="['/cliente']"
          [class.active]="isActiveRoute('/cliente')">Inicio</a> |
-      <a [routerLink]="['/consultas']"
+      <a [routerLink]="['/cliente/consultas']"
          [class.active]="isActiveRoute('/cliente/consultas')">Consultas</a> |
-      <a [routerLink]="['/retiros']"
+      <a [routerLink]="['/cliente/retiros']"
          [class.active]="isActiveRoute('/cliente/retiros')">Retiros</a> |
-      <a [routerLink]="['/transferencias']"
+      <a [routerLink]="['/cliente/transferencias']"
          [class.active]="isActiveRoute('/cliente/transferencias')">Transferencias</a> |
-      <a [routerLink]="['/pagos']"
+      <a [routerLink]="['/cliente/pagos']"
          [class.active]="isActiveRoute('/cliente/pagos')">Pagos</a> |
-      <a [routerLink]="['/prestamos']"
+      <a [routerLink]="['/cliente/prestamos']"
          [class.active]="isActiveRoute('/cliente/prestamos')">Préstamos</a> |
-      <a [routerLink]="['/creditos']"
+      <a [routerLink]="['/cliente/creditos']"
          [class.active]="isActiveRoute('/cliente/creditos')">Créditos</a> |
       <a href="#" (click)="logout($event)">Cerrar Sesión</a>
     </nav>
