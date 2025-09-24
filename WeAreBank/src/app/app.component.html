@@ -1,5 +1,5 @@
 <div class="app-container">
-  <!-- Navbar para Cliente 
+  <!-- Navbar para Cliente -->
   <header *ngIf="showNavbar && userType === 'cliente'">
     <h1>WeAreBank - Portal Cliente</h1>
 
@@ -22,7 +22,7 @@
     </nav>
   </header>
 
-  Navbar para Gerente 
+  <!-- Navbar para Gerente -->
   <header *ngIf="showNavbar && userType === 'gerente'" class="gerente-header">
     <h1>WeAreBank - Portal Gerente</h1>
 
@@ -39,7 +39,7 @@
          [class.active]="isActiveRoute('/gerente/solicitudes')">Solicitudes</a> |
       <a href="#" (click)="logout($event)">Cerrar Sesión</a>
     </nav>
-  </header>-->
+  </header>
 
   <main>
     <router-outlet></router-outlet>

@@ -17,8 +17,8 @@ import { EjecutivosComponent } from './ejecutivos/ejecutivos.component';
 
 
 // ✅ Importación corregida de los dos navbars
-import { NavbarComponent } from './cliente/components/navbar/navbar.component';
-import { NavbarComponent as NavbarComponentGer } from './gerente/navbar/navbar.component';
+//import { NavbarComponent } from './cliente/components/navbar/navbar.component';
+//import { NavbarComponent as NavbarComponentGer } from './gerente/navbar/navbar.component';
 
 export const routes: Routes = [
   // Rutas públicas
@@ -34,7 +34,7 @@ export const routes: Routes = [
   { path: 'cliente/pagos', component: PagosComponent },
   { path: 'cliente/prestamos', component: PrestamosComponent },
   { path: 'cliente/creditos', component: CreditosComponent },
-  { path: 'cliente/navbar', component: NavbarComponent }, // 👈 Navbar cliente
+  //{ path: 'cliente/navbar', component: NavbarComponent }, // 👈 Navbar cliente
 
   // Rutas de gerente
   { path: 'gerente', component: GerenteHomeComponent },
@@ -42,7 +42,7 @@ export const routes: Routes = [
   { path: 'gerente/cuentas', component: CuentasComponent },
   { path: 'gerente/gestion-permisos', component: GestionPermisosComponent },
   { path: 'gerente/solicitudes', component: SolicitudesComponent },
-  { path: 'gerente/navbar', component: NavbarComponentGer }, // 👈 Navbar gerente
+  //{ path: 'gerente/navbar', component: NavbarComponentGer }, // 👈 Navbar gerente
 
   // Rutas de ejecutivo
   { path: 'ejecutivo', component: EjecutivosComponent},
