@@ -13,17 +13,21 @@ import { filter } from 'rxjs/operators';
 export class AppComponent {
   title = 'WeAreBank';
   showNavbar: boolean = false;
-  userType: 'cliente' | 'gerente' | null = null;
+  userType: 'cliente' | 'gerente' | 'ejecutivo' | null = null;
 
   // Lista de rutas para cada tipo de usuario
   private clientRoutes = [
-    '/cliente', '/consultas', '/retiros', '/transferencias', 
+    '/cliente', '/consultas', '/retiros', '/transferencias',
     '/pagos', '/prestamos', '/creditos'
   ];
 
   private gerenteRoutes = [
     '/gerente', '/gerente/autorizaciones', '/gerente/cuentas',
     '/gerente/gestion-permisos', '/gerente/solicitudes'
+  ];
+
+  private ejecutivoRoutes = [
+    '/ejecutivo'
   ];
 
   constructor(private router: Router) {
@@ -33,7 +37,7 @@ export class AppComponent {
       )
       .subscribe((event: NavigationEnd) => {
         const currentUrl = event.urlAfterRedirects;
-        
+
         // Determinar tipo de usuario basado en la ruta
         if (this.clientRoutes.some(route => currentUrl.startsWith(route))) {
           this.showNavbar = true;
@@ -41,6 +45,9 @@ export class AppComponent {
         } else if (this.gerenteRoutes.some(route => currentUrl.startsWith(route))) {
           this.showNavbar = true;
           this.userType = 'gerente';
+        }else if (this.ejecutivoRoutes.some(route => currentUrl.startsWith(route))){
+          this.showNavbar = true;
+          this.userType = 'ejecutivo';
         } else {
           this.showNavbar = false;
           this.userType = null;

@@ -2,22 +2,22 @@
   <!-- Navbar para Cliente -->
   <header *ngIf="showNavbar && userType === 'cliente'">
     <h1>WeAreBank - Portal Cliente</h1>
-    
+
     <nav>
-      <a [routerLink]="['/cliente']" 
+      <a [routerLink]="['/cliente']"
          [class.active]="isActiveRoute('/cliente')">Inicio</a> |
-      <a [routerLink]="['/consultas']" 
-         [class.active]="isActiveRoute('/consultas')">Consultas</a> |
-      <a [routerLink]="['/retiros']" 
-         [class.active]="isActiveRoute('/retiros')">Retiros</a> |
-      <a [routerLink]="['/transferencias']" 
-         [class.active]="isActiveRoute('/transferencias')">Transferencias</a> |
-      <a [routerLink]="['/pagos']" 
-         [class.active]="isActiveRoute('/pagos')">Pagos</a> |
-      <a [routerLink]="['/prestamos']" 
-         [class.active]="isActiveRoute('/prestamos')">Préstamos</a> |
-      <a [routerLink]="['/creditos']" 
-         [class.active]="isActiveRoute('/creditos')">Créditos</a> |
+      <a [routerLink]="['/cliente/consultas']"
+         [class.active]="isActiveRoute('/cliente/consultas')">Consultas</a> |
+      <a [routerLink]="['/cliente/retiros']"
+         [class.active]="isActiveRoute('/cliente/retiros')">Retiros</a> |
+      <a [routerLink]="['/cliente/transferencias']"
+         [class.active]="isActiveRoute('/cliente/transferencias')">Transferencias</a> |
+      <a [routerLink]="['/cliente/pagos']"
+         [class.active]="isActiveRoute('/cliente/pagos')">Pagos</a> |
+      <a [routerLink]="['/cliente/prestamos']"
+         [class.active]="isActiveRoute('/cliente/prestamos')">Préstamos</a> |
+      <a [routerLink]="['/cliente/creditos']"
+         [class.active]="isActiveRoute('/cliente/creditos')">Créditos</a> |
       <a href="#" (click)="logout($event)">Cerrar Sesión</a>
     </nav>
   </header>
@@ -25,17 +25,17 @@
   <!-- Navbar para Gerente -->
   <header *ngIf="showNavbar && userType === 'gerente'" class="gerente-header">
     <h1>WeAreBank - Portal Gerente</h1>
-    
+
     <nav>
-      <a [routerLink]="['/gerente']" 
+      <a [routerLink]="['/gerente']"
          [class.active]="isActiveRoute('/gerente')">Inicio</a> |
-      <a [routerLink]="['/gerente/autorizaciones']" 
+      <a [routerLink]="['/gerente/autorizaciones']"
          [class.active]="isActiveRoute('/gerente/autorizaciones')">Autorizaciones</a> |
-      <a [routerLink]="['/gerente/cuentas']" 
+      <a [routerLink]="['/gerente/cuentas']"
          [class.active]="isActiveRoute('/gerente/cuentas')">Cuentas</a> |
-      <a [routerLink]="['/gerente/gestion-permisos']" 
+      <a [routerLink]="['/gerente/gestion-permisos']"
          [class.active]="isActiveRoute('/gerente/gestion-permisos')">Gestión Permisos</a> |
-      <a [routerLink]="['/gerente/solicitudes']" 
+      <a [routerLink]="['/gerente/solicitudes']"
          [class.active]="isActiveRoute('/gerente/solicitudes')">Solicitudes</a> |
       <a href="#" (click)="logout($event)">Cerrar Sesión</a>
     </nav>
