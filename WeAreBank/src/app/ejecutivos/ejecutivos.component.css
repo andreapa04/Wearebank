@@ -1,0 +1,394 @@
+/* ejecutivos.component.css */
+
+/* Reset y configuración base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.dashboard-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+  color: #333;
+}
+
+/* ===== HEADER STYLES ===== */
+.header {
+  background: linear-gradient(135deg, #8B7BC7 0%, #6B5B95 50%, #5B4B85 100%);
+  color: white;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+.logo-section {
+  flex: 0 0 auto;
+}
+
+.logo-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-icon {
+  font-size: 1.8rem;
+}
+
+.logo-text {
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.navigation {
+  display: flex;
+  gap: 0;
+  flex: 1;
+  justify-content: center;
+}
+
+.nav-item {
+  color: white;
+  text-decoration: none;
+  padding: 12px 20px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border-radius: 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.nav-item:first-child {
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+
+.nav-item:last-child {
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+  border-right: none;
+}
+
+.nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.nav-item.active {
+  background-color: rgba(255, 255, 255, 0.25);
+  font-weight: 600;
+}
+
+.user-section {
+  flex: 0 0 auto;
+}
+
+.welcome-text {
+  font-size: 0.9rem;
+  opacity: 0.95;
+  font-weight: 400;
+}
+
+/* ===== MAIN CONTENT ===== */
+.main-content {
+  flex: 1;
+  padding: 32px 24px;
+}
+
+.content-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+/* ===== STATISTICS PANEL ===== */
+.stats-panel {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.stats-container {
+  padding: 0;
+}
+
+.stat-item {
+  padding: 24px 28px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.stat-item:last-child {
+  border-bottom: none;
+}
+
+.stat-item:hover {
+  background-color: #fafbfc;
+}
+
+.stat-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-label {
+  color: #6c757d;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.stat-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+/* ===== CHART PANEL ===== */
+.chart-panel {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.chart-container {
+  padding: 24px 28px;
+}
+
+.chart-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.chart-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.chart-area {
+  position: relative;
+}
+
+/* Y-Axis Labels */
+.y-axis-labels {
+  position: absolute;
+  left: -8px;
+  top: 0;
+  height: 200px;
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 8px 0;
+}
+
+.y-label {
+  font-size: 0.8rem;
+  color: #6c757d;
+  font-weight: 400;
+  line-height: 1;
+}
+
+/* Chart Content */
+.chart-content {
+  margin-left: 24px;
+  position: relative;
+  height: 200px;
+  padding: 8px 0;
+}
+
+/* Grid Lines */
+.chart-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.grid-line {
+  height: 1px;
+  background-color: #e9ecef;
+  width: 100%;
+}
+
+/* Chart Bars */
+.chart-bars {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  height: calc(100% - 16px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  padding: 0 16px;
+  gap: 12px;
+}
+
+.bar-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  height: 100%;
+}
+
+.bar {
+  width: 42px;
+  min-height: 8px;
+  border-radius: 4px 4px 0 0;
+  transition: all 0.3s ease;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.bar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.bar::before {
+  content: attr(data-value);
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #495057;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.bar:hover::before {
+  opacity: 1;
+}
+
+/* X-Axis Labels */
+.x-axis-labels {
+  display: flex;
+  justify-content: space-around;
+  padding: 12px 16px 0 40px;
+  margin-top: 4px;
+}
+
+.x-label {
+  font-size: 0.85rem;
+  color: #6c757d;
+  text-align: center;
+  font-weight: 500;
+  flex: 1;
+}
+
+/* ===== FOOTER ===== */
+.footer {
+  background: linear-gradient(135deg, #8B7BC7 0%, #6B5B95 50%, #5B4B85 100%);
+  color: white;
+  padding: 16px 24px;
+  margin-top: auto;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.footer-text {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+  font-weight: 400;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1024px) {
+  .content-wrapper {
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .navigation {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .nav-item {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+  }
+
+  .main-content {
+    padding: 24px 16px;
+  }
+
+  .content-wrapper {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .chart-bars {
+    padding: 0 8px;
+  }
+
+  .bar {
+    width: 32px;
+  }
+
+  .x-axis-labels {
+    padding: 12px 8px 0 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-text {
+    font-size: 1.3rem;
+  }
+
+  .stat-item {
+    padding: 20px 20px;
+  }
+
+  .stat-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .chart-container {
+    padding: 20px 20px;
+  }
+
+  .bar {
+    width: 28px;
+  }
+}
