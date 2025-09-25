@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
+import { safeLocalStorage } from '../utils/storage.util';
 
 @Injectable({
   providedIn: 'root'
@@ -8,15 +9,15 @@ export class AuthGuard {
   constructor(private router: Router) {}
 
   canActivate: CanActivateFn = (route, state) => {
-    const usuario = JSON.parse(localStorage.getItem('usuario') || 'null');
+    const ls = safeLocalStorage();
+    const usuario = JSON.parse(ls.getItem('usuario') || 'null');
 
     if (!usuario) {
       this.router.navigate(['/login']);
       return false;
     }
 
-    // Verificamos el rol contra la ruta
-    const rol = usuario.rol; // 0 = gerente, 1 = ejecutivo, 2 = cliente
+    const rol = usuario.rol;
     const url = state.url;
 
     if (url.startsWith('/gerente') && rol !== 0) {

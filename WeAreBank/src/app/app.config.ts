@@ -1,15 +1,14 @@
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideClientHydration } from '@angular/platform-browser';
-import { provideHttpClient } from '@angular/common/http';
 import { routes } from './app.routes';
 import { AuthGuard } from './guards/auth.guard';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(routes, withComponentInputBinding()),
+    provideRouter(routes),
     provideClientHydration(),
-    provideHttpClient(),
-    AuthGuard
+    provideHttpClient(withFetch()) // ✅ usa fetch API
   ]
 };
