@@ -33,8 +33,9 @@ app.post("/api/login", (req, res) => {
     return res.status(400).json({ error: "Faltan credenciales" });
   }
 
+  // 🔹 Seleccionamos los campos necesarios, incluyendo rol
   db.query(
-    "SELECT * FROM usuario WHERE email = ? AND contrasenia = ?",
+    "SELECT idUsuario, nombre, apellidoP, apellidoM, direccion, email, rol FROM usuario WHERE email = ? AND contrasenia = ?",
     [email, contrasenia],
     (err, results) => {
       if (err) {
@@ -43,6 +44,7 @@ app.post("/api/login", (req, res) => {
       }
 
       if (results.length > 0) {
+        // 🔹 Ahora results[0] incluye el rol
         res.json({ user: results[0] });
       } else {
         res.json({ error: "Credenciales inválidas" });
