@@ -1,3 +1,4 @@
+// routes/auth.js
 import express from "express";
 import pool from "../db.js";
 
@@ -5,26 +6,25 @@ const router = express.Router();
 
 /**
  * POST /login
- * Body: { usuario, contrasena }
+ * Body: { email, contrasenia }
  */
 router.post("/login", async (req, res) => {
   try {
-    const { usuario, contrasena } = req.body;
+    const { email, contrasenia } = req.body;
 
-    if (!usuario || !contrasena) {
-      return res.status(400).json({ error: "Usuario y contraseña son requeridos" });
+    if (!email || !contrasenia) {
+      return res.status(400).json({ error: "Email y contraseña son requeridos" });
     }
 
     const [rows] = await pool.query(
-      "SELECT idUsuario, nombre, rol FROM Usuario WHERE usuario = ? AND contrasena = ?",
-      [usuario, contrasena]
+      "SELECT idUsuario, nombre, apellidoP, apellidoM, rol FROM usuario WHERE email = ? AND contrasenia = ?",
+      [email, contrasenia]
     );
 
     if (rows.length === 0) {
       return res.status(401).json({ error: "Credenciales inválidas" });
     }
 
-    // Usuario encontrado
     const user = rows[0];
 
     res.json({
@@ -32,6 +32,8 @@ router.post("/login", async (req, res) => {
       user: {
         id: user.idUsuario,
         nombre: user.nombre,
+        apellidoP: user.apellidoP,
+        apellidoM: user.apellidoM,
         rol: user.rol, // 0=Gerente, 1=Ejecutivo, 2=Cliente
       },
     });
