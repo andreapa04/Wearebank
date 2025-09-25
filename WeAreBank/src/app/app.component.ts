@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
-import { safeLocalStorage } from './utils/storage.util'; // 🔹 importa tu helper
+import { safeLocalStorage } from './utils/storage.util';
 
 @Component({
   selector: 'app-root',
@@ -15,10 +15,12 @@ export class AppComponent {
   title = 'WeAreBank';
   showNavbar: boolean = false;
   userType: 'cliente' | 'gerente' | 'ejecutivo' | null = null;
+  errorMessage: string | null = null;
 
   private clientRoutes = [
-    '/cliente', '/cliente/consultas', '/cliente/retiros', '/cliente/transferencias',
-    '/cliente/pagos', '/cliente/prestamos', '/cliente/creditos'
+    '/cliente', '/cliente/consultas', '/cliente/retiros',
+    '/cliente/transferencias', '/cliente/pagos',
+    '/cliente/prestamos', '/cliente/creditos'
   ];
 
   private gerenteRoutes = [
@@ -26,15 +28,11 @@ export class AppComponent {
     '/gerente/gestion-permisos', '/gerente/solicitudes'
   ];
 
-  private ejecutivoRoutes = [
-    '/ejecutivo'
-  ];
+  private ejecutivoRoutes = ['/ejecutivo'];
 
   constructor(private router: Router) {
     this.router.events
-      .pipe(
-        filter((event): event is NavigationEnd => event instanceof NavigationEnd)
-      )
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
         const currentUrl = event.urlAfterRedirects;
 
@@ -51,22 +49,24 @@ export class AppComponent {
           this.showNavbar = false;
           this.userType = null;
         }
+
+        // 🔹 Limpiar mensajes de error al navegar correctamente
+        this.errorMessage = null;
       });
   }
 
   logout(event: Event) {
     event.preventDefault();
-
-    // 🔹 Eliminar sesión guardada
     const ls = safeLocalStorage();
     ls.removeItem('usuario');
-
-    // 🔹 Resetear estado local
     this.showNavbar = false;
     this.userType = null;
-
-    // 🔹 Redirigir al login
     this.router.navigate(['/login']);
+  }
+
+  // Mostrar error desde el guard
+  showError(msg: string) {
+    this.errorMessage = msg;
   }
 
   isActiveRoute(route: string): boolean {

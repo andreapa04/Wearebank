@@ -1,47 +1,47 @@
 <div class="app-container">
-  <!-- Navbar para Cliente -->
+  <!-- Navbar Cliente -->
   <header *ngIf="showNavbar && userType === 'cliente'">
     <h1>WeAreBank - Portal Cliente</h1>
-
     <nav>
-      <a [routerLink]="['/cliente']"
-         [class.active]="isActiveRoute('/cliente')">Inicio</a> |
-      <a [routerLink]="['/cliente/consultas']"
-         [class.active]="isActiveRoute('/cliente/consultas')">Consultas</a> |
-      <a [routerLink]="['/cliente/retiros']"
-         [class.active]="isActiveRoute('/cliente/retiros')">Retiros</a> |
-      <a [routerLink]="['/cliente/transferencias']"
-         [class.active]="isActiveRoute('/cliente/transferencias')">Transferencias</a> |
-      <a [routerLink]="['/cliente/pagos']"
-         [class.active]="isActiveRoute('/cliente/pagos')">Pagos</a> |
-      <a [routerLink]="['/cliente/prestamos']"
-         [class.active]="isActiveRoute('/cliente/prestamos')">Préstamos</a> |
-      <a [routerLink]="['/cliente/creditos']"
-         [class.active]="isActiveRoute('/cliente/creditos')">Créditos</a> |
+      <a [routerLink]="['/cliente']" [class.active]="isActiveRoute('/cliente')">Inicio</a> |
+      <a [routerLink]="['/cliente/consultas']" [class.active]="isActiveRoute('/cliente/consultas')">Consultas</a> |
+      <a [routerLink]="['/cliente/retiros']" [class.active]="isActiveRoute('/cliente/retiros')">Retiros</a> |
+      <a [routerLink]="['/cliente/transferencias']" [class.active]="isActiveRoute('/cliente/transferencias')">Transferencias</a> |
+      <a [routerLink]="['/cliente/pagos']" [class.active]="isActiveRoute('/cliente/pagos')">Pagos</a> |
+      <a [routerLink]="['/cliente/prestamos']" [class.active]="isActiveRoute('/cliente/prestamos')">Préstamos</a> |
+      <a [routerLink]="['/cliente/creditos']" [class.active]="isActiveRoute('/cliente/creditos')">Créditos</a> |
       <a href="#" (click)="logout($event)">Cerrar Sesión</a>
     </nav>
   </header>
 
-  <!-- Navbar para Gerente -->
+  <!-- Navbar Gerente -->
   <header *ngIf="showNavbar && userType === 'gerente'" class="gerente-header">
     <h1>WeAreBank - Portal Gerente</h1>
-
     <nav>
-      <a [routerLink]="['/gerente']"
-         [class.active]="isActiveRoute('/gerente')">Inicio</a> |
-      <a [routerLink]="['/gerente/autorizaciones']"
-         [class.active]="isActiveRoute('/gerente/autorizaciones')">Autorizaciones</a> |
-      <a [routerLink]="['/gerente/cuentas']"
-         [class.active]="isActiveRoute('/gerente/cuentas')">Cuentas</a> |
-      <a [routerLink]="['/gerente/gestion-permisos']"
-         [class.active]="isActiveRoute('/gerente/gestion-permisos')">Gestión Permisos</a> |
-      <a [routerLink]="['/gerente/solicitudes']"
-         [class.active]="isActiveRoute('/gerente/solicitudes')">Solicitudes</a> |
+      <a [routerLink]="['/gerente']" [class.active]="isActiveRoute('/gerente')">Inicio</a> |
+      <a [routerLink]="['/gerente/autorizaciones']" [class.active]="isActiveRoute('/gerente/autorizaciones')">Autorizaciones</a> |
+      <a [routerLink]="['/gerente/cuentas']" [class.active]="isActiveRoute('/gerente/cuentas')">Cuentas</a> |
+      <a [routerLink]="['/gerente/gestion-permisos']" [class.active]="isActiveRoute('/gerente/gestion-permisos')">Gestión Permisos</a> |
+      <a [routerLink]="['/gerente/solicitudes']" [class.active]="isActiveRoute('/gerente/solicitudes')">Solicitudes</a> |
+      <a href="#" (click)="logout($event)">Cerrar Sesión</a>
+    </nav>
+  </header>
+
+  <!-- Navbar Ejecutivo -->
+  <header *ngIf="showNavbar && userType === 'ejecutivo'" class="ejecutivo-header">
+    <h1>WeAreBank - Portal Ejecutivo</h1>
+    <nav>
+      <a [routerLink]="['/ejecutivo']" [class.active]="isActiveRoute('/ejecutivo')">Inicio</a> |
       <a href="#" (click)="logout($event)">Cerrar Sesión</a>
     </nav>
   </header>
 
   <main>
+    <!-- 🔹 Aquí mostramos un mensaje de error si intenta entrar a rutas prohibidas -->
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+
     <router-outlet></router-outlet>
   </main>
 
@@ -49,3 +49,4 @@
     <p>Todos los derechos reservados. 2025 ©</p>
   </footer>
 </div>
+
