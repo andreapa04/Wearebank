@@ -13,6 +13,7 @@ export class AuthGuard {
     const usuario = JSON.parse(ls.getItem('usuario') || 'null');
 
     if (!usuario) {
+      // Si no hay sesión iniciada → redirigir al login
       this.router.navigate(['/login']);
       return false;
     }
@@ -20,18 +21,19 @@ export class AuthGuard {
     const rol = usuario.rol;
     const url = state.url;
 
+    // Validación de acceso por rol
     if (url.startsWith('/gerente') && rol !== 0) {
-      this.router.navigate(['/login']);
+      alert('No tienes permisos para acceder a esta ruta (solo Gerente).');
       return false;
     }
 
     if (url.startsWith('/ejecutivo') && rol !== 1) {
-      this.router.navigate(['/login']);
+      alert('No tienes permisos para acceder a esta ruta (solo Ejecutivo).');
       return false;
     }
 
     if (url.startsWith('/cliente') && rol !== 2) {
-      this.router.navigate(['/login']);
+      alert('No tienes permisos para acceder a esta ruta (solo Cliente).');
       return false;
     }
 

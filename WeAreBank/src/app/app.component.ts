@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { safeLocalStorage } from './utils/storage.util';
 
 @Component({
   selector: 'app-root',
@@ -14,11 +15,12 @@ export class AppComponent {
   title = 'WeAreBank';
   showNavbar: boolean = false;
   userType: 'cliente' | 'gerente' | 'ejecutivo' | null = null;
+  errorMessage: string | null = null;
 
-  // Lista de rutas para cada tipo de usuario
   private clientRoutes = [
-    '/cliente', '/consultas', '/retiros', '/transferencias',
-    '/pagos', '/prestamos', '/creditos'
+    '/cliente', '/cliente/consultas', '/cliente/retiros',
+    '/cliente/transferencias', '/cliente/pagos',
+    '/cliente/prestamos', '/cliente/creditos'
   ];
 
   private gerenteRoutes = [
@@ -26,41 +28,47 @@ export class AppComponent {
     '/gerente/gestion-permisos', '/gerente/solicitudes'
   ];
 
-  private ejecutivoRoutes = [
-    '/ejecutivo'
-  ];
+  private ejecutivoRoutes = ['/ejecutivo'];
 
   constructor(private router: Router) {
     this.router.events
-      .pipe(
-        filter((event): event is NavigationEnd => event instanceof NavigationEnd)
-      )
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
         const currentUrl = event.urlAfterRedirects;
 
-        // Determinar tipo de usuario basado en la ruta
         if (this.clientRoutes.some(route => currentUrl.startsWith(route))) {
           this.showNavbar = true;
           this.userType = 'cliente';
         } else if (this.gerenteRoutes.some(route => currentUrl.startsWith(route))) {
           this.showNavbar = true;
           this.userType = 'gerente';
-        }else if (this.ejecutivoRoutes.some(route => currentUrl.startsWith(route))){
+        } else if (this.ejecutivoRoutes.some(route => currentUrl.startsWith(route))) {
           this.showNavbar = true;
           this.userType = 'ejecutivo';
         } else {
           this.showNavbar = false;
           this.userType = null;
         }
+
+        // 🔹 Limpiar mensajes de error al navegar correctamente
+        this.errorMessage = null;
       });
   }
 
   logout(event: Event) {
     event.preventDefault();
+    const ls = safeLocalStorage();
+    ls.removeItem('usuario');
+    this.showNavbar = false;
+    this.userType = null;
     this.router.navigate(['/login']);
   }
 
-  // Método para verificar si una ruta está activa
+  // Mostrar error desde el guard
+  showError(msg: string) {
+    this.errorMessage = msg;
+  }
+
   isActiveRoute(route: string): boolean {
     return this.router.url === route || this.router.url.startsWith(route + '/');
   }
