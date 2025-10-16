@@ -1,78 +1,152 @@
-<div class="register-container">
+<div class="register-container"> 
   <h1># Crea tu cuenta en WeAreBank</h1>
 
   <form (ngSubmit)="enviarSolicitud()" class="register-form">
+    <!-- DATOS PERSONALES -->
     <fieldset>
       <legend>Datos personales</legend>
       
       <div class="form-row">
         <div class="form-group">
           <label for="nombre">Nombre</label>
-          <input type="text" id="nombre" title="nombre" name="nombre" placeholder="Nombre" class="form-input">
+          <input 
+            type="text" 
+            id="nombre" 
+            name="nombre" 
+            [(ngModel)]="nombre" 
+            placeholder="Nombre" 
+            class="form-input" 
+            required>
         </div>
         
         <div class="form-group">
-          <label for="apellidoPaterno">Apellido Paterno</label>
-          <input type="text" id="apellidoPaterno" title="apellidoPaterno" name="apellidoPaterno" placeholder="Apellido Paterno" class="form-input">
+          <label for="apellidoP">Apellido Paterno</label>
+          <input 
+            type="text" 
+            id="apellidoP" 
+            name="apellidoP" 
+            [(ngModel)]="apellidoP" 
+            placeholder="Apellido Paterno" 
+            class="form-input" 
+            required>
         </div>
         
         <div class="form-group">
-          <label for="apellidoMaterno">Apellido Materno</label>
-          <input type="text" id="apellidoMaterno" title="apellidoMaterno" name="apellidoMaterno" placeholder="Apellido Materno" class="form-input">
+          <label for="apellidoM">Apellido Materno</label>
+          <input 
+            type="text" 
+            id="apellidoM" 
+            name="apellidoM" 
+            [(ngModel)]="apellidoM" 
+            placeholder="Apellido Materno" 
+            class="form-input" 
+            required>
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
-          <label>Fecha de nacimiento</label>
-          <div class="date-inputs">
-            <input type="number" title="fechaNacimiento" name="dia" placeholder="DD" min="1" max="31" class="form-input small">
-            <input type="number" title="fechaNacimiento" name="mes" placeholder="MM" min="1" max="12" class="form-input small">
-            <input type="number" title="fechaNacimiento" name="anio" placeholder="AAAA" min="1900" max="2023" class="form-input medium">
-          </div>
+          <label for="fechaNacimiento">Fecha de nacimiento</label>
+          <input 
+            type="date" 
+            id="fechaNacimiento" 
+            name="fechaNacimiento" 
+            [(ngModel)]="fechaNacimiento" 
+            class="form-input" 
+            required>
         </div>
         
         <div class="form-group">
-          <label for="curp">CURP</label>
-          <input type="text" id="curp" title="curp" name="curp" placeholder="CURP" class="form-input">
+          <label for="CURP">CURP</label>
+          <input 
+            type="text" 
+            id="CURP" 
+            name="CURP" 
+            [(ngModel)]="CURP" 
+            placeholder="CURP" 
+            class="form-input" 
+            required>
         </div>
         
         <div class="form-group">
-          <label for="rfc">RFC</label>
-          <input type="text" id="rfc" title="rfc" name="rfc" placeholder="RFC" class="form-input">
+          <label for="RFC">RFC</label>
+          <input 
+            type="text" 
+            id="RFC" 
+            name="RFC" 
+            [(ngModel)]="RFC" 
+            placeholder="RFC" 
+            class="form-input" 
+            required>
         </div>
       </div>
     </fieldset>
 
+    <!-- DIRECCIÓN -->
     <fieldset>
       <legend>Dirección</legend>
       
       <div class="form-row">
         <div class="form-group">
           <label for="calleNumero">Calle y número</label>
-          <input type="text" id="calleNumero" title="calleNumero" name="calleNumero" placeholder="Calle y número" class="form-input">
+          <input 
+            type="text" 
+            id="calleNumero" 
+            name="calleNumero" 
+            [(ngModel)]="calleNumero" 
+            placeholder="Calle y número" 
+            class="form-input" 
+            required>
         </div>
         
         <div class="form-group">
           <label for="colonia">Colonia</label>
-          <input type="text" id="colonia" title="colonia" name="colonia" placeholder="Colonia" class="form-input">
+          <input 
+            type="text" 
+            id="colonia" 
+            name="colonia" 
+            [(ngModel)]="colonia" 
+            placeholder="Colonia" 
+            class="form-input" 
+            required>
         </div>
         
         <div class="form-group">
           <label for="ciudad">Ciudad</label>
-          <input type="text" id="ciudad" title="ciudad" name="ciudad" placeholder="Ciudad" class="form-input">
+          <input 
+            type="text" 
+            id="ciudad" 
+            name="ciudad" 
+            [(ngModel)]="ciudad" 
+            placeholder="Ciudad" 
+            class="form-input" 
+            required>
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label for="codigoPostal">Código postal</label>
-          <input type="text" id="codigoPostal" title="codigoPostal" name="codigoPostal" placeholder="Código postal" class="form-input">
+          <input 
+            type="text" 
+            id="codigoPostal" 
+            name="codigoPostal" 
+            [(ngModel)]="codigoPostal" 
+            placeholder="Código postal" 
+            class="form-input" 
+            required>
         </div>
         
         <div class="form-group">
           <label for="estado">Estado</label>
-          <input type="text" id="estado" title="estado" name="estado" placeholder="Estado" class="form-input">
+          <input 
+            type="text" 
+            id="estado" 
+            name="estado" 
+            [(ngModel)]="estado" 
+            placeholder="Estado" 
+            class="form-input" 
+            required>
         </div>
       </div>
     </fieldset>
@@ -81,27 +155,53 @@
       <legend>Documentos</legend>
       <div class="form-group">
         <label><strong>Sube un documento PDF de tu INE</strong> 📄</label>
-        <input type="file" accept=".pdf" class="form-input">
+        <input 
+          type="file" 
+          accept=".pdf" 
+          class="form-input"
+          (change)="onFileSelected($event)">
       </div>
     </fieldset>
 
+    <!-- CONTACTO -->
     <fieldset>
       <legend>Contacto</legend>
       
       <div class="form-row">
         <div class="form-group">
           <label for="telefono">Teléfono</label>
-          <input type="tel" id="telefono" title="telefono" name="telefono" placeholder="Teléfono" class="form-input">
+          <input 
+            type="tel" 
+            id="telefono" 
+            name="telefono" 
+            [(ngModel)]="telefono" 
+            placeholder="Teléfono" 
+            class="form-input" 
+            required>
         </div>
         
         <div class="form-group">
           <label for="email">Correo electrónico</label>
-          <input type="email" id="email" title="email" name="email" placeholder="Correo electrónico" class="form-input">
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            [(ngModel)]="email" 
+            placeholder="Correo electrónico" 
+            class="form-input" 
+            required>
         </div>
         
         <div class="form-group">
-          <label for="contrasena">Contraseña</label>
-          <input type="password" id="contrasena" title="contrasena" name="contrasena" placeholder="Contraseña" class="form-input">
+          <label for="contrasenia">Contraseña</label>
+          <input 
+            type="password" 
+            id="contrasenia" 
+            name="contrasenia" 
+            [(ngModel)]="contrasenia" 
+            placeholder="Contraseña" 
+            class="form-input" 
+            required>
         </div>
       </div>
     </fieldset>

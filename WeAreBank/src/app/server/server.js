@@ -1,8 +1,8 @@
-// server.js
+// Es el punto de entrada principal del backend
 import express from "express";
 import cors from "cors";
-import authRoutes from "./routes/auth.js"; // 🔹 importa el router de login
-
+import authRoutes from "./routes/auth.js"; // importa el router de login
+//se arranca el servidor Express.
 const app = express();
 app.use(cors());
 app.use(express.json());
