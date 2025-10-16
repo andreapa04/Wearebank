@@ -13,12 +13,16 @@ import { AutorizacionesComponent } from './gerente/autorizaciones/autorizaciones
 import { CuentasComponent } from './gerente/cuentas/cuentas.component';
 import { GestionPermisosComponent } from './gerente/gestion-permisos/gestion-permisos.component';
 import { SolicitudesComponent } from './gerente/solicitudes/solicitudes.component';
-import { EjecutivosComponent } from './ejecutivos/ejecutivos.component';
+import { EjecutivoLayoutComponent } from './ejecutivos/layout/ejecutivo-layout.component';
+import { EjecutivosComponent } from './ejecutivos/ejecutivos/ejecutivos.component';
 
 
 // ✅ Importación corregida de los dos navbars
 import { NavbarComponent } from './cliente/components/navbar/navbar.component';
 import { NavbarComponent as NavbarComponentGer } from './gerente/navbar/navbar.component';
+
+
+
 
 export const routes: Routes = [
   // Rutas públicas
@@ -44,8 +48,17 @@ export const routes: Routes = [
   { path: 'gerente/solicitudes', component: SolicitudesComponent },
   { path: 'gerente/navbar', component: NavbarComponentGer }, // 👈 Navbar gerente
 
-  // Rutas de ejecutivo
-  { path: 'ejecutivo', component: EjecutivosComponent},
+
+  // Rutas de ejecutivos
+  { path: 'ejecutivos', component: EjecutivoLayoutComponent, 
+    children: [
+      { path: '', component: EjecutivosComponent },
+      { path: 'cuentas', loadComponent: () => import('./ejecutivos/cuentas/cuentas.component').then(m => m.CuentasComponent) },
+      {path: 'solicitudes', loadComponent: () => import('./ejecutivos/solicitudes/solicitudes.component').then(m => m.SolicitudesComponent) },
+      { path: 'consultas', loadComponent: () => import('./ejecutivos/consultas/consultas.component').then(m => m.ConsultasComponent) }
+    ]
+  },
+
   // Ruta por defecto
   { path: '**', redirectTo: '/login' }
 ];

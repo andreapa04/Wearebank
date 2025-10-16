@@ -1,0 +1,133 @@
+<div class="solicitudes-page-content">
+
+    <section class="solicitudes-section">
+        <h2 class="section-title">Solicitudes de Apertura de Cuentas</h2>
+        
+        <table class="ejecutivos-table solicitudes-table">
+            <thead>
+                <tr>
+                    <th>ID Solicitud</th>
+                    <th>Cliente</th>
+                    <th>Documento (CURP/RFC)</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (sol of aperturaCuentas; track sol.id) {
+                    <tr>
+                        <td>{{ sol.id }}</td>
+                        <td>{{ sol.cliente }}</td>
+                        <td>{{ sol.documento }}</td>
+                        <td>{{ sol.fecha }}</td>
+                        <td><span [class]="getStatusClass(sol.estado)">{{ sol.estado }}</span></td>
+                        <td class="action-links">
+                            <a [routerLink]="['./', sol.id, 'revisar']" class="action-link">Revisar</a> / 
+                            <a [routerLink]="['./', sol.id, 'aprobar']" class="action-link">Aprobar</a> / 
+                            <a [routerLink]="['./', sol.id, 'rechazar']" class="action-link">Rechazar</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+
+    <section class="solicitudes-section">
+        <h2 class="section-title">Solicitudes de Préstamo</h2>
+        
+        <table class="ejecutivos-table solicitudes-table">
+            <thead>
+                <tr>
+                    <th>ID Solicitud</th>
+                    <th>Cliente</th>
+                    <th>Monto solicitado</th>
+                    <th>Plazo</th>
+                    <th>Tasa de Interés</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (sol of prestamos; track sol.id) {
+                    <tr>
+                        <td>{{ sol.id }}</td>
+                        <td>{{ sol.cliente }}</td>
+                        <td>${{ sol.monto | number:'1.2-2' }}</td>
+                        <td>{{ sol.plazo }}</td>
+                        <td>{{ sol.tasa }}</td>
+                        <td>{{ sol.fecha }}</td>
+                        <td><span [class]="getStatusClass(sol.estado)">{{ sol.estado }}</span></td>
+                        <td class="action-links">
+                            <a [routerLink]="['./', sol.id, 'ver']" class="action-link detail-btn">Ver detalle</a> / 
+                            <a [routerLink]="['./', sol.id, 'aprobar']" class="action-link">Aprobar</a> / 
+                            <a [routerLink]="['./', sol.id, 'rechazar']" class="action-link">Rechazar</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+
+    <section class="solicitudes-section">
+        <h2 class="section-title">Solicitudes de Cierre de Cuenta</h2>
+        
+        <table class="ejecutivos-table solicitudes-table">
+            <thead>
+                <tr>
+                    <th>ID Solicitud</th>
+                    <th>Cliente</th>
+                    <th>Número de cuenta</th>
+                    <th>Saldo actual</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (sol of cierreCuentas; track sol.id) {
+                    <tr>
+                        <td>{{ sol.id }}</td>
+                        <td>{{ sol.cliente }}</td>
+                        <td>{{ sol.numeroCuenta }}</td>
+                        <td>${{ sol.saldoActual | number:'1.2-2' }}</td>
+                        <td>{{ sol.fecha }}</td>
+                        <td><span [class]="getStatusClass(sol.estado)">{{ sol.estado }}</span></td>
+                        <td class="action-links">
+                            <a [routerLink]="['./', sol.id, 'revisar']" class="action-link">Revisar</a> / 
+                            <a [routerLink]="['./', sol.id, 'confirmar']" class="action-link">Confirmar cierre</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+    
+    <section class="historial-section">
+        <h2 class="section-title">Historial de Solicitudes</h2>
+        
+        <table class="ejecutivos-table historial-table">
+            <thead>
+                <tr>
+                    <th>ID Solicitud</th>
+                    <th>Tipo</th>
+                    <th>Cliente</th>
+                    <th>Fecha</th>
+                    <th>Estado final</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (item of historial; track item.id) {
+                    <tr>
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.tipo }}</td>
+                        <td>{{ item.cliente }}</td>
+                        <td>{{ item.fecha }}</td>
+                        <td><span [class]="getStatusClass(item.estadoFinal)">{{ item.estadoFinal }}</span></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+</div>

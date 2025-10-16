@@ -1,0 +1,87 @@
+/* src/app/ejecutivos/cuentas/cuentas.component.css */
+
+.cuentas-page-content {
+    padding: 1rem 0;
+}
+
+.section-title {
+    /* Estilo del título: Color #6361A2, grande y en negrita */
+    color: #6361A2; 
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+/* ------------------------------------------- */
+/* AJUSTE DE BOTONES */
+/* ------------------------------------------- */
+
+.action-btn {
+    /* Reutilizamos la clase genérica .detail-btn que ya tienes definida */
+    /* Aquí forzamos el color más oscuro del Gerente y el padding */
+    background-color: #6361A2; /* Morado Oscuro principal */
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 4px; /* Pequeño radio de esquina */
+    cursor: pointer;
+    transition: background-color 0.3s;
+    /* Añadimos un pequeño margen debajo del botón */
+    margin-bottom: 1.5rem; 
+}
+
+.action-btn:hover {
+    background-color: #5D5B9D; /* Un tono un poco más oscuro al pasar el ratón */
+}
+
+.section-separator {
+    border: none;
+    border-top: 1px solid #ddd;
+    margin: 2rem 0;
+}
+
+/* ------------------------------------------- */
+/* ESTILO DE LA TABLA DE CARTERA */
+/* ------------------------------------------- */
+
+.consultar-cartera-section {
+    margin-top: 2rem;
+}
+
+/* Aseguramos que la tabla completa tenga la apariencia de Gerente */
+.ejecutivos-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    background: white;
+    /* Estilo de tarjeta de Gerente: Sombra */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+}
+
+/* Encabezados de la tabla */
+.ejecutivos-table th {
+    /* Color de fondo: Morado oscuro y texto blanco */
+    background-color: #6361A2; 
+    color: white;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+}
+
+/* Celdas de la tabla */
+.ejecutivos-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+/* Estilo para las filas al pasar el ratón */
+.ejecutivos-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Estilo para el estado "Activa" */
+.status-aprobado {
+    color: #28a745; /* Verde para Activo */
+    font-weight: 600;
+}

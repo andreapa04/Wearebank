@@ -1,0 +1,52 @@
+<div class="cuentas-page-content">
+
+    <section class="acciones-rapidas-section">
+        
+        <h2 class="section-title">Agregar Cliente</h2>
+        <button class="detail-btn action-btn" (click)="agregarCliente()">+ Agregar Nuevo Cliente</button>
+
+        <hr class="section-separator">
+        
+        <h2 class="section-title">Abrir Préstamo</h2>
+        <button class="detail-btn action-btn" (click)="abrirPrestamo()">Solicitar Préstamo</button>
+
+        <hr class="section-separator">
+
+        <h2 class="section-title">Abrir Crédito</h2>
+        <button class="detail-btn action-btn" (click)="abrirCredito()">Solicitar Crédito</button>
+        
+    </section>
+
+    <hr class="section-separator">
+
+    <section class="consultar-cartera-section">
+        <h2 class="section-title">Consultar Cartera</h2>
+        
+        <table class="ejecutivos-table cartera-table">
+            <thead>
+                <tr>
+                    <th>ID Cliente</th>
+                    <th>Nombre completo</th>
+                    <th>No. Cuenta</th>
+                    <th>Producto</th>
+                    <th>Saldo Actual</th>
+                    <th>Estado</th>
+                    <th>Ultimo Movimiento</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (item of cartera; track item.id) {
+                    <tr>
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.nombre }}</td>
+                        <td>{{ item.cuenta }}</td>
+                        <td>{{ item.producto }}</td>
+                        <td>${{ item.saldo | number:'1.2-2' }}</td> 
+                        <td><span [class.status-aprobado]="item.estado === 'Activa'">{{ item.estado }}</span></td>
+                        <td>{{ item.ultimoMovimiento }}</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+</div>

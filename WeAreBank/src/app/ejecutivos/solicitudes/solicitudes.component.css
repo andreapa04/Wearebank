@@ -1,0 +1,61 @@
+/* src/app/ejecutivos/solicitudes/solicitudes.component.css */
+
+/* ------------------------------------------- */
+/* ESTILO DE TABLAS UNIFORME (Clase .ejecutivos-table) */
+/* ------------------------------------------- */
+
+.ejecutivos-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    /* ⚠️ 1. FONDO Y SOMBRA (Estilo de Tarjeta de Gerente) */
+    background: white; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+    border-radius: 6px; /* Para que la sombra se vea mejor */
+    overflow: hidden; /* Oculta bordes redondeados en IE/Edge */
+}
+
+/* ⚠️ 2. ENCABEZADOS DE TABLA (TH) */
+.ejecutivos-table th {
+    /* Color de fondo: Morado oscuro y texto blanco */
+    background-color: #6361A2; 
+    color: white;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+}
+
+/* Filas y celdas de datos */
+.ejecutivos-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+/* Estilo para las filas al pasar el ratón */
+.ejecutivos-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Estilos de Acciones, Estados, y Títulos (Reutilizados) */
+
+.section-title {
+    color: #6361A2;
+    font-size: 1.5rem;
+    margin: 2rem 0 0.75rem 0;
+    font-weight: 600;
+}
+
+.status-aprobado {
+    color: #28a745; 
+    font-weight: 600;
+}
+
+.status-rechazado {
+    color: #dc3545; 
+    font-weight: 600;
+}
+
+.status-pendiente {
+    color: #5D5B9D; 
+    font-weight: 600;
+}

@@ -1,0 +1,29 @@
+<div class="ejecutivo-app-wrapper">
+    
+    <header class="top-bar">
+        
+        <div class="header-title-section">
+            <span class="logo-text">WeAreBank</span>
+            <span class="portal-title">- Portal Ejecutivo</span>
+        </div>
+
+        <nav class="navegacion-menu">
+            <a routerLink="/ejecutivos" routerLinkActive="active" 
+               [routerLinkActiveOptions]="{exact: true}" 
+               class="nav-item">Ejecutivo</a>
+            
+            <a routerLink="/ejecutivos/cuentas" routerLinkActive="active" class="nav-item">Administrar cuentas</a>
+            <a routerLink="/ejecutivos/solicitudes" routerLinkActive="active" class="nav-item">Solicitudes pendientes</a>
+            <a routerLink="/ejecutivos/consultas" routerLinkActive="active" class="nav-item">Consultas</a>
+        </nav>
+        
+        <div class="user-greeting">
+            Bienvenid&#64; {{ usuario }}
+        </div>
+    </header>
+
+    <main class="gerente-container main-content-executive">
+        <router-outlet></router-outlet>
+    </main>
+
+    </div>

@@ -1,0 +1,86 @@
+<div class="consultas-page-content">
+
+    <section class="consulta-clientes-section">
+        <h2 class="section-title">Consulta de Clientes</h2>
+        
+        <div class="search-container">
+            <input type="text" placeholder="Buscar..." class="search-input" [(ngModel)]="searchQueryClientes">
+            <button class="search-button detail-btn">🔍 Buscar</button>
+        </div>
+        
+        <table class="ejecutivos-table">
+            <thead>
+                <tr>
+                    <th>ID Cliente</th>
+                    <th>Nombre</th>
+                    <th>Apellidos</th>
+                    <th>CURP</th>
+                    <th>RFC</th>
+                    <th>Dirección</th>
+                    <th>Teléfono</th>
+                    <th>Correo</th>
+                    <th>Estado</th>
+                    <th>Ejecutivo asignado</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (cliente of clientes; track cliente.id) {
+                    <tr>
+                        <td>{{ cliente.id }}</td>
+                        <td>{{ cliente.nombre }}</td>
+                        <td>{{ cliente.apellido }}</td>
+                        <td>{{ cliente.curp }}</td>
+                        <td>{{ cliente.rfc }}</td>
+                        <td>{{ cliente.direccion }}</td>
+                        <td>{{ cliente.telefono }}</td>
+                        <td>{{ cliente.correo }}</td>
+                        <td><span [class]="getStatusClass(cliente.estado)">{{ cliente.estado }}</span></td>
+                        <td>{{ cliente.ejecutivo }}</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+    
+    <hr class="section-separator">
+
+    <section class="consulta-movimientos-section">
+        <h2 class="section-title">Consultar Movimientos</h2>
+        
+        <div class="search-container">
+            <input type="text" placeholder="Buscar..." class="search-input" [(ngModel)]="searchQueryMovimientos">
+            <button class="search-button detail-btn">🔍 Buscar</button>
+        </div>
+        
+        <table class="ejecutivos-table">
+            <thead>
+                <tr>
+                    <th>ID Movimiento</th>
+                    <th>Fecha</th>
+                    <th>Cuenta</th>
+                    <th>Cliente</th>
+                    <th>Tipo de movimiento</th>
+                    <th>Monto</th>
+                    <th>Saldo después</th>
+                    <th>Ejecutivo</th>
+                    <th>Comentarios</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (mov of movimientos; track mov.id) {
+                    <tr>
+                        <td>{{ mov.id }}</td>
+                        <td>{{ mov.fecha }}</td>
+                        <td>{{ mov.cuenta }}</td>
+                        <td>{{ mov.cliente }}</td>
+                        <td>{{ mov.tipo }}</td>
+                        <td>${{ mov.monto | number:'1.2-2' }}</td>
+                        <td>${{ mov.saldoDespues | number:'1.2-2' }}</td>
+                        <td>{{ mov.ejecutivo }}</td>
+                        <td>{{ mov.comentarios }}</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+</div>

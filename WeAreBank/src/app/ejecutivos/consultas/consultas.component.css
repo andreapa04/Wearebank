@@ -1,0 +1,101 @@
+/* src/app/ejecutivos/consultas/consultas.component.css */
+
+.consultas-page-content {
+    padding: 1rem 0;
+}
+
+.section-title {
+    /* Color de título principal y margen */
+    color: #6361A2; 
+    font-size: 1.5rem;
+    margin: 2rem 0 0.75rem 0;
+    font-weight: 600;
+}
+
+/* ------------------------------------------- */
+/* ESTILO DE BÚSQUEDA (Replicando el diseño de caja) */
+/* ------------------------------------------- */
+
+.search-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.search-input {
+    /* Estilo para la caja de texto */
+    padding: 0.75rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 300px;
+    font-size: 1rem;
+}
+
+.search-button {
+    /* Estilo del botón (Clase .detail-btn o similar en Gerente) */
+    background-color: #6361A2; /* Morado Oscuro principal */
+    color: white;
+    border: none;
+    padding: 0.75rem 1.2rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    white-space: nowrap; /* Evita que el texto se rompa */
+}
+
+/* ------------------------------------------- */
+/* ESTILO DE TABLAS (Aplicando el estilo de Tarjeta de Gerente) */
+/* ------------------------------------------- */
+
+/* Aseguramos que la clase .ejecutivos-table esté bien definida para esta vista */
+.ejecutivos-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    /* Fondo blanco y sombra (Estilo Tarjeta) */
+    background: white; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+    border-radius: 6px; 
+    overflow: hidden; 
+}
+
+/* Encabezados de tabla */
+.ejecutivos-table th {
+    background-color: #6361A2; /* Morado Oscuro */
+    color: white;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+}
+
+/* Celdas de datos */
+.ejecutivos-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+/* Filas con hover */
+.ejecutivos-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* ------------------------------------------- */
+/* ESTILOS DE ESTADO (Reutilizando clases de Gerente) */
+/* ------------------------------------------- */
+
+.status-aprobado {
+    color: #28a745; /* Verde para Activo */
+    font-weight: 600;
+}
+
+.status-rechazado {
+    color: #dc3545; /* Rojo para Inactivo */
+    font-weight: 600;
+}
+
+.section-separator {
+    border: none;
+    border-top: 1px solid #ddd;
+    margin: 3rem 0;
+}

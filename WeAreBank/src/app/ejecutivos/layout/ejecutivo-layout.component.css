@@ -1,0 +1,77 @@
+/* src/app/ejecutivos/layout/ejecutivo-layout.component.css */
+
+/* ------------------------------------------- */
+/* HEADER UNIFICADO (top-bar) */
+/* ------------------------------------------- */
+
+.top-bar {
+    background-color: #6361A2; /* Morado de Gerente */
+    display: flex;
+    /* Distribuye el espacio entre los elementos: Logo/Título, Menú, Bienvenida */
+    justify-content: space-between; 
+    align-items: center;
+    padding: 1rem 3rem; 
+    width: 100%;
+}
+
+.header-title-section {
+    /* Mantiene el logo/título a la izquierda */
+    display: flex;
+    align-items: center;
+    color: white;
+    /* Asegura que no ocupe demasiado espacio forzando al menú */
+    flex-shrink: 0; 
+}
+
+.logo-text {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.portal-title {
+    font-size: 1.2rem;
+    margin-left: 0.5rem;
+    white-space: nowrap; /* Evita que el título se rompa */
+}
+
+/* ------------------------------------------- */
+/* NAVEGACIÓN (Centrado y Expansión) */
+/* ------------------------------------------- */
+
+.navegacion-menu {
+    display: flex;
+    /* ESTE ES EL CAMBIO CLAVE: Permite que el menú ocupe el espacio central */
+    flex-grow: 1; 
+    /* Centra los botones dentro del espacio que ocupan */
+    justify-content: center; 
+    /* Elimina el margen por defecto de la lista si existe, aunque usamos 'a' */
+    padding: 0; 
+}
+
+/* Los botones individuales dentro del menú */
+.navegacion-menu a {
+    color: white;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    /* Añade margen horizontal para separar los botones */
+    margin: 0 0.5rem; 
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+.navegacion-menu a.active {
+    background-color: #8988C1;
+    font-weight: bold;
+}
+
+/* ------------------------------------------- */
+/* BIENVENIDA (Derecha) */
+/* ------------------------------------------- */
+
+.user-greeting {
+    font-size: 1rem;
+    color: white;
+    text-align: right;
+    /* Mantiene la bienvenida a la derecha */
+    flex-shrink: 0; 
+}
