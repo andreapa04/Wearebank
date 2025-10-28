@@ -22,17 +22,17 @@ export class AuthGuard {
     const url = state.url;
 
     // Validación de acceso por rol
-    if (url.startsWith('/gerente') && rol !== 0) {
+    if (url.startsWith('/gerente') && rol !== 1) {
       alert('No tienes permisos para acceder a esta ruta (solo Gerente).');
       return false;
     }
 
-    if (url.startsWith('/ejecutivo') && rol !== 1) {
+    if (url.startsWith('/ejecutivo') && rol !== 2) {
       alert('No tienes permisos para acceder a esta ruta (solo Ejecutivo).');
       return false;
     }
 
-    if (url.startsWith('/cliente') && rol !== 2) {
+    if (url.startsWith('/cliente') && rol !== 3) {
       alert('No tienes permisos para acceder a esta ruta (solo Cliente).');
       return false;
     }

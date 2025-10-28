@@ -29,21 +29,30 @@ export class LoginComponent {
         console.log("Respuesta del backend:", res);
 
         if (res.user) {
-          // 🔹 Guardamos con la clave 'usuario' (igual que espera AuthGuard)
-          localStorage.setItem('usuario', JSON.stringify(res.user));
+          const user = res.user;
+
+          // 🔹 Guardamos los datos del usuario
+          localStorage.setItem('usuario', JSON.stringify(user));
+          localStorage.setItem('nombreUsuario', `${user.nombre} ${user.apellidoP}`);
+          const roles: Record<number, string> = {
+            1: 'Gerente',
+            2: 'Ejecutivo',
+            3: 'Cliente'
+          };
+          localStorage.setItem('rolUsuario', roles[user.rol] || 'Desconocido');
 
           // 🔹 Redirigir según rol
-          const rol = res.user.rol;
-          if (rol === 0) this.router.navigate(['/gerente']);
-          else if (rol === 1) this.router.navigate(['/ejecutivo']);
-          else if (rol === 2) this.router.navigate(['/cliente']);
+          if (user.rol === 1) this.router.navigate(['/gerente']);
+          else if (user.rol === 2) this.router.navigate(['/ejecutivo']);
+          else if (user.rol === 3) this.router.navigate(['/cliente']);
+          else alert("Rol desconocido. Contacta con soporte.");
         } else {
-          alert(res.error || "Credenciales inválidas");
+          alert(res.message || "Credenciales inválidas");
         }
       },
       error: (err) => {
         console.error("Error en login:", err);
-        alert("Error en el servidor");
+        alert(err.error?.message || "Error en el servidor");
       }
     });
   }

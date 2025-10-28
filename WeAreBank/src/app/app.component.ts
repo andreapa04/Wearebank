@@ -15,6 +15,8 @@ export class AppComponent {
   title = 'WeAreBank';
   showNavbar: boolean = false;
   userType: 'cliente' | 'gerente' | 'ejecutivo' | null = null;
+  nombreUsuario: string | null = null;
+  rolUsuario: string | null = null;
   errorMessage: string | null = null;
 
   private clientRoutes = [
@@ -50,7 +52,11 @@ export class AppComponent {
           this.userType = null;
         }
 
-        // 🔹 Limpiar mensajes de error al navegar correctamente
+        // 🔹 Cargar nombre y rol
+        const ls = safeLocalStorage();
+        this.nombreUsuario = ls.getItem('nombreUsuario');
+        this.rolUsuario = ls.getItem('rolUsuario');
+
         this.errorMessage = null;
       });
   }
@@ -59,12 +65,13 @@ export class AppComponent {
     event.preventDefault();
     const ls = safeLocalStorage();
     ls.removeItem('usuario');
+    ls.removeItem('nombreUsuario');
+    ls.removeItem('rolUsuario');
     this.showNavbar = false;
     this.userType = null;
     this.router.navigate(['/login']);
   }
 
-  // Mostrar error desde el guard
   showError(msg: string) {
     this.errorMessage = msg;
   }

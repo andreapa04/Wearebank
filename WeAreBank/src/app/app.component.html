@@ -2,6 +2,7 @@
   <!-- Navbar Cliente -->
   <header *ngIf="showNavbar && userType === 'cliente'">
     <h1>WeAreBank - Portal Cliente</h1>
+    <p class="saludo">👋 Bienvenido, <strong>{{ nombreUsuario }}</strong> ({{ rolUsuario }})</p>
     <nav>
       <a [routerLink]="['/cliente']" [class.active]="isActiveRoute('/cliente')">Inicio</a> |
       <a [routerLink]="['/cliente/consultas']" [class.active]="isActiveRoute('/cliente/consultas')">Consultas</a> |
@@ -17,6 +18,7 @@
   <!-- Navbar Gerente -->
   <header *ngIf="showNavbar && userType === 'gerente'" class="gerente-header">
     <h1>WeAreBank - Portal Gerente</h1>
+    <p class="saludo">👋 Hola, <strong>{{ nombreUsuario }}</strong> ({{ rolUsuario }})</p>
     <nav>
       <a [routerLink]="['/gerente']" [class.active]="isActiveRoute('/gerente')">Inicio</a> |
       <a [routerLink]="['/gerente/autorizaciones']" [class.active]="isActiveRoute('/gerente/autorizaciones')">Autorizaciones</a> |
@@ -30,6 +32,7 @@
   <!-- Navbar Ejecutivo -->
   <header *ngIf="showNavbar && userType === 'ejecutivo'" class="ejecutivo-header">
     <h1>WeAreBank - Portal Ejecutivo</h1>
+    <p class="saludo">👋 Bienvenido, <strong>{{ nombreUsuario }}</strong> ({{ rolUsuario }})</p>
     <nav>
       <a [routerLink]="['/ejecutivo']" [class.active]="isActiveRoute('/ejecutivo')">Inicio</a> |
       <a href="#" (click)="logout($event)">Cerrar Sesión</a>
@@ -37,7 +40,6 @@
   </header>
 
   <main>
-    <!-- 🔹 Aquí mostramos un mensaje de error si intenta entrar a rutas prohibidas -->
     <div *ngIf="errorMessage" class="error-message">
       {{ errorMessage }}
     </div>
@@ -49,4 +51,3 @@
     <p>Todos los derechos reservados. 2025 ©</p>
   </footer>
 </div>
-
