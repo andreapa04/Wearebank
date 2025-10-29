@@ -1,211 +1,97 @@
-<div class="register-container"> 
-  <h1># Crea tu cuenta en WeAreBank</h1>
+<div class="register-container">
+  <h1>Crea tu cuenta en WeAreBank</h1>
 
-  <form (ngSubmit)="enviarSolicitud()" class="register-form">
-    <!-- DATOS PERSONALES -->
+  <form (ngSubmit)="enviarSolicitud()">
     <fieldset>
       <legend>Datos personales</legend>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label for="nombre">Nombre</label>
-          <input 
-            type="text" 
-            id="nombre" 
-            name="nombre" 
-            [(ngModel)]="nombre" 
-            placeholder="Nombre" 
-            class="form-input" 
-            required>
-        </div>
-        
-        <div class="form-group">
-          <label for="apellidoP">Apellido Paterno</label>
-          <input 
-            type="text" 
-            id="apellidoP" 
-            name="apellidoP" 
-            [(ngModel)]="apellidoP" 
-            placeholder="Apellido Paterno" 
-            class="form-input" 
-            required>
-        </div>
-        
-        <div class="form-group">
-          <label for="apellidoM">Apellido Materno</label>
-          <input 
-            type="text" 
-            id="apellidoM" 
-            name="apellidoM" 
-            [(ngModel)]="apellidoM" 
-            placeholder="Apellido Materno" 
-            class="form-input" 
-            required>
-        </div>
+      <div class="form-group">
+        <label>Nombre</label>
+        <input type="text" [(ngModel)]="nombre" name="nombre" required>
       </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="fechaNacimiento">Fecha de nacimiento</label>
-          <input 
-            type="date" 
-            id="fechaNacimiento" 
-            name="fechaNacimiento" 
-            [(ngModel)]="fechaNacimiento" 
-            class="form-input" 
-            required>
-        </div>
-        
-        <div class="form-group">
-          <label for="CURP">CURP</label>
-          <input 
-            type="text" 
-            id="CURP" 
-            name="CURP" 
-            [(ngModel)]="CURP" 
-            placeholder="CURP" 
-            class="form-input" 
-            required>
-        </div>
-        
-        <div class="form-group">
-          <label for="RFC">RFC</label>
-          <input 
-            type="text" 
-            id="RFC" 
-            name="RFC" 
-            [(ngModel)]="RFC" 
-            placeholder="RFC" 
-            class="form-input" 
-            required>
-        </div>
+      <div class="form-group">
+        <label>Apellido Paterno</label>
+        <input type="text" [(ngModel)]="apellidoP" name="apellidoP">
+      </div>
+      <div class="form-group">
+        <label>Apellido Materno</label>
+        <input type="text" [(ngModel)]="apellidoM" name="apellidoM">
+      </div>
+      <div class="form-group">
+        <label>Fecha de nacimiento</label>
+        <input type="date" [(ngModel)]="fechaNacimiento" name="fechaNacimiento">
+      </div>
+      <div class="form-group">
+        <label>CURP</label>
+        <input type="text" [(ngModel)]="CURP" name="CURP">
+      </div>
+      <div class="form-group">
+        <label>RFC</label>
+        <input type="text" [(ngModel)]="RFC" name="RFC">
       </div>
     </fieldset>
 
-    <!-- DIRECCIÓN -->
     <fieldset>
       <legend>Dirección</legend>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label for="calleNumero">Calle y número</label>
-          <input 
-            type="text" 
-            id="calleNumero" 
-            name="calleNumero" 
-            [(ngModel)]="calleNumero" 
-            placeholder="Calle y número" 
-            class="form-input" 
-            required>
-        </div>
-        
-        <div class="form-group">
-          <label for="colonia">Colonia</label>
-          <input 
-            type="text" 
-            id="colonia" 
-            name="colonia" 
-            [(ngModel)]="colonia" 
-            placeholder="Colonia" 
-            class="form-input" 
-            required>
-        </div>
-        
-        <div class="form-group">
-          <label for="ciudad">Ciudad</label>
-          <input 
-            type="text" 
-            id="ciudad" 
-            name="ciudad" 
-            [(ngModel)]="ciudad" 
-            placeholder="Ciudad" 
-            class="form-input" 
-            required>
-        </div>
+      <div class="form-group">
+        <label>Calle y número</label>
+        <input type="text" [(ngModel)]="calleNumero" name="calleNumero">
       </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="codigoPostal">Código postal</label>
-          <input 
-            type="text" 
-            id="codigoPostal" 
-            name="codigoPostal" 
-            [(ngModel)]="codigoPostal" 
-            placeholder="Código postal" 
-            class="form-input" 
-            required>
-        </div>
-        
-        <div class="form-group">
-          <label for="estado">Estado</label>
-          <input 
-            type="text" 
-            id="estado" 
-            name="estado" 
-            [(ngModel)]="estado" 
-            placeholder="Estado" 
-            class="form-input" 
-            required>
-        </div>
+      <div class="form-group">
+        <label>Colonia</label>
+        <input type="text" [(ngModel)]="colonia" name="colonia">
+      </div>
+      <div class="form-group">
+        <label>Ciudad</label>
+        <input type="text" [(ngModel)]="ciudad" name="ciudad">
+      </div>
+      <div class="form-group">
+        <label>Estado</label>
+        <input type="text" [(ngModel)]="estado" name="estado">
+      </div>
+      <div class="form-group">
+        <label>Código postal</label>
+        <input type="text" [(ngModel)]="codigoPostal" name="codigoPostal">
       </div>
     </fieldset>
 
     <fieldset>
       <legend>Documentos</legend>
       <div class="form-group">
-        <label><strong>Sube un documento PDF de tu INE</strong> 📄</label>
-        <input 
-          type="file" 
-          accept=".pdf" 
-          class="form-input"
-          (change)="onFileSelected($event)">
+        <label>Sube un documento PDF de tu INE</label>
+        <input type="file" (change)="onFileSelected($event)">
       </div>
     </fieldset>
 
-    <!-- CONTACTO -->
     <fieldset>
-      <legend>Contacto</legend>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label for="telefono">Teléfono</label>
-          <input 
-            type="tel" 
-            id="telefono" 
-            name="telefono" 
-            [(ngModel)]="telefono" 
-            placeholder="Teléfono" 
-            class="form-input" 
-            required>
-        </div>
-        
-        <div class="form-group">
-          <label for="email">Correo electrónico</label>
-          <input 
-            type="email" 
-            id="email" 
-            name="email" 
-            [(ngModel)]="email" 
-            placeholder="Correo electrónico" 
-            class="form-input" 
-            required>
-        </div>
-        
-        <div class="form-group">
-          <label for="contrasenia">Contraseña</label>
-          <input 
-            type="password" 
-            id="contrasenia" 
-            name="contrasenia" 
-            [(ngModel)]="contrasenia" 
-            placeholder="Contraseña" 
-            class="form-input" 
-            required>
-        </div>
+      <legend>Contacto y contraseña</legend>
+      <div class="form-group">
+        <label>Teléfono</label>
+        <input type="text" [(ngModel)]="telefono" name="telefono">
+      </div>
+      <div class="form-group">
+        <label>Correo electrónico</label>
+        <input type="email" [(ngModel)]="email" name="email" required>
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" [(ngModel)]="contrasenia" name="contrasenia" required>
       </div>
     </fieldset>
 
-    <button type="submit" class="submit-button">Enviar solicitud</button>
+    <fieldset>
+      <legend>Pregunta de seguridad</legend>
+      <div class="form-group">
+        <label>Pregunta de seguridad</label>
+        <input type="text" [(ngModel)]="preguntaSeguridad" name="preguntaSeguridad" required>
+      </div>
+      <div class="form-group">
+        <label>Respuesta de seguridad</label>
+        <input type="text" [(ngModel)]="respuestaSeguridad" name="respuestaSeguridad" required>
+      </div>
+    </fieldset>
+
+    <p *ngIf="mensajeError" class="error-msg">{{ mensajeError }}</p>
+
+    <button type="submit" class="submit-button">Registrar</button>
   </form>
 </div>

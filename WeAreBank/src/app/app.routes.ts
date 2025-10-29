@@ -15,12 +15,15 @@ import { GestionPermisosComponent } from './gerente/gestion-permisos/gestion-per
 import { SolicitudesComponent } from './gerente/solicitudes/solicitudes.component';
 import { EjecutivosComponent } from './ejecutivos/ejecutivos.component';
 import { AuthGuard } from './guards/auth.guard';
+import { RecuperarComponent } from './recuperar/recuperar.component';
 
 export const routes: Routes = [
   // Rutas públicas
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+  { path: 'recuperar', component: RecuperarComponent },
+
 
   // Rutas de cliente (rol = 2)
   { path: 'cliente', component: ClienteComponent, canActivate: [AuthGuard] },

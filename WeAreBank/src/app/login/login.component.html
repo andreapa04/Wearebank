@@ -34,20 +34,21 @@
         <input 
           type="checkbox" 
           id="recordarme"
-          name="recordarme" 
-          [(ngModel)]="recordarme">
+          name="recordarme">
         <span>Recuérdame</span>
       </label>
       
-      <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+      <a (click)="forgotpassword()" class="forgotpassword">¿Olvidaste tu contraseña?</a>
     </div>
 
     <div class="button-group">
       <button type="button" (click)="iniciarSesion()" class="login-button">
         Iniciar sesión
       </button>
-      <a routerLink="/register" class="register-button">Crear cuenta</a>
+      <a (click)="registrar()" class="register-button">Crear cuenta</a>
     </div>
+    <p *ngIf="mensajeError" style="color: red; font-weight: bold;">{{ mensajeError }}</p>
+
 
     <div class="login-footer">
       <p>Al iniciar sesión, aceptas nuestros Términos y Condiciones</p>
