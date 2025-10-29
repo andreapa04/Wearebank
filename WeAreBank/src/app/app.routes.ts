@@ -16,6 +16,8 @@ import { SolicitudesComponent } from './gerente/solicitudes/solicitudes.componen
 import { EjecutivosComponent } from './ejecutivos/ejecutivos.component';
 import { AuthGuard } from './guards/auth.guard';
 import { RecuperarComponent } from './recuperar/recuperar.component';
+import { DepositosComponent } from './cliente/depositos/depositos.component';
+
 
 export const routes: Routes = [
   // Rutas públicas
@@ -33,6 +35,7 @@ export const routes: Routes = [
   { path: 'cliente/pagos', component: PagosComponent, canActivate: [AuthGuard] },
   { path: 'cliente/prestamos', component: PrestamosComponent, canActivate: [AuthGuard] },
   { path: 'cliente/creditos', component: CreditosComponent, canActivate: [AuthGuard] },
+  {path: 'cliente/depositos', component: DepositosComponent, canActivate: [AuthGuard]},
 
   // Rutas de gerente (rol = 0)
   { path: 'gerente', component: GerenteHomeComponent, canActivate: [AuthGuard] },

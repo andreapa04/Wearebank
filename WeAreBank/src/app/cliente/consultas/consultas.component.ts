@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { safeLocalStorage } from '../../utils/storage.util';
 
 @Component({
   selector: 'app-consultas',
@@ -8,13 +10,21 @@ import { CommonModule } from '@angular/common';
   templateUrl: './consultas.component.html',
   styleUrls: ['./consultas.component.css']
 })
-export class ConsultasComponent {
-  cuentas = [
-    { numero: '1234-5678-9012-3456', tipo: 'Corriente', saldo: 18000 },
-    { numero: '1672-3781-8927-1029', tipo: 'Nómina', saldo: 5000 },
-    { numero: '1782-1094-2452-1245', tipo: 'Ahorro', saldo: 3000 },
-    { numero: '2981-3410-3400-2391', tipo: 'Cheques', saldo: 12000 }
-  ];
+export class ConsultasComponent implements OnInit {
+  cuentas: any[] = [];
+  movimientos: any[] = [];
+  idCuentaSeleccionada: number | null = null;
 
-  movimientos: any[] = []; // Se podría llenar dinámicamente
+  constructor(private http: HttpClient) {}
+
+  ngOnInit() {
+    const usuario = JSON.parse(safeLocalStorage().getItem('usuario') || 'null');
+    if (usuario) this.http.get(`http://localhost:3000/api/transferencias/mis-cuentas/${usuario.id}`).subscribe((data:any)=> this.cuentas=data);
+  }
+
+  cargarMovimientos() {
+    if (!this.idCuentaSeleccionada) return;
+    this.http.get(`http://localhost:3000/api/movimientos/${this.idCuentaSeleccionada}`)
+      .subscribe((data:any)=> this.movimientos=data);
+  }
 }

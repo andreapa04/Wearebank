@@ -2,6 +2,13 @@
 import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/auth.js"; // importa el router de login
+import transferenciasRoutes from "./routes/transferencias.js";
+import movimientosRoutes from "./routes/movimientos.js";
+import creditosRoutes from "./routes/creditos.js";
+import prestamosRoutes from "./routes/prestamos.js";
+import pagosRoutes from "./routes/pagos.js";
+import retirosRoutes from "./routes/retiros.js";
+
 //se arranca el servidor Express.
 const app = express();
 app.use(cors());
@@ -9,6 +16,12 @@ app.use(express.json());
 
 // 🔹 Montar rutas de autenticación
 app.use("/api/auth", authRoutes);
+app.use("/api/transferencias", transferenciasRoutes);
+app.use("/api/movimientos", movimientosRoutes);
+app.use("/api/creditos", creditosRoutes);
+app.use("/api/prestamos", prestamosRoutes);
+app.use("/api/pagos", pagosRoutes);
+app.use("/api/retiros", retirosRoutes);
 
 // 🔹 Endpoint de prueba (verificar servidor corriendo)
 app.get("/", (req, res) => {

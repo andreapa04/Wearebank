@@ -22,7 +22,7 @@ export class AppComponent {
   private clientRoutes = [
     '/cliente', '/cliente/consultas', '/cliente/retiros',
     '/cliente/transferencias', '/cliente/pagos',
-    '/cliente/prestamos', '/cliente/creditos'
+    '/cliente/prestamos', '/cliente/creditos', '/cliente/depositos'
   ];
 
   private gerenteRoutes = [
