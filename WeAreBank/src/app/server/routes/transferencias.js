@@ -1,5 +1,6 @@
 import express from "express";
 import pool from "../db.js";
+import { enviarCorreoMovimiento } from "../../utils/mailer.js";
 
 const router = express.Router();
 
@@ -86,6 +87,20 @@ router.post("/", async (req, res) => {
       );
     }
 
+    // ENVIAR CORREO
+    const [user] = await pool.query(
+      `SELECT u.email, c.clabe
+       FROM usuario u
+       JOIN pertenece p ON p.idUsuario = u.idUsuario
+       JOIN cuenta c ON c.idCuenta = p.idCuenta
+       WHERE c.idCuenta = ? LIMIT 1`,
+      [idCuentaOrigen]
+    );
+
+    if (user.length) {
+      await enviarCorreoMovimiento(user[0].email, "TRANSFERENCIA", total, user[0].clabe);
+    }
+
     res.json({ message: "Transferencia completada exitosamente" });
   } catch (err) {
     console.error("Error transferencia:", err.message);
@@ -113,6 +128,20 @@ router.post("/deposito", async (req, res) => {
       "INSERT INTO movimiento (idCuenta, monto, tipoMovimiento) VALUES (?, ?, 'DEPOSITO')",
       [idCuenta, monto]
     );
+
+    // ENVIAR CORREO
+    const [user] = await pool.query(
+      `SELECT u.email, c.clabe
+       FROM usuario u
+       JOIN pertenece p ON p.idUsuario = u.idUsuario
+       JOIN cuenta c ON c.idCuenta = p.idCuenta
+       WHERE c.idCuenta = ? LIMIT 1`,
+      [idCuenta]
+    );
+
+    if (user.length) {
+      await enviarCorreoMovimiento(user[0].email, "DEPÓSITO", monto, user[0].clabe);
+    }
 
     res.json({ message: "Depósito realizado exitosamente" });
   } catch (err) {

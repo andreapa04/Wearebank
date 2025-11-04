@@ -1,5 +1,6 @@
 import express from "express";
 import pool from "../db.js";
+import { enviarCorreoMovimiento } from "../../utils/mailer.js";
 
 const router = express.Router();
 
@@ -14,12 +15,18 @@ router.post("/", async (req, res) => {
       [idCuentaDestino, monto]
     );
 
+    // ENVIAR CORREO
     const [user] = await pool.query(
-      `SELECT email, nombre FROM usuario
+      `SELECT email, nombre, clabe FROM usuario
        JOIN pertenece ON usuario.idUsuario = pertenece.idUsuario
+       JOIN cuenta ON cuenta.idCuenta = pertenece.idCuenta
        WHERE pertenece.idCuenta = ?`,
       [idCuentaDestino]
     );
+
+    if (user.length) {
+      await enviarCorreoMovimiento(user[0].email, "DEPÓSITO", monto, user[0].clabe);
+    }
 
     res.json({ message: "Depósito exitoso" });
   } catch (error) {
