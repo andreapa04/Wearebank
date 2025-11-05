@@ -22,7 +22,7 @@ import { NavbarComponent } from './cliente/components/navbar/navbar.component';
 import { NavbarComponent as NavbarComponentGer } from './gerente/navbar/navbar.component';
 
 
-
+import { PdfComponent } from './pdf/pdf.component'; //PDF Prubeas
 
 export const routes: Routes = [
   // Rutas públicas
@@ -59,6 +59,10 @@ export const routes: Routes = [
     ]
   },
 
+
+    // 👇 Ruta de prueba para el PDF
+  { path: 'pdf', component: PdfComponent },
+  
   // Ruta por defecto
   { path: '**', redirectTo: '/login' }
 ];
