@@ -4,36 +4,49 @@
   <table>
     <thead>
       <tr>
-        <th>Cuenta</th>
+        <th>CLABE</th>
         <th>Tipo</th>
         <th>Saldo disponible</th>
-        <th></th>
+        <th>Acción</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let cuenta of cuentas">
-        <td>{{ cuenta.numero }}</td>
-        <td>{{ cuenta.tipo }}</td>
-        <td>${{ cuenta.saldo }}</td>
-        <td><a href="#">Detalles</a></td>
+      <tr *ngFor="let cuenta of cuentas" (click)="seleccionarCuenta(cuenta)" style="cursor: pointer;">
+        <td>{{ cuenta.clabe }}</td>
+        <td>{{ cuenta.tipoCuenta }}</td>
+        <td>${{ cuenta.saldo | number:'1.2-2' }}</td>
+        <td><button (click)="seleccionarCuenta(cuenta)">Ver movimientos</button></td>
+      </tr>
+      <tr *ngIf="cuentas.length === 0">
+        <td colspan="4">No tienes cuentas registradas.</td>
       </tr>
     </tbody>
   </table>
 
-  <h3>Movimientos recientes</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Descripción</th>
-        <th>Fecha</th>
-        <th>Monto</th>
-        <th>Cuenta</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngIf="movimientos.length === 0">
-        <td colspan="4">No hay movimientos recientes</td>
-      </tr>
-    </tbody>
-  </table>
+  <div *ngIf="idCuentaSeleccionada">
+    <h3>Movimientos recientes</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Descripción</th>
+          <th>Fecha</th>
+          <th>Monto</th>
+          <th>Tipo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let mov of movimientos">
+          <td>{{ mov.tipoMovimiento }}</td>
+          <td>{{ mov.fecha | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
+          <td [ngClass]="{ 'positivo': mov.monto > 0, 'negativo': mov.monto < 0 }">
+            {{ mov.monto | currency:'MXN':'symbol' }}
+          </td>
+          <td>{{ mov.tipoMovimiento }}</td>
+        </tr>
+        <tr *ngIf="movimientos.length === 0">
+          <td colspan="4">No hay movimientos recientes</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>

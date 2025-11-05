@@ -8,6 +8,7 @@ import creditosRoutes from "./routes/creditos.js";
 import prestamosRoutes from "./routes/prestamos.js";
 import pagosRoutes from "./routes/pagos.js";
 import retirosRoutes from "./routes/retiros.js";
+import consultasRoutes from "./routes/consultas.js";
 
 //se arranca el servidor Express.
 const app = express();
@@ -22,6 +23,8 @@ app.use("/api/creditos", creditosRoutes);
 app.use("/api/prestamos", prestamosRoutes);
 app.use("/api/pagos", pagosRoutes);
 app.use("/api/retiros", retirosRoutes);
+app.use("/api/consultas", consultasRoutes);
+
 
 // 🔹 Endpoint de prueba (verificar servidor corriendo)
 app.get("/", (req, res) => {

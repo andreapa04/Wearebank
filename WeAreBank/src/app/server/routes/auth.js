@@ -97,4 +97,35 @@ router.post("/reset-password", async (req, res) => {
   res.json({ message: "Contraseña actualizada correctamente" });
 });
 
+router.post("/register", async (req, res) => {
+  try {
+    const {
+      nombre, apellidoP, apellidoM, direccion, telefono, email,
+      contrasenia, fechaNacimiento, CURP, RFC, INE,
+      preguntaSeguridad, respuestaSeguridad
+    } = req.body;
+
+    // Encriptar contraseña antes de guardar
+    const hash = await bcrypt.hash(contrasenia, 10);
+
+    // Ejecutar el procedimiento almacenado
+    await pool.query(
+      `CALL registrar_usuario_completo(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        nombre, apellidoP, apellidoM, direccion, telefono, email,
+        hash, fechaNacimiento, CURP, RFC, INE,
+        preguntaSeguridad, respuestaSeguridad
+      ]
+    );
+
+    res.status(201).json({
+      message: "Usuario registrado correctamente con cuenta y tarjeta asignadas."
+    });
+
+  } catch (error) {
+    console.error("❌ Error en /register:", error);
+    res.status(500).json({ message: "Error al registrar el usuario." });
+  }
+});
+
 export default router;
