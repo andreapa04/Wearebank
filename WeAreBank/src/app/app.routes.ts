@@ -15,12 +15,17 @@ import { GestionPermisosComponent } from './gerente/gestion-permisos/gestion-per
 import { SolicitudesComponent } from './gerente/solicitudes/solicitudes.component';
 import { EjecutivosComponent } from './ejecutivos/ejecutivos.component';
 import { AuthGuard } from './guards/auth.guard';
+import { RecuperarComponent } from './recuperar/recuperar.component';
+import { DepositosComponent } from './cliente/depositos/depositos.component';
+
 
 export const routes: Routes = [
   // Rutas públicas
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+  { path: 'recuperar', component: RecuperarComponent },
+
 
   // Rutas de cliente (rol = 2)
   { path: 'cliente', component: ClienteComponent, canActivate: [AuthGuard] },
@@ -30,6 +35,7 @@ export const routes: Routes = [
   { path: 'cliente/pagos', component: PagosComponent, canActivate: [AuthGuard] },
   { path: 'cliente/prestamos', component: PrestamosComponent, canActivate: [AuthGuard] },
   { path: 'cliente/creditos', component: CreditosComponent, canActivate: [AuthGuard] },
+  {path: 'cliente/depositos', component: DepositosComponent, canActivate: [AuthGuard]},
 
   // Rutas de gerente (rol = 0)
   { path: 'gerente', component: GerenteHomeComponent, canActivate: [AuthGuard] },

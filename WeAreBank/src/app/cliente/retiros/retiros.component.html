@@ -1,28 +1,32 @@
 <div class="container">
   <h2>Realizar retiro</h2>
 
-  <label>Cuenta:</label>
-  <select>
-    <option>Seleccionar</option>
+  <label for="cuenta">Cuenta:</label>
+  <select id="cuenta" [(ngModel)]="idCuentaSeleccionada">
+    <option [ngValue]="null">Seleccionar</option>
+    <option *ngFor="let cuenta of cuentas" [ngValue]="cuenta.idCuenta">
+      {{ cuenta.clabe }} - {{ cuenta.tipoCuenta }} ({{ cuenta.saldo | currency:'MXN' }})
+    </option>
   </select>
 
   <label>Monto:</label>
   <div class="monto-btns">
-    <button (click)="seleccionarMonto(100)">$100</button>
-    <button (click)="seleccionarMonto(500)">$500</button>
+    <button (click)="seleccionarMonto(100)" [class.active]="montoSeleccionado === 100">$100</button>
+    <button (click)="seleccionarMonto(500)" [class.active]="montoSeleccionado === 500">$500</button>
     <button (click)="seleccionarMonto(1000)" [class.active]="montoSeleccionado === 1000">$1000</button>
-    <button (click)="seleccionarMonto(1500)">$1500</button>
-    <button (click)="seleccionarMonto(2000)">$2000</button>
-    <button>Otro</button>
-    <input type="number" [(ngModel)]="montoOtro" placeholder="$200" />
+    <button (click)="seleccionarMonto(1500)" [class.active]="montoSeleccionado === 1500">$1500</button>
+    <button (click)="seleccionarMonto(2000)" [class.active]="montoSeleccionado === 2000">$2000</button>
+    <button (click)="montoSeleccionado = null">Otro</button>
+    <input type="number" [(ngModel)]="montoOtro" placeholder="$200" *ngIf="!montoSeleccionado" />
   </div>
 
   <div>
     <input type="checkbox" [(ngModel)]="retiroSinTarjeta" /> Retiro sin tarjeta (código cajero)
   </div>
-  <div>
-    <input type="checkbox" [(ngModel)]="transferenciaCuenta" /> Transferencia a cuenta propia
-  </div>
 
   <button class="submit" (click)="retirar()">Retirar</button>
+
+  <div *ngIf="mensaje" class="mensaje">
+    {{ mensaje }}
+  </div>
 </div>

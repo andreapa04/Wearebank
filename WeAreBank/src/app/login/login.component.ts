@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -12,15 +13,17 @@ import { AuthService } from '../services/auth.service';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
-  email: string = '';
-  contrasenia: string = '';
-  recordarme: boolean = false;
+  email = '';
+  contrasenia = '';
+  mensajeError = '';
 
   constructor(private authService: AuthService, private router: Router) {}
 
   iniciarSesion() {
+    this.mensajeError = '';
+
     if (!this.email || !this.contrasenia) {
-      alert("Por favor, ingresa correo y contraseña");
+      this.mensajeError = 'Por favor ingresa correo y contraseña.';
       return;
     }
 
@@ -29,22 +32,27 @@ export class LoginComponent {
         console.log("Respuesta del backend:", res);
 
         if (res.user) {
-          // 🔹 Guardamos con la clave 'usuario' (igual que espera AuthGuard)
           localStorage.setItem('usuario', JSON.stringify(res.user));
 
-          // 🔹 Redirigir según rol
           const rol = res.user.rol;
-          if (rol === 0) this.router.navigate(['/gerente']);
-          else if (rol === 1) this.router.navigate(['/ejecutivo']);
-          else if (rol === 2) this.router.navigate(['/cliente']);
+          if (rol === 1) this.router.navigate(['/gerente']);
+          else if (rol === 2) this.router.navigate(['/ejecutivo']);
+          else if (rol === 3) this.router.navigate(['/cliente']);
         } else {
-          alert(res.error || "Credenciales inválidas");
+          this.mensajeError = res.error || 'Credenciales inválidas.';
         }
       },
       error: (err) => {
         console.error("Error en login:", err);
-        alert("Error en el servidor");
+        this.mensajeError = err.error?.error || 'Error en el servidor.';
       }
     });
+  }
+  registrar(){
+    this.router.navigate(['/register'])
+  }
+
+  forgotpassword(){
+    this.router.navigate(['/recuperar'])
   }
 }
