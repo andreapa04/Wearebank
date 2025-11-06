@@ -30,3 +30,52 @@ th, td {
 h2, h3 {
   color: #6a5acd;
 }
+
+
+/* 🔹 Estilos para el botón de PDF */
+.pdf-section {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.btn-pdf {
+  background: linear-gradient(135deg, #241c45, #31296E);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(36, 28, 69, 0.3);
+}
+
+.btn-pdf:hover:not(:disabled) {
+  background: linear-gradient(135deg, #31296E, #443A8C);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(36, 28, 69, 0.4);
+}
+
+.btn-pdf:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Resaltar cuenta seleccionada */
+tr.selected {
+  background-color: #5D5B9D20;
+  border-left: 4px solid #31296E;
+}
+
+/* Estilos para montos positivos y negativos */
+.positivo {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.negativo {
+  color: #dc3545;
+  font-weight: 600;
+}

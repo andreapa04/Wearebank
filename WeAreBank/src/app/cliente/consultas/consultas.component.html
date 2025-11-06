@@ -11,11 +11,20 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let cuenta of cuentas" (click)="seleccionarCuenta(cuenta)" style="cursor: pointer;">
+      <tr 
+        *ngFor="let cuenta of cuentas" 
+        (click)="seleccionarCuenta(cuenta)" 
+        style="cursor: pointer;"
+        [class.selected]="idCuentaSeleccionada === cuenta.idCuenta"
+      >
         <td>{{ cuenta.clabe }}</td>
         <td>{{ cuenta.tipoCuenta }}</td>
         <td>${{ cuenta.saldo | number:'1.2-2' }}</td>
-        <td><button (click)="seleccionarCuenta(cuenta)">Ver movimientos</button></td>
+        <td>
+          <button (click)="seleccionarCuenta(cuenta); $event.stopPropagation()">
+            Ver movimientos
+          </button>
+        </td>
       </tr>
       <tr *ngIf="cuentas.length === 0">
         <td colspan="4">No tienes cuentas registradas.</td>
@@ -24,6 +33,22 @@
   </table>
 
   <div *ngIf="idCuentaSeleccionada">
+    <!-- 🔹 BOTÓN PARA DESCARGAR PDF -->
+    <div class="pdf-section">
+      <button 
+        class="btn-pdf" 
+        (click)="descargarEstadoCuentaPDF()"
+        [disabled]="cargandoPDF"
+      >
+        <span *ngIf="!cargandoPDF">
+          📄 Descargar Estado de Cuenta (PDF)
+        </span>
+        <span *ngIf="cargandoPDF">
+          ⏳ Generando PDF...
+        </span>
+      </button>
+    </div>
+
     <h3>Movimientos recientes</h3>
     <table>
       <thead>

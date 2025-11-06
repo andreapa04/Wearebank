@@ -1,54 +1,96 @@
 <section>
-  <h2>Solicitudes de préstamo</h2>
-  
-  <h3>Mis solicitudes</h3>
+  <h2>Mis Solicitudes</h2>
   <table>
     <thead>
       <tr>
+        <th>Cuenta</th>
+        <th>Tipo</th>
+        <th>Monto</th>
         <th>Plazo</th>
+        <th>Interés (%)</th>
+        <th>CAT (%)</th>
         <th>Estado</th>
-        <th>Monto solicitado</th>
-        <th>Fecha de solicitud</th>
+        <th>Fecha</th>
+        <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
-      <tr title="Solicitudes">
-        <td>Plazo</td>
-        <td>Estado</td>
-        <td>Monto Solicitado</td>
-        <td>Fecha Solicitud</td>
+      <tr *ngFor="let s of solicitudes">
+        <td>{{ s.clabe }}</td>
+        <td>{{ s.tipo }}</td>
+        <td>{{ s.montoTotal | currency }}</td>
+        <td>{{ s.plazo }}</td>
+        <td>{{ s.intereses }}</td>
+        <td>{{ s.cat }}</td>
+        <td>{{ s.estado }}</td>
+        <td>{{ s.fechaSolicitud | date:'short' }}</td>
+        <td>
+          <button (click)="verPagos(s.idSolicitud)">Ver pagos</button>
+          <div *ngIf="s.estado === 'APROBADA'">
+            <input type="number" placeholder="Monto a pagar" [(ngModel)]="montoPago">
+            <button (click)="pagarSolicitud(s.idSolicitud)">Pagar</button>
+          </div>
+        </td>
       </tr>
     </tbody>
   </table>
 </section>
 
+<hr />
+
+<section *ngIf="pagos.length > 0">
+  <h3>Pagos de la solicitud seleccionada</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>ID Pago</th>
+        <th>Monto</th>
+        <th>Fecha y hora</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of pagos">
+        <td>{{ p.idPago }}</td>
+        <td>{{ p.monto | currency }}</td>
+        <td>{{ p.fechaHora | date:'short' }}</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<hr />
+
 <section>
-  <h2>Solicitar préstamo</h2>
-  
-  <div class="form-group">
-    <label for="tipoPrestamo">Tipo de préstamo:</label>
-    <select id="tipoPrestamo">
-      <option value="">Seleccionar</option>
-      <option value="personal">Personal</option>
-      <option value="hipotecario">Hipotecario</option>
-      <option value="automotriz">Automotriz</option>
+  <h2>Solicitar nuevo préstamo o crédito</h2>
+
+  <div>
+    <label>Cuenta asociada:</label>
+    <select [(ngModel)]="cuentaSeleccionada">
+      <option [value]="null">Seleccionar cuenta</option>
+      <option *ngFor="let c of cuentas" [value]="c.idCuenta">
+        {{ c.tipoCuenta }} - {{ c.clabe }}
+      </option>
     </select>
   </div>
-  
-  <div class="form-group">
-    <label for="montoPrestamo">Monto:</label>
-    <input type="number" id="montoPrestamo">
+
+  <div>
+    <label>Tipo:</label>
+    <select [(ngModel)]="tipoPrestamo">
+      <option value="">Seleccionar</option>
+      <option value="personal">Préstamo personal</option>
+      <option value="automotriz">Crédito automotriz</option>
+    </select>
   </div>
-  
-  <div class="form-group">
-    <label for="plazoPrestamo">Plazo: (Meses)</label>
-    <input type="number" id="plazoPrestamo">
+
+  <div>
+    <label>Monto:</label>
+    <input type="number" [(ngModel)]="monto" />
   </div>
-  
-  <div class="form-group">
-    <label for="ingresosMensuales">Ingresos Mens.:</label>
-    <input type="number" id="ingresosMensuales" >
+
+  <div>
+    <label>Plazo (meses):</label>
+    <input type="number" [(ngModel)]="plazo" />
   </div>
-  
+
   <button (click)="solicitarPrestamo()">Solicitar</button>
 </section>

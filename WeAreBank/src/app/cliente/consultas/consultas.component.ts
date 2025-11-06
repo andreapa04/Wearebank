@@ -12,8 +12,8 @@ interface Cuenta {
 
 interface Movimiento {
   idMovimiento: number;
-  fecha?: string | Date;       // Puede ser null o string
-  fechaHora?: string | Date;   // Alternativo si viene del backend como "fechaHora"
+  fecha?: string | Date;
+  fechaHora?: string | Date;
   monto: number;
   tipoMovimiento: string;
 }
@@ -29,6 +29,8 @@ export class ConsultasComponent implements OnInit {
   cuentas: Cuenta[] = [];
   movimientos: Movimiento[] = [];
   idCuentaSeleccionada: number | null = null;
+  cuentaSeleccionada: Cuenta | null = null;
+  cargandoPDF: boolean = false;
 
   constructor(private http: HttpClient) {}
 
@@ -55,6 +57,7 @@ export class ConsultasComponent implements OnInit {
 
   seleccionarCuenta(cuenta: Cuenta): void {
     this.idCuentaSeleccionada = cuenta.idCuenta;
+    this.cuentaSeleccionada = cuenta;
     this.cargarMovimientos(cuenta.idCuenta);
   }
 
@@ -98,6 +101,59 @@ export class ConsultasComponent implements OnInit {
         error: (err) => {
           console.error('❌ Error al cargar movimientos:', err);
         },
+      });
+  }
+
+  /**
+   * 🔹 Descarga el estado de cuenta en PDF
+   */
+  descargarEstadoCuentaPDF(): void {
+    if (!this.cuentaSeleccionada) {
+      alert('⚠️ Por favor selecciona una cuenta primero');
+      return;
+    }
+
+    this.cargandoPDF = true;
+
+    this.http
+      .get(
+        `http://localhost:3000/api/consultas/estado-cuenta-pdf/${this.cuentaSeleccionada.clabe}`,
+        {
+          responseType: 'blob' // ✅ Importante: recibir como blob
+        }
+      )
+      .subscribe({
+        next: (blob: Blob) => {
+          // ✅ Crear un objeto URL temporal para el blob
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+
+          // ✅ Generar nombre del archivo con fecha
+          const fecha = new Date();
+          const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+          const año = fecha.getFullYear();
+          const nombreArchivo = `estado-cuenta-${this.cuentaSeleccionada!.clabe}-${año}-${mes}.pdf`;
+
+          link.download = nombreArchivo;
+          link.click();
+
+          // ✅ Liberar memoria
+          window.URL.revokeObjectURL(url);
+
+          this.cargandoPDF = false;
+          alert('✅ Estado de cuenta descargado correctamente');
+        },
+        error: (error) => {
+          console.error('❌ Error al descargar el PDF:', error);
+          this.cargandoPDF = false;
+          
+          if (error.status === 404) {
+            alert('❌ No se encontró la cuenta o no tiene movimientos');
+          } else {
+            alert('❌ Error al generar el estado de cuenta. Intenta nuevamente.');
+          }
+        }
       });
   }
 }
