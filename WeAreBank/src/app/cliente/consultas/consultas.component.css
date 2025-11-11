@@ -31,6 +31,12 @@ h2, h3 {
   color: #6a5acd;
 }
 
+button {
+  background: #B2B0D5;
+  color: white;
+  border: none;
+  font-size: 10px;
+}
 
 /* 🔹 Estilos para el botón de PDF */
 .pdf-section {
