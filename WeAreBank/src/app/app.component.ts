@@ -15,8 +15,8 @@ export class AppComponent {
   title = 'WeAreBank';
   showNavbar: boolean = false;
   userType: 'cliente' | 'gerente' | 'ejecutivo' | null = null;
-  nombreUsuario: string | null = null;
-  rolUsuario: string | null = null;
+  nombreUsuario: string = '';
+  rolUsuario: string = '';
   errorMessage: string | null = null;
 
   private clientRoutes = [
@@ -33,11 +33,18 @@ export class AppComponent {
   private ejecutivoRoutes = ['/ejecutivo'];
 
   constructor(private router: Router) {
+    // Detecta cambios de ruta y actualiza el encabezado
     this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
         const currentUrl = event.urlAfterRedirects;
+        const ls = safeLocalStorage();
 
+        const usuario = JSON.parse(ls.getItem('usuario') || 'null');
+        this.nombreUsuario = usuario?.nombre || 'Usuario';
+        this.rolUsuario = usuario?.rol || 'Invitado';
+
+        // 🔹 Determinar tipo de usuario según la ruta
         if (this.clientRoutes.some(route => currentUrl.startsWith(route))) {
           this.showNavbar = true;
           this.userType = 'cliente';
@@ -52,11 +59,6 @@ export class AppComponent {
           this.userType = null;
         }
 
-        // 🔹 Cargar nombre y rol
-        const ls = safeLocalStorage();
-        this.nombreUsuario = ls.getItem('nombreUsuario');
-        this.rolUsuario = ls.getItem('rolUsuario');
-
         this.errorMessage = null;
       });
   }
@@ -65,8 +67,6 @@ export class AppComponent {
     event.preventDefault();
     const ls = safeLocalStorage();
     ls.removeItem('usuario');
-    ls.removeItem('nombreUsuario');
-    ls.removeItem('rolUsuario');
     this.showNavbar = false;
     this.userType = null;
     this.router.navigate(['/login']);

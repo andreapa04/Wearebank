@@ -53,7 +53,6 @@
     <table>
       <thead>
         <tr>
-          <th>Descripción</th>
           <th>Fecha</th>
           <th>Monto</th>
           <th>Tipo</th>
@@ -61,7 +60,6 @@
       </thead>
       <tbody>
         <tr *ngFor="let mov of movimientos">
-          <td>{{ mov.tipoMovimiento }}</td>
           <td>{{ mov.fecha | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
           <td [ngClass]="{ 'positivo': mov.monto > 0, 'negativo': mov.monto < 0 }">
             {{ mov.monto | currency:'MXN':'symbol' }}
