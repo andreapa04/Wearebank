@@ -20,6 +20,12 @@ export class AuthService {
     localStorage.removeItem('usuario');
   }
 
+  register(userData: any): Observable<any> {
+    // Llama al endpoint de registro en el backend
+    // No guarda la sesión (tap), porque registrar no es lo mismo que loguear.
+    return this.http.post(`${this.apiUrl}/register`, userData);
+  }
+
   getUsuarioActual() {
     const usuario = localStorage.getItem('usuario');
     return usuario ? JSON.parse(usuario) : null;

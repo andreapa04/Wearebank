@@ -30,7 +30,7 @@ export class AppComponent {
     '/gerente/gestion-permisos', '/gerente/solicitudes'
   ];
 
-  private ejecutivoRoutes = ['/ejecutivo'];
+  private ejecutivoRoutes = ['/ejecutivos'];
 
   constructor(private router: Router) {
     // Detecta cambios de ruta y actualiza el encabezado

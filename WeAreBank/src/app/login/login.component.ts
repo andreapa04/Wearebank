@@ -36,7 +36,7 @@ export class LoginComponent {
 
           const rol = res.user.rol;
           if (rol === 1) this.router.navigate(['/gerente']);
-          else if (rol === 2) this.router.navigate(['/ejecutivo']);
+          else if (rol === 2) this.router.navigate(['/ejecutivos']);
           else if (rol === 3) this.router.navigate(['/cliente']);
         } else {
           this.mensajeError = res.error || 'Credenciales inválidas.';

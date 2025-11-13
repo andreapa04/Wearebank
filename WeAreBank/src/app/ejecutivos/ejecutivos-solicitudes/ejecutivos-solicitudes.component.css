@@ -1,0 +1,115 @@
+/* Estilos de Pestañas */
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid #ddd;
+  margin-bottom: 1.5rem;
+}
+.tabs button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background-color: transparent;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+}
+.tabs button.active {
+  color: #716FAF;
+  border-bottom-color: #716FAF;
+}
+
+.vista-container {
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* Tarjetas de Solicitud */
+.solicitud-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f9f9f9;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #eee;
+}
+.card-header h4 {
+  margin: 0;
+  color: #31296E;
+}
+.card-header .monto {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #31296E;
+}
+.card-body {
+  padding: 1.5rem;
+}
+.card-body p {
+  margin: 0.5rem 0;
+}
+.buro-info {
+  background-color: #e6f7ec;
+  color: #155724;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  margin-top: 1rem;
+  font-weight: 600;
+}
+.buro-info.riesgo {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.card-footer {
+  display: flex;
+  gap: 0.5rem;
+  background-color: #f9f9f9;
+  padding: 1rem 1.5rem;
+}
+.card-footer button {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.btn-aprobar {
+  background-color: #28a745;
+  color: white;
+}
+.btn-rechazar {
+  background-color: #dc3545;
+  color: white;
+}
+
+/* Tabla de Historial */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+.status {
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: white;
+}
+.status.APROBADA { background-color: #28a745; }
+.status.LIQUIDADA { background-color: #17a2b8; }
+.status.RECHAZADA { background-color: #dc3545; }

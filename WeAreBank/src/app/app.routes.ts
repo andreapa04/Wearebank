@@ -18,6 +18,12 @@ import { AuthGuard } from './guards/auth.guard';
 import { RecuperarComponent } from './recuperar/recuperar.component';
 import { DepositosComponent } from './cliente/depositos/depositos.component';
 
+import { EjecutivosHomeComponent } from './ejecutivos/ejecutivos-home/ejecutivos-home.component';
+import { EjecutivosCuentasComponent } from './ejecutivos/ejecutivos-cuentas/ejecutivos-cuentas.component';
+import { EjecutivosSolicitudesComponent } from './ejecutivos/ejecutivos-solicitudes/ejecutivos-solicitudes.component';
+import { EjecutivosConsultasComponent } from './ejecutivos/ejecutivos-consultas/ejecutivos-consultas.component';
+
+
 
 export const routes: Routes = [
   // Rutas públicas
@@ -45,7 +51,18 @@ export const routes: Routes = [
   { path: 'gerente/solicitudes', component: SolicitudesComponent, canActivate: [AuthGuard] },
 
   // Rutas de ejecutivo (rol = 1)
-  { path: 'ejecutivo', component: EjecutivosComponent, canActivate: [AuthGuard] },
+  {
+    path: 'ejecutivos',
+    canActivate: [AuthGuard],
+    data: { roles: [2] }, // Solo rol 2 (Ejecutivo)
+    children: [
+      { path: '', redirectTo: 'inicio', pathMatch: 'full' },
+      { path: 'inicio', component: EjecutivosHomeComponent },
+      { path: 'cuentas', component: EjecutivosCuentasComponent },
+      { path: 'solicitudes', component: EjecutivosSolicitudesComponent },
+      { path: 'consultas', component: EjecutivosConsultasComponent },
+    ],
+  },
 
   // Ruta por defecto
   { path: '**', redirectTo: '/login' }

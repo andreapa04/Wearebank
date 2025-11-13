@@ -30,12 +30,14 @@
     </nav>
   </header>
 
-  <!-- Navbar Ejecutivo -->
-  <header *ngIf="showNavbar && userType === 'ejecutivo'" class="ejecutivo-header">
+  <header *ngIf="showNavbar && userType === 'ejecutivo'" class="ejecutivos-header">
     <h1>WeAreBank - Portal Ejecutivo</h1>
     <p class="saludo">👋 Bienvenido, <strong>{{ nombreUsuario }}</strong></p>
     <nav>
-      <a [routerLink]="['/ejecutivo']" [class.active]="isActiveRoute('/ejecutivo')">Inicio</a> |
+      <a [routerLink]="['/ejecutivos/inicio']" [class.active]="isActiveRoute('/ejecutivos/inicio')">Inicio</a> |
+      <a [routerLink]="['/ejecutivos/cuentas']" [class.active]="isActiveRoute('/ejecutivos/cuentas')">Administrar Cuentas</a> |
+      <a [routerLink]="['/ejecutivos/solicitudes']" [class.active]="isActiveRoute('/ejecutivos/solicitudes')">Solicitudes</a> |
+      <a [routerLink]="['/ejecutivos/consultas']" [class.active]="isActiveRoute('/ejecutivos/consultas')">Consultar Clientes</a> |
       <a href="#" (click)="logout($event)">Cerrar Sesión</a>
     </nav>
   </header>

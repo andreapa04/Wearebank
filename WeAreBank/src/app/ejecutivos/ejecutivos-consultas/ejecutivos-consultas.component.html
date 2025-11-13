@@ -1,0 +1,85 @@
+<h2>Consultar Clientes</h2>
+<p>Busca y selecciona un cliente para ver sus cuentas y movimientos.</p>
+
+<input type="text" [(ngModel)]="filtro" placeholder="Buscar por nombre, email, CURP o RFC..." class="filtro">
+
+<table class="tabla-clientes">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Email</th>
+      <th>Teléfono</th>
+      <th>RFC</th>
+      <th>Acción</th>
+    </tr>
+  </thead>
+  <tbody>
+    <ng-container *ngFor="let c of clientesFiltrados">
+      <tr (click)="verDetalle(c)" class="fila-cliente">
+        <td>{{ c.nombre }} {{ c.apellidoP }} {{ c.apellidoM }}</td>
+        <td>{{ c.email }}</td>
+        <td>{{ c.telefono }}</td>
+        <td>{{ c.RFC }}</td>
+        <td>
+          <button>{{ clienteSeleccionado?.idUsuario === c.idUsuario ? 'Ocultar' : 'Ver Detalle' }}</button>
+        </td>
+      </tr>
+      
+      <!-- Detalle desplegable -->
+      <tr *ngIf="clienteSeleccionado?.idUsuario === c.idUsuario" class="fila-detalle">
+        <td colspan="5">
+          <div *ngIf="cargandoDetalle">Cargando...</div>
+          
+          <div *ngIf="!cargandoDetalle" class="detalle-contenido">
+            <h4>Cuentas de {{ c.nombre }}</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th>CLABE</th>
+                  <th>Tipo</th>
+                  <th>Saldo</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let cuenta of cuentasCliente">
+                  <td>{{ cuenta.clabe }}</td>
+                  <td>{{ cuenta.tipoCuenta }}</td>
+                  <td>{{ cuenta.saldo | currency }}</td>
+                  <td>
+                    <button class="btn-secundario" (click)="descargarEstadoCuenta(cuenta.clabe)">
+                      Descargar PDF
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h4>Últimos Movimientos</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Tipo</th>
+                  <th>Monto</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let m of movimientosCliente">
+                  <td>{{ m.fechaHora | date:'short' }}</td>
+                  <td>{{ m.tipoMovimiento }}</td>
+                  <td [class.positivo]="m.monto > 0" [class.negativo]="m.monto < 0">
+                    {{ m.monto | currency }}
+                  </td>
+                </tr>
+                <tr *ngIf="movimientosCliente.length === 0">
+                  <td colspan="3">No hay movimientos.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </td>
+      </tr>
+    </ng-container>
+  </tbody>
+</table>
