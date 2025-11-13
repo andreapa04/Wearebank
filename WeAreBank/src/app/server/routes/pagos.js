@@ -70,7 +70,7 @@ router.post("/servicio", async (req, res) => {
     }
 
     res.json({
-      message: `✅ Pago de ${referencia || "servicio"} realizado correctamente.`,
+      message: ` Pago de ${referencia || "servicio"} realizado correctamente.`,
       nuevoSaldo: saldo - monto,
     });
   } catch (error) {
@@ -78,7 +78,7 @@ router.post("/servicio", async (req, res) => {
       await connection.rollback(); // Rollback en caso de error
       connection.release();
     }
-    console.error("❌ Error en pago de servicio:", error);
+    console.error(" Error en pago de servicio:", error);
     res.status(500).json({ error: "Error al procesar el pago" });
   }
 });
@@ -175,7 +175,7 @@ router.post("/prestamo", async (req, res) => {
     }
 
     res.json({
-      message: `✅ Pago de préstamo realizado correctamente.`,
+      message: ` Pago de préstamo realizado correctamente.`,
       nuevoSaldo: saldo - monto,
     });
   } catch (error) {
@@ -183,7 +183,7 @@ router.post("/prestamo", async (req, res) => {
       await connection.rollback(); // Rollback en caso de error
       connection.release();
     }
-    console.error("❌ Error en pago de préstamo:", error);
+    console.error(" Error en pago de préstamo:", error);
     res.status(500).json({ error: "Error al procesar el pago de préstamo" });
   }
 });
@@ -259,7 +259,7 @@ router.get("/historial/:idUsuario", async (req, res) => {
 
     res.json(historialCompleto);
   } catch (error) {
-    console.error("❌ Error al obtener historial de pagos:", error);
+    console.error(" Error al obtener historial de pagos:", error);
     res.status(500).json({ error: "Error al obtener el historial de pagos" });
   }
 });
@@ -294,7 +294,7 @@ router.get("/prestamos/:idUsuario", async (req, res) => {
 
     res.json(prestamos);
   } catch (error) {
-    console.error("❌ Error al obtener préstamos:", error);
+    console.error(" Error al obtener préstamos:", error);
     res.status(500).json({ error: "Error al obtener los préstamos" });
   }
 });

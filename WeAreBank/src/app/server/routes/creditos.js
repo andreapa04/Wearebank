@@ -113,7 +113,7 @@ router.post("/solicitar", async (req, res) => {
       cat,
     });
   } catch (error) {
-    console.error("❌ Error al registrar solicitud:", error);
+    console.error(" Error al registrar solicitud:", error);
     res.status(500).json({ error: "Error interno al procesar la solicitud." });
   }
 });
@@ -140,7 +140,7 @@ router.get("/mis-solicitudes/:idUsuario", async (req, res) => {
 
     res.json(solicitudes);
   } catch (error) {
-    console.error("❌ Error al obtener solicitudes:", error);
+    console.error(" Error al obtener solicitudes:", error);
     res.status(500).json({ error: "Error al cargar solicitudes" });
   }
 });

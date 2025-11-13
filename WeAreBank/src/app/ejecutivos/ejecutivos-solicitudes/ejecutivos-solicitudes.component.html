@@ -1,66 +1,124 @@
-<h2>Administrar Solicitudes</h2>
+<div class="container">
+  <h2>Gestión de Solicitudes</h2>
 
-<div class="tabs">
-  <button [class.active]="vista === 'PENDIENTES'" (click)="vista = 'PENDIENTES'">
-    Pendientes ({{ solicitudesPendientes.length }})
-  </button>
-  <button [class.active]="vista === 'HISTORIAL'" (click)="vista = 'HISTORIAL'">
-    Historial
-  </button>
-</div>
-
-<div *ngIf="mensaje" class="mensaje">{{ mensaje }}</div>
-
-<!-- VISTA: Solicitudes Pendientes -->
-<div *ngIf="vista === 'PENDIENTES'" class="vista-container">
-  <h3>Solicitudes Pendientes de Revisión</h3>
-  <div *ngIf="solicitudesPendientes.length === 0">No hay solicitudes pendientes.</div>
-
-  <div *ngFor="let s of solicitudesPendientes" class="solicitud-card">
-    <div class="card-header">
-      <h4>{{ s.tipo.replace('_', ' ') }}</h4>
-      <span class="monto">{{ s.montoTotal | currency }}</span>
-    </div>
-    <div class="card-body">
-      <p><strong>Cliente:</strong> {{ s.nombre }} {{ s.apellidoP }} ({{ s.email }})</p>
-      <p><strong>CURP:</strong> {{ s.CURP }}</p>
-      <p><strong>Plazo:</strong> {{ s.plazo }}</p>
-      <div class="buro-info" [class.riesgo]="(s.puntaje || 0) < 650">
-        <strong>Buró:</strong> {{ s.puntaje || 'N/A' }} Puntos (Consultado: {{ s.fechaConsulta }})
-      </div>
-    </div>
-    <div class="card-footer">
-      <button class="btn-aprobar" (click)="procesarSolicitud(s.idSolicitud, true)">Aprobar</button>
-      <button class="btn-rechazar" (click)="procesarSolicitud(s.idSolicitud, false)">Rechazar</button>
-    </div>
+  <div *ngIf="mensaje" class="mensaje" [class.error]="mensaje.includes('Error') || mensaje.includes('denegada') || mensaje.includes('denied')">
+    {{ mensaje }}
   </div>
-</div>
 
-<!-- VISTA: Historial -->
-<div *ngIf="vista === 'HISTORIAL'" class="vista-container">
-  <h3>Historial de Solicitudes</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Cliente</th>
-        <th>Tipo</th>
-        <th>Monto</th>
-        <th>Estado</th>
-        <th>Fecha</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let s of solicitudesHistorial">
-        <td>{{ s.idSolicitud }}</td>
-        <td>{{ s.nombre }} {{ s.apellidoP }}</td>
-        <td>{{ s.tipo.replace('_', ' ') }}</td>
-        <td>{{ s.montoTotal | currency }}</td>
-        <td>
-          <span class="status" [ngClass]="s.estado">{{ s.estado }}</span>
-        </td>
-        <td>{{ s.fechaSolicitud | date:'short' }}</td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="vista-tabs">
+    <button 
+      [class.active]="vistaActual === 'prestamos'"
+      (click)="cambiarVista('prestamos')">
+      Préstamos y Créditos ({{ solicitudesPrestamo.length }})
+    </button>
+    <button 
+      [class.active]="vistaActual === 'cierre'"
+      (click)="cambiarVista('cierre')">
+      Cierre de Cuenta ({{ solicitudesCierre.length }})
+    </button>
+  </div>
+
+  <div *ngIf="vistaActual === 'prestamos'">
+    <h3>Solicitudes Pendientes (Préstamos/Créditos)</h3>
+    <ng-container *ngIf="solicitudesPrestamo.length > 0; else noPendientes">
+      <div *ngFor="let s of solicitudesPrestamo" class="solicitud-card">
+        <div class="card-header">
+          <h4>{{ s.tipo.replace('_', ' ') }} - {{ s.nombre }} {{ s.apellidoP }}</h4>
+          <span class="monto">{{ s.montoTotal | currency }}</span>
+        </div>
+        <div class="card-body">
+          <p><strong>Email:</strong> {{ s.email }}</p>
+          <p><strong>Plazo:</strong> {{ s.plazo }}</p>
+          <p><strong>Interés:</strong> {{ s.intereses }}%</p>
+          <div class="buro-info" [class.riesgo]="s.puntaje < 700">
+            Puntaje de Buró: <strong>{{ s.puntaje || 'N/A' }}</strong>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button class="btn-aprobar" (click)="procesarPrestamo(s.idSolicitud, true)">Aprobar</button>
+          <button class="btn-rechazar" (click)="procesarPrestamo(s.idSolicitud, false)">Rechazar</button>
+        </div>
+      </div>
+    </ng-container>
+    <ng-template #noPendientes>
+      <p>No hay solicitudes de préstamos pendientes.</p>
+    </ng-template>
+
+    <hr>
+    
+    <h3>Historial de Solicitudes (Préstamos/Créditos)</h3>
+    <table *ngIf="historialSolicitudes.length > 0; else noHistorial">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Cliente</th>
+          <th>Tipo</th>
+          <th>Monto</th>
+          <th>Fecha</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of historialSolicitudes">
+          <td>{{ s.idSolicitud }}</td>
+          <td>{{ s.nombre }} {{ s.apellidoP }}</td>
+          <td>{{ s.tipo.replace('_', ' ') }}</td>
+          <td>{{ s.montoTotal | currency }}</td>
+          <td>{{ s.fechaSolicitud | date:'short' }}</td>
+          <td>
+            <span class="status" [ngClass]="s.estado">{{ s.estado }}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <ng-template #noHistorial>
+      <p>No hay historial de solicitudes.</p>
+    </ng-template>
+  </div>
+
+
+  <div *ngIf="vistaActual === 'cierre'">
+    <h3>Solicitudes Pendientes (Cierre de Cuenta)</h3>
+    <table *ngIf="solicitudesCierre.length > 0; else noCierres">
+      <thead>
+        <tr>
+          <th>ID Solicitud</th>
+          <th>ID Usuario</th>
+          <th>Cliente</th>
+          <th>Email</th>
+          <th>Fecha Solicitud</th>
+          <th>Razón de Rechazo (si aplica)</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of solicitudesCierre">
+          <td>{{ s.idSolicitudCierre }}</td>
+          <td>{{ s.idUsuario }}</td>
+          <td>{{ s.nombre }} {{ s.apellidoP }}</td>
+          <td>{{ s.email }}</td>
+          <td>{{ s.fechaSolicitud | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>
+            <input 
+              type="text" 
+              [(ngModel)]="s.razon_rechazo" 
+              placeholder="Escribe la razón aquí si rechazas"
+              class="input-rechazo"
+            />
+          </td>
+          <td class="acciones">
+            <button class="btn-aprobar" (click)="procesarCierre(s, true)">
+              Aprobar Cierre
+            </button>
+            <button class="btn-rechazar" (click)="procesarCierre(s, false)">
+              Rechazar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <ng-template #noCierres>
+      <p>No hay solicitudes de cierre de cuenta pendientes.</p>
+    </ng-template>
+  </div>
 </div>

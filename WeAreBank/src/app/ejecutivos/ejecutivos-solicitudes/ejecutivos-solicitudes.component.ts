@@ -1,78 +1,150 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-// 1. Importar HttpClientModule (el Módulo)
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms'; // 🔽 Importar FormsModule
 
-interface Solicitud {
+// 🔽 --- INTERFAZ PARA SOLICITUD DE PRÉSTAMO --- 🔽
+interface SolicitudPrestamo {
   idSolicitud: number;
-  tipo: string;
+  idCuenta: number;
+  estado: string;
   montoTotal: number;
   plazo: string;
-  estado: string;
+  intereses: number;
+  cat: number;
+  tipo: string;
+  fechaSolicitud: string;
+  // Campos unidos (joined)
+  nombre: string;
+  apellidoP: string;
+  email: string;
+  puntaje: number;
+}
+
+// 🔽 --- NUEVA INTERFAZ PARA SOLICITUD DE CIERRE --- 🔽
+interface SolicitudCierre {
+  idSolicitudCierre: number;
   fechaSolicitud: string;
   idUsuario: number;
   nombre: string;
   apellidoP: string;
-  apellidoM: string;
-  CURP: string;
   email: string;
-  puntaje: number;
-  fechaConsulta: string;
+  razon_rechazo?: string; // Para el campo de texto
 }
 
 @Component({
   selector: 'app-ejecutivos-solicitudes',
   standalone: true,
-  // 2. Importar NgModules
-  imports: [CommonModule, HttpClientModule],
+  imports: [CommonModule, HttpClientModule, FormsModule], // 🔽 Añadir FormsModule
   templateUrl: './ejecutivos-solicitudes.component.html',
   styleUrls: ['./ejecutivos-solicitudes.component.css']
 })
 export class EjecutivosSolicitudesComponent implements OnInit {
-  vista: 'PENDIENTES' | 'HISTORIAL' = 'PENDIENTES';
-  solicitudesPendientes: Solicitud[] = [];
-  solicitudesHistorial: Solicitud[] = [];
-  mensaje: string = '';
 
-  // 3. Inyectar HttpClient (el Servicio)
+  solicitudesPrestamo: SolicitudPrestamo[] = [];
+  historialSolicitudes: SolicitudPrestamo[] = [];
+  
+  // 🔽 --- NUEVAS PROPIEDADES --- 🔽
+  solicitudesCierre: SolicitudCierre[] = [];
+  vistaActual: 'prestamos' | 'cierre' = 'prestamos'; // Para alternar vistas
+  mensaje: string = '';
+  // 🔼 -------------------------- 🔼
+
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.cargarPendientes();
-    this.cargarHistorial();
+    this.cargarSolicitudesPrestamo();
+    this.cargarHistorialSolicitudes();
+    this.cargarSolicitudesCierre(); // 🔽 Cargar nuevas solicitudes
   }
 
-  cargarPendientes(): void {
-    this.http.get<Solicitud[]>('http://localhost:3000/api/ejecutivo/solicitudes/PENDIENTES')
+  cambiarVista(vista: 'prestamos' | 'cierre') {
+    this.vistaActual = vista;
+    this.mensaje = '';
+  }
+
+  cargarSolicitudesPrestamo(): void {
+    this.http.get<any>('http://localhost:3000/api/ejecutivo/solicitudes-prestamo')
       .subscribe({
-        next: data => this.solicitudesPendientes = data,
-        // 4. Tipar error
-        error: (err: any) => console.error('Error al cargar pendientes', err)
+        next: (data: any) => {
+          this.solicitudesPrestamo = data.pendientes;
+        },
+        error: (err: any) => {
+          this.mensaje = 'Error al cargar solicitudes de préstamo';
+          console.error(err);
+        }
       });
   }
 
-  cargarHistorial(): void {
-    this.http.get<Solicitud[]>('http://localhost:3000/api/ejecutivo/solicitudes/HISTORIAL')
+  cargarHistorialSolicitudes(): void {
+    this.http.get<any>('http://localhost:3000/api/ejecutivo/solicitudes-prestamo')
       .subscribe({
-        next: data => this.solicitudesHistorial = data,
-        // 5. Tipar error
-        error: (err: any) => console.error('Error al cargar historial', err)
+        next: (data: any) => {
+          this.historialSolicitudes = data.historial;
+        },
+        error: (err: any) => {
+          this.mensaje = 'Error al cargar historial de solicitudes';
+          console.error(err);
+        }
       });
   }
 
-  procesarSolicitud(idSolicitud: number, aprobar: boolean): void {
+  procesarPrestamo(idSolicitud: number, aprobado: boolean): void {
     this.mensaje = 'Procesando...';
-    this.http.post(`http://localhost:3000/api/ejecutivo/procesar-solicitud/${idSolicitud}`, { aprobar })
+    this.http.post('http://localhost:3000/api/ejecutivo/procesar-prestamo', { idSolicitud, aprobado })
       .subscribe({
-        // 6. Tipar respuesta
         next: (res: any) => {
           this.mensaje = res.message;
-          this.cargarPendientes(); // Recargar ambas listas
-          this.cargarHistorial();
+          this.cargarSolicitudesPrestamo(); // Recargar pendientes
+          this.cargarHistorialSolicitudes(); // Recargar historial
         },
-        // 7. Tipar error
         error: (err: any) => {
-          this.mensaje = err.error?.error || 'Error al procesar la solicitud.';
+          this.mensaje = err.error?.message || 'Error al procesar la solicitud.';
+          console.error(err);
+        }
+      });
+  }
+
+  // 🔽 --- NUEVAS FUNCIONES --- 🔽
+  
+  cargarSolicitudesCierre(): void {
+    this.http.get<SolicitudCierre[]>('http://localhost:3000/api/ejecutivo/solicitudes-cierre')
+      .subscribe({
+        next: (data: any) => this.solicitudesCierre = data,
+        error: (err: any) => {
+          this.mensaje = 'Error al cargar solicitudes de cierre';
+          console.error(err);
+        }
+      });
+  }
+
+  procesarCierre(solicitud: SolicitudCierre, aprobado: boolean): void {
+    this.mensaje = 'Procesando...';
+
+    const payload: any = {
+      idSolicitudCierre: solicitud.idSolicitudCierre,
+      aprobado: aprobado
+    };
+
+    if (!aprobado && !solicitud.razon_rechazo) {
+      this.mensaje = 'Por favor, escribe una razón para rechazar la solicitud.';
+      return;
+    }
+
+    if (!aprobado) {
+      payload.razon_rechazo = solicitud.razon_rechazo;
+    }
+
+    this.http.post('http://localhost:3000/api/ejecutivo/procesar-cierre', payload)
+      .subscribe({
+        next: (res: any) => {
+          this.mensaje = res.message;
+          // Recargar lista de cierres
+          this.cargarSolicitudesCierre();
+        },
+        error: (err: any) => {
+          this.mensaje = err.error?.message || 'Error al procesar la solicitud.';
+          console.error(err);
         }
       });
   }

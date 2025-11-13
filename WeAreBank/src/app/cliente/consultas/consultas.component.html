@@ -98,4 +98,23 @@
       </tbody>
     </table>
   </div>
-</div>
+
+  <h2 class="section-divider danger-zone-title">Zona de Peligro</h2>
+  <div class="danger-zone">
+    <div>
+      <h3>Cerrar Cuenta</h3>
+      <p>Puedes solicitar el cierre permanente de tu cuenta. Un ejecutivo revisará tu solicitud.</p>
+      <p class="warning-text">Esta acción es irreversible y tu acceso será bloqueado si se aprueba.</p>
+    </div>
+    <button class="btn-danger" (click)="solicitarCierreCuenta()">
+      Solicitar Cierre de Cuenta
+    </button>
+    
+    <div *ngIf="cierreMensaje" class="mensaje success" style="margin-top: 1rem;">
+      {{ cierreMensaje }}
+    </div>
+    <div *ngIf="cierreError" class="mensaje error" style="margin-top: 1rem;">
+      {{ cierreError }}
+    </div>
+  </div>
+  </div>

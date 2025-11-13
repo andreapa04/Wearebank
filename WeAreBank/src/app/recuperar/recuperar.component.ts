@@ -32,7 +32,7 @@ export class RecuperarComponent {
             console.log("Respuesta del backend:", res);
             if (res.bloqueado) {
             this.bloqueado = true;
-            alert("⚠️ Su cuenta está bloqueada. Solicite ayuda de un ejecutivo.");
+            alert(" Su cuenta está bloqueada. Solicite ayuda de un ejecutivo.");
             return;
             }
             this.bloqueado = false;

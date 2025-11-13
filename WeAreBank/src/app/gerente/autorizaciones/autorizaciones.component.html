@@ -1,65 +1,64 @@
-<div class="gerente-container">
-  <h1>WeAreBank</h1>
-  <div class="autorizaciones-section">
-    <h2>Registro de autorizaciones</h2>
-    
-    <table class="autorizaciones-table">
-      <thead>
-        <tr>
-          <th>Cliente solicitante</th>
-          <th>Fecha</th>
-          <th>Trámite</th>
-          <th>Monto</th>
-          <th>Ejecutivo a cargo</th>
-          <th>Estatus</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Cliente 7</td>
-          <td>11/06/25</td>
-          <td>Préstamo</td>
-          <td>$10,000.00</td>
-          <td>Ejecutivo 1</td>
-          <td><span class="status-pendiente">Pendiente</span></td>
-        </tr>
-        <tr>
-          <td>Cliente 8</td>
-          <td>12/06/25</td>
-          <td>Crédito</td>
-          <td>$2,000.00</td>
-          <td>Ejecutivo 2</td>
-          <td><span class="status-aprobado">Aprobado</span></td>
-        </tr>
-        <tr>
-          <td>Cliente 9</td>
-          <td>14/06/25</td>
-          <td>Crédito</td>
-          <td>$8,000.00</td>
-          <td>Ejecutivo 4</td>
-          <td><span class="status-pendiente">Pendiente</span></td>
-        </tr>
-        <tr>
-          <td>Cliente 10</td>
-          <td>18/06/25</td>
-          <td>Préstamo</td>
-          <td>$100,000.00</td>
-          <td>Ejecutivo 3</td>
-          <td><span class="status-rechazado">Rechazado</span></td>
-        </tr>
-        <tr>
-          <td>Cliente 11</td>
-          <td>18/06/25</td>
-          <td>Crédito</td>
-          <td>$25,000.00</td>
-          <td>Ejecutivo 1</td>
-          <td><span class="status-aprobado">Aprobado</span></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+<h2>Centro de Autorizaciones (Créditos y Préstamos)</h2>
 
-  <footer>
-    <p>Todos los derechos reservados. 2025 ©</p>
-  </footer>
+<div class="tabs">
+  <button [class.active]="vista === 'PENDIENTES'" (click)="vista = 'PENDIENTES'">
+    Pendientes ({{ autorizacionesPendientes.length }})
+  </button>
+  <button [class.active]="vista === 'HISTORIAL'" (click)="vista = 'HISTORIAL'">
+    Historial
+  </button>
+</div>
+
+<div *ngIf="mensaje" class="mensaje">{{ mensaje }}</div>
+
+<div *ngIf="vista === 'PENDIENTES'" class="vista-container">
+  <h3>Autorizaciones Pendientes de Revisión</h3>
+  <div *ngIf="autorizacionesPendientes.length === 0">No hay autorizaciones pendientes.</div>
+
+  <div *ngFor="let s of autorizacionesPendientes" class="solicitud-card">
+    <div class="card-header">
+      <h4>{{ s.tipo.replace('_', ' ') }}</h4>
+      <span class="monto">{{ s.montoTotal | currency }}</span>
+    </div>
+    <div class="card-body">
+      <p><strong>Cliente:</strong> {{ s.nombre }} {{ s.apellidoP }} ({{ s.email }})</p>
+      <p><strong>CURP:</strong> {{ s.CURP }}</p>
+      <p><strong>Plazo:</strong> {{ s.plazo }}</p>
+      <div class="buro-info" [class.riesgo]="(s.puntaje || 0) < 650">
+        <strong>Buró:</strong> {{ s.puntaje || 'N/A' }} Puntos (Consultado: {{ s.fechaConsulta | date:'shortDate' }})
+      </div>
+    </div>
+    <div class="card-footer">
+      <button class="btn-aprobar" (click)="procesarSolicitud(s.idSolicitud, true)">Aprobar</button>
+      <button class="btn-rechazar" (click)="procesarSolicitud(s.idSolicitud, false)">Rechazar</button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="vista === 'HISTORIAL'" class="vista-container">
+  <h3>Historial de Autorizaciones</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Cliente</th>
+        <th>Tipo</th>
+        <th>Monto</th>
+        <th>Estado</th>
+        <th>Fecha</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let s of autorizacionesHistorial">
+        <td>{{ s.idSolicitud }}</td>
+        <td>{{ s.nombre }} {{ s.apellidoP }}</td>
+        <td>{{ s.tipo.replace('_', ' ') }}</td>
+        <td>{{ s.montoTotal | currency }}</td>
+        <td>
+          <span class="status" [ngClass]="s.estado.toLowerCase()">{{ s.estado }}</span>
+        </td>
+        <td>{{ s.fechaSolicitud | date:'short' }}</td>
+      </tr>
+    </tbody>
+  </table>
 </div>

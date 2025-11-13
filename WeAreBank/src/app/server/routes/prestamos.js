@@ -57,7 +57,7 @@ router.post("/solicitar", async (req, res) => {
     });
 
   } catch (error) {
-    console.error("❌ Error al registrar solicitud:", error);
+    console.error(" Error al registrar solicitud:", error);
     res.status(500).json({ error: "Error al registrar la solicitud" });
   }
 });
@@ -102,7 +102,7 @@ router.put("/aprobar/:idSolicitud", async (req, res) => {
 
     res.json({ message: `Solicitud ${nuevoEstado.toLowerCase()} correctamente` });
   } catch (error) {
-    console.error("❌ Error al procesar solicitud:", error);
+    console.error(" Error al procesar solicitud:", error);
     res.status(500).json({ error: "Error al procesar solicitud" });
   }
 });
@@ -150,7 +150,7 @@ router.post("/pago", async (req, res) => {
 
     res.json({ message: "Pago registrado con éxito", totalPagado });
   } catch (error) {
-    console.error("❌ Error al registrar pago:", error);
+    console.error(" Error al registrar pago:", error);
     res.status(500).json({ error: "Error al registrar el pago" });
   }
 });
@@ -184,7 +184,7 @@ router.get("/mis-solicitudes/:idUsuario", async (req, res) => {
 
     res.json(solicitudes);
   } catch (error) {
-    console.error("❌ Error al consultar solicitudes de préstamo:", error);
+    console.error(" Error al consultar solicitudes de préstamo:", error);
     res.status(500).json({ error: "Error al consultar solicitudes" });
   }
 });
@@ -211,7 +211,7 @@ router.get("/pagos/:idSolicitud", async (req, res) => {
     // No es un error si no hay pagos, solo regresa un array vacío
     res.json(pagos);
   } catch (error) {
-    console.error("❌ Error al consultar pagos:", error);
+    console.error(" Error al consultar pagos:", error);
     res.status(500).json({ error: "Error al consultar los pagos" });
   }
 });

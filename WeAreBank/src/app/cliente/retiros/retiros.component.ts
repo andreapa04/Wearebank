@@ -34,7 +34,7 @@ export class RetirosComponent implements OnInit {
     const usuario = JSON.parse(safeLocalStorage().getItem('usuario') || 'null');
 
     if (!usuario || !usuario.id) {
-      this.error = '⚠️ No se encontró el usuario en sesión.';
+      this.error = ' No se encontró el usuario en sesión.';
       return;
     }
 
@@ -47,7 +47,7 @@ export class RetirosComponent implements OnInit {
       .subscribe({
         next: (data) => (this.cuentas = data),
         error: (err) => {
-          console.error('❌ Error al cargar cuentas:', err);
+          console.error(' Error al cargar cuentas:', err);
           this.error = 'Error al cargar tus cuentas.';
         }
       });
@@ -71,7 +71,7 @@ export class RetirosComponent implements OnInit {
     const monto = this.montoOtro ? this.montoOtro : this.montoSeleccionado;
 
     if (!this.idCuentaSeleccionada || !monto || monto <= 0) {
-      this.error = '⚠️ Selecciona una cuenta y un monto válido.';
+      this.error = ' Selecciona una cuenta y un monto válido.';
       return;
     }
 
@@ -83,15 +83,15 @@ export class RetirosComponent implements OnInit {
 
     this.http.post('http://localhost:3000/api/retiros', retiroData).subscribe({
       next: (res: any) => {
-        this.mensaje = res.message || '✅ Operación realizada.';
+        this.mensaje = res.message || ' Operación realizada.';
         this.codigoGenerado = res.codigo || null; // 🔽 Captura el código
         
         // Refrescar saldo
         this.cargarCuentas(JSON.parse(safeLocalStorage().getItem('usuario') || 'null').id);
       },
       error: (err) => {
-        console.error('❌ Error al realizar el retiro:', err);
-        this.error = err.error?.message || '❌ Error al realizar el retiro.';
+        console.error(' Error al realizar el retiro:', err);
+        this.error = err.error?.message || ' Error al realizar el retiro.';
       }
     });
   }

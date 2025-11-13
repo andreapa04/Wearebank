@@ -63,7 +63,7 @@ export class PrestamosComponent implements OnInit {
       .subscribe({
         next: data => this.solicitudes = data,
         error: err => {
-          console.error('❌ Error al cargar solicitudes de préstamo:', err);
+          console.error(' Error al cargar solicitudes de préstamo:', err);
           this.mensaje = 'Error al cargar tus préstamos.';
         }
       });
@@ -73,7 +73,7 @@ export class PrestamosComponent implements OnInit {
     this.http.get<any[]>(`http://localhost:3000/api/consultas/mis-cuentas/${idUsuario}`)
       .subscribe({
         next: data => this.cuentas = data,
-        error: err => console.error('❌ Error al cargar cuentas:', err)
+        error: err => console.error(' Error al cargar cuentas:', err)
       });
   }
 
@@ -82,15 +82,15 @@ export class PrestamosComponent implements OnInit {
     const usuario = JSON.parse(safeLocalStorage().getItem('usuario') || 'null');
     if (!usuario?.id) return alert('No se encontró usuario en sesión');
     if (!this.cuentaSeleccionada) {
-      this.mensaje = '⚠️ Selecciona una cuenta.';
+      this.mensaje = ' Selecciona una cuenta.';
       return;
     }
     if (!this.monto || this.monto <= 0) {
-      this.mensaje = '⚠️ Ingresa un monto válido.';
+      this.mensaje = ' Ingresa un monto válido.';
       return;
     }
     if (!this.tipoPrestamo) {
-      this.mensaje = '⚠️ Selecciona un tipo de préstamo.';
+      this.mensaje = ' Selecciona un tipo de préstamo.';
       return;
     }
 
@@ -110,7 +110,7 @@ export class PrestamosComponent implements OnInit {
           this.cargarSolicitudes(usuario.id);
         },
         error: err => {
-          console.error('❌ Error al solicitar préstamo:', err);
+          console.error(' Error al solicitar préstamo:', err);
           this.mensaje = err.error?.error || 'Error al procesar la solicitud.';
         }
       });
@@ -132,7 +132,7 @@ export class PrestamosComponent implements OnInit {
         next: data => this.pagos = data,
         error: err => {
           // Este error ya no debería ser un 404
-          console.error('❌ Error al obtener pagos:', err); 
+          console.error(' Error al obtener pagos:', err); 
           this.mensaje = 'Error al cargar el historial de pagos.';
         }
       });
@@ -156,7 +156,7 @@ export class PrestamosComponent implements OnInit {
           const usuario = JSON.parse(safeLocalStorage().getItem('usuario') || 'null');
           this.cargarSolicitudes(usuario.id); // Refrescar saldos de solicitudes
         },
-        error: err => console.error('❌ Error al registrar pago:', err)
+        error: err => console.error(' Error al registrar pago:', err)
       });
   }
 }

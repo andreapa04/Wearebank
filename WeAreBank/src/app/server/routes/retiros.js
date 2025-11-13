@@ -60,14 +60,14 @@ router.post("/", async (req, res) => {
     let codigoGenerado = null;
     let tipoMovimiento = "RETIRO";
     let tipoCorreo = "ALERTA";
-    let mensajeExito = "✅ Retiro realizado correctamente.";
+    let mensajeExito = " Retiro realizado correctamente.";
 
     // 3️⃣ Lógica condicional para retiro sin tarjeta
     if (retiroSinTarjeta) {
       codigoGenerado = Math.floor(100000 + Math.random() * 900000).toString();
       tipoMovimiento = "RETIRO_SIN_TARJETA";
       tipoCorreo = "CODIGO";
-      mensajeExito = "✅ Retiro sin tarjeta procesado. Revisa tu correo para ver el código.";
+      mensajeExito = " Retiro sin tarjeta procesado. Revisa tu correo para ver el código.";
     }
 
     // 4️⃣ Registrar movimiento
@@ -95,7 +95,7 @@ router.post("/", async (req, res) => {
       await connection.rollback();
       connection.release();
     }
-    console.error("❌ Error en retiro:", error);
+    console.error(" Error en retiro:", error);
     res.status(500).json({ message: "Error al procesar el retiro." });
   }
 });

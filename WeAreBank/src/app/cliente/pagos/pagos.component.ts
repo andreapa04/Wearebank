@@ -80,7 +80,7 @@ export class PagosComponent implements OnInit {
     const usuario = JSON.parse(safeLocalStorage().getItem('usuario') || 'null');
 
     if (!usuario || !usuario.id) {
-      console.error('⚠️ No se encontró usuario en sesión');
+      console.error(' No se encontró usuario en sesión');
       return;
     }
 
@@ -88,7 +88,7 @@ export class PagosComponent implements OnInit {
     this.http.get<Cuenta[]>(`http://localhost:3000/api/consultas/mis-cuentas/${usuario.id}`)
       .subscribe({
         next: (data) => (this.cuentas = data),
-        error: (err) => console.error('❌ Error al cargar cuentas:', err)
+        error: (err) => console.error(' Error al cargar cuentas:', err)
       });
 
     // 🔹 Cargar préstamos aprobados
@@ -96,9 +96,9 @@ export class PagosComponent implements OnInit {
       .subscribe({
         next: (data) => {
           this.prestamos = data;
-          console.log('✅ Préstamos cargados:', this.prestamos);
+          console.log(' Préstamos cargados:', this.prestamos);
         },
-        error: (err) => console.error('❌ Error al cargar préstamos:', err)
+        error: (err) => console.error(' Error al cargar préstamos:', err)
       });
 
     // 🔹 Cargar historial de pagos
@@ -137,7 +137,7 @@ export class PagosComponent implements OnInit {
     // 🔽 Limpiar mensaje al iniciar la acción
     this.mensaje = ''; 
     if (!this.idCuentaSeleccionada || this.montoPago <= 0) {
-      this.mensaje = '⚠️ Selecciona una cuenta y un monto válido.';
+      this.mensaje = ' Selecciona una cuenta y un monto válido.';
       return;
     }
 
@@ -149,15 +149,15 @@ export class PagosComponent implements OnInit {
 
     this.http.post('http://localhost:3000/api/pagos/servicio', pagoData).subscribe({
       next: (res: any) => {
-        this.mensaje = res.message || '✅ Pago realizado con éxito.';
+        this.mensaje = res.message || ' Pago realizado con éxito.';
         // 🔽 Limpieza manual, sin borrar el 'this.mensaje'
         this.montoPago = 0;
         this.referencia = '';
         this.ngOnInit(); // Actualizar datos
       },
       error: (err) => {
-        console.error('❌ Error al realizar el pago:', err);
-        this.mensaje = err.error?.error || '❌ Error al realizar el pago.';
+        console.error(' Error al realizar el pago:', err);
+        this.mensaje = err.error?.error || ' Error al realizar el pago.';
       }
     });
   }
@@ -166,7 +166,7 @@ export class PagosComponent implements OnInit {
     // 🔽 Limpiar mensaje al iniciar la acción
     this.mensaje = '';
     if (!this.idCuentaSeleccionada || !this.prestamoSeleccionado || this.montoPagoPrestamo <= 0) {
-      this.mensaje = '⚠️ Selecciona una cuenta, un préstamo y un monto válido.';
+      this.mensaje = ' Selecciona una cuenta, un préstamo y un monto válido.';
       return;
     }
 
@@ -178,15 +178,15 @@ export class PagosComponent implements OnInit {
 
     this.http.post('http://localhost:3000/api/pagos/prestamo', pagoData).subscribe({
       next: (res: any) => {
-        this.mensaje = res.message || '✅ Pago de préstamo realizado con éxito.';
+        this.mensaje = res.message || ' Pago de préstamo realizado con éxito.';
         // 🔽 Limpieza manual, sin borrar el 'this.mensaje'
         this.prestamoSeleccionado = null;
         this.montoPagoPrestamo = 0;
         this.ngOnInit(); // Actualizar datos
       },
       error: (err) => {
-        console.error('❌ Error al realizar el pago de préstamo:', err);
-        this.mensaje = err.error?.error || '❌ Error al realizar el pago de préstamo.';
+        console.error(' Error al realizar el pago de préstamo:', err);
+        this.mensaje = err.error?.error || ' Error al realizar el pago de préstamo.';
       }
     });
   }
@@ -200,9 +200,9 @@ export class PagosComponent implements OnInit {
       .subscribe({
         next: (data) => {
           this.historialPagos = data;
-          console.log('✅ Historial cargado:', this.historialPagos);
+          console.log(' Historial cargado:', this.historialPagos);
         },
-        error: (err) => console.error('❌ Error al cargar historial:', err)
+        error: (err) => console.error(' Error al cargar historial:', err)
       });
   }
 

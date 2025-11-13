@@ -23,7 +23,7 @@ router.get("/mis-cuentas/:idUsuario", async (req, res) => {
 
     res.json(cuentas);
   } catch (error) {
-    console.error("❌ Error al consultar cuentas:", error);
+    console.error(" Error al consultar cuentas:", error);
     res.status(500).json({ message: "Error al obtener las cuentas." });
   }
 });
@@ -93,7 +93,7 @@ router.get("/estado-cuenta-pdf/:clabe", async (req, res) => {
 
   } catch (error) {
     if (connection) connection.release();
-    console.error("❌ Error al generar estado de cuenta PDF:", error);
+    console.error(" Error al generar estado de cuenta PDF:", error);
     res.status(500).json({ message: "Error al generar el PDF." });
   }
 });
@@ -125,7 +125,7 @@ router.get("/mis-tarjetas/:idUsuario", async (req, res) => {
 
     res.json(tarjetas);
   } catch (error) {
-    console.error("❌ Error al consultar tarjetas:", error);
+    console.error(" Error al consultar tarjetas:", error);
     res.status(500).json({ message: "Error al obtener las tarjetas." });
   }
 });
@@ -153,10 +153,43 @@ router.get("/movimientos/:idCuenta", async (req, res) => {
 
     res.json(movimientos);
   } catch (error) {
-    console.error("❌ Error al consultar movimientos:", error);
+    console.error(" Error al consultar movimientos:", error);
     res.status(500).json({ message: "Error al obtener los movimientos." });
   }
 });
+
+router.post("/solicitar-cierre", async (req, res) => {
+  const { idUsuario, razon_cliente } = req.body; // idUsuario debe venir del frontend (auth)
+
+  if (!idUsuario) {
+    return res.status(400).json({ message: "Información de usuario no encontrada." });
+  }
+
+  try {
+    // 1. Verificar si ya tiene una solicitud pendiente
+    const [existente] = await pool.query(
+      "SELECT idSolicitudCierre FROM solicitud_cierre WHERE idUsuario = ? AND estado = 'PENDIENTE'",
+      [idUsuario]
+    );
+
+    if (existente.length > 0) {
+      return res.status(400).json({ message: "Ya tienes una solicitud de cierre pendiente de revisión." });
+    }
+
+    // 2. Insertar la nueva solicitud
+    await pool.query(
+      "INSERT INTO solicitud_cierre (idUsuario, razon_cliente, estado) VALUES (?, ?, 'PENDIENTE')",
+      [idUsuario, razon_cliente || null]
+    );
+
+    res.status(201).json({ message: "Solicitud de cierre enviada. Un ejecutivo la revisará pronto." });
+    
+  } catch (error) {
+    console.error("Error al solicitar cierre:", error);
+    res.status(500).json({ message: "Error al procesar la solicitud." });
+  }
+});
+
 
 /**
  * 🔹 GET /api/consultas/detalle-cuenta/:idCuenta
@@ -193,7 +226,7 @@ router.get("/detalle-cuenta/:idCuenta", async (req, res) => {
       movimientos,
     });
   } catch (error) {
-    console.error("❌ Error al consultar detalle de cuenta:", error);
+    console.error(" Error al consultar detalle de cuenta:", error);
     res.status(500).json({ message: "Error al obtener el detalle de la cuenta." });
   }
 });

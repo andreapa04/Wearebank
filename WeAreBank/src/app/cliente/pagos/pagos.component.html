@@ -148,7 +148,7 @@
     </table>
   </div>
 
-  <p *ngIf="mensaje" [class.success]="mensaje.includes('✅')" [class.error]="mensaje.includes('❌')" class="mensaje">
+  <p *ngIf="mensaje" [class.success]="mensaje.includes('')" [class.error]="mensaje.includes('')" class="mensaje">
     {{ mensaje }}
   </p>
 </div>

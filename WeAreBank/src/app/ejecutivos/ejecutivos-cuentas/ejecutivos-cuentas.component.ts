@@ -100,7 +100,7 @@ export class EjecutivosCuentasComponent implements OnInit {
     this.authService.register(this.formCliente).subscribe({
       // 8. Tipar respuesta
       next: (res: any) => {
-        this.mensaje = '✅ Cliente y cuenta creados exitosamente.';
+        this.mensaje = ' Cliente y cuenta creados exitosamente.';
         // Reiniciar formulario (simple)
         this.formCliente = {
           nombre: '', apellidoP: '', apellidoM: '', direccion: '', telefono: '',

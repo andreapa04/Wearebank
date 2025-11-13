@@ -64,7 +64,7 @@ export class CreditosComponent implements OnInit {
 
   solicitarCredito(): void {
     if (!this.idCuentaSeleccionada || this.monto <= 0 || !this.plazo) {
-      this.mensaje = '⚠️ Completa todos los campos correctamente.';
+      this.mensaje = ' Completa todos los campos correctamente.';
       return;
     }
 
@@ -83,7 +83,7 @@ export class CreditosComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.mensaje = err.error?.error || '❌ Error al solicitar crédito.';
+          this.mensaje = err.error?.error || ' Error al solicitar crédito.';
         }
       });
   }
