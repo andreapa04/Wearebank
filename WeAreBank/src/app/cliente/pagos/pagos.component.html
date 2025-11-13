@@ -1,18 +1,16 @@
 <div class="container">
   <h2>Gestión de Pagos</h2>
 
-  <!-- Selector de cuenta -->
   <div class="cuenta-selector">
     <label>Selecciona una cuenta:</label>
     <select [(ngModel)]="idCuentaSeleccionada">
       <option [value]="null">Seleccionar</option>
       <option *ngFor="let cuenta of cuentas" [value]="cuenta.idCuenta">
-        {{ cuenta.tipoCuenta }} - CLABE: {{ cuenta.clabe }} - ${{ cuenta.saldo | number:'1.2-2' }}
+        {{ cuenta.tipoCuenta }} • ****{{ cuenta.clabe.slice(-4) }} • Saldo: {{ cuenta.saldo | currency }}
       </option>
     </select>
   </div>
 
-  <!-- Botones de navegación -->
   <div class="vista-tabs">
     <button 
       [class.active]="vistaActual === 'servicios'"
@@ -31,7 +29,6 @@
     </button>
   </div>
 
-  <!-- VISTA: Pago de Servicios -->
   <div *ngIf="vistaActual === 'servicios' && !mostrarHistorial" class="vista-servicios">
     <h3>Servicios disponibles</h3>
     <table>
@@ -61,7 +58,6 @@
     </div>
   </div>
 
-  <!-- VISTA: Pago de Préstamos -->
   <div *ngIf="vistaActual === 'prestamos' && !mostrarHistorial" class="vista-prestamos">
     <h3>Préstamos Aprobados</h3>
     
@@ -119,7 +115,6 @@
     </div>
   </div>
 
-  <!-- VISTA: Historial de Pagos -->
   <div *ngIf="mostrarHistorial" class="vista-historial">
     <h3>📋 Historial de Pagos</h3>
 

@@ -107,28 +107,35 @@ export class PagosComponent implements OnInit {
 
   cambiarVista(vista: 'servicios' | 'prestamos'): void {
     this.vistaActual = vista;
-    this.limpiarFormulario();
+    this.limpiarFormulario(false); // 🔽 Limpiar formulario sin borrar mensaje
   }
 
-  limpiarFormulario(): void {
+  // 🔽 Modificado para no borrar el mensaje por defecto
+  limpiarFormulario(limpiarMensaje: boolean = true): void {
     this.montoPago = 0;
     this.referencia = '';
     this.prestamoSeleccionado = null;
     this.montoPagoPrestamo = 0;
-    this.mensaje = '';
+    if (limpiarMensaje) {
+      this.mensaje = '';
+    }
   }
 
   pagarServicio(servicio: Servicio): void {
     this.referencia = servicio.referencia;
     this.montoPago = servicio.ultimoPago;
+    this.mensaje = ''; // Limpiar mensaje al seleccionar
   }
 
   seleccionarPrestamo(prestamo: Prestamo): void {
     this.prestamoSeleccionado = prestamo;
     this.montoPagoPrestamo = 0;
+    this.mensaje = ''; // Limpiar mensaje al seleccionar
   }
 
   realizarPagoServicio(): void {
+    // 🔽 Limpiar mensaje al iniciar la acción
+    this.mensaje = ''; 
     if (!this.idCuentaSeleccionada || this.montoPago <= 0) {
       this.mensaje = '⚠️ Selecciona una cuenta y un monto válido.';
       return;
@@ -143,7 +150,9 @@ export class PagosComponent implements OnInit {
     this.http.post('http://localhost:3000/api/pagos/servicio', pagoData).subscribe({
       next: (res: any) => {
         this.mensaje = res.message || '✅ Pago realizado con éxito.';
-        this.limpiarFormulario();
+        // 🔽 Limpieza manual, sin borrar el 'this.mensaje'
+        this.montoPago = 0;
+        this.referencia = '';
         this.ngOnInit(); // Actualizar datos
       },
       error: (err) => {
@@ -154,6 +163,8 @@ export class PagosComponent implements OnInit {
   }
 
   realizarPagoPrestamo(): void {
+    // 🔽 Limpiar mensaje al iniciar la acción
+    this.mensaje = '';
     if (!this.idCuentaSeleccionada || !this.prestamoSeleccionado || this.montoPagoPrestamo <= 0) {
       this.mensaje = '⚠️ Selecciona una cuenta, un préstamo y un monto válido.';
       return;
@@ -168,7 +179,9 @@ export class PagosComponent implements OnInit {
     this.http.post('http://localhost:3000/api/pagos/prestamo', pagoData).subscribe({
       next: (res: any) => {
         this.mensaje = res.message || '✅ Pago de préstamo realizado con éxito.';
-        this.limpiarFormulario();
+        // 🔽 Limpieza manual, sin borrar el 'this.mensaje'
+        this.prestamoSeleccionado = null;
+        this.montoPagoPrestamo = 0;
         this.ngOnInit(); // Actualizar datos
       },
       error: (err) => {
@@ -195,6 +208,7 @@ export class PagosComponent implements OnInit {
 
   toggleHistorial(): void {
     this.mostrarHistorial = !this.mostrarHistorial;
+    this.mensaje = ''; // Limpiar mensaje al cambiar de vista
     if (this.mostrarHistorial) {
       this.cargarHistorial();
     }

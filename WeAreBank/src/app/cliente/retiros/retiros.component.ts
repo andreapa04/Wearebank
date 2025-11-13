@@ -25,6 +25,8 @@ export class RetirosComponent implements OnInit {
   montoOtro: number | null = null;
   retiroSinTarjeta = true;
   mensaje = '';
+  codigoGenerado: string | null = null; // 🔽 Para guardar el código
+  error: string = ''; // 🔽 Para mensajes de error
 
   constructor(private http: HttpClient) {}
 
@@ -32,29 +34,44 @@ export class RetirosComponent implements OnInit {
     const usuario = JSON.parse(safeLocalStorage().getItem('usuario') || 'null');
 
     if (!usuario || !usuario.id) {
-      console.error('⚠️ No se encontró el usuario en sesión.');
+      this.error = '⚠️ No se encontró el usuario en sesión.';
       return;
     }
 
-    // 🔹 Cargar las cuentas disponibles del usuario
+    this.cargarCuentas(usuario.id);
+  }
+
+  cargarCuentas(idUsuario: number): void {
     this.http
-      .get<Cuenta[]>(`http://localhost:3000/api/consultas/mis-cuentas/${usuario.id}`)
+      .get<Cuenta[]>(`http://localhost:3000/api/consultas/mis-cuentas/${idUsuario}`)
       .subscribe({
         next: (data) => (this.cuentas = data),
-        error: (err) => console.error('❌ Error al cargar cuentas:', err)
+        error: (err) => {
+          console.error('❌ Error al cargar cuentas:', err);
+          this.error = 'Error al cargar tus cuentas.';
+        }
       });
   }
 
   seleccionarMonto(monto: number): void {
     this.montoSeleccionado = monto;
     this.montoOtro = null;
+    this.limpiarMensajes(); // 🔽 Limpiar al cambiar monto
+  }
+
+  // 🔽 Limpia mensajes al cambiar de opción
+  limpiarMensajes(): void {
+    this.mensaje = '';
+    this.error = '';
+    this.codigoGenerado = null;
   }
 
   retirar(): void {
+    this.limpiarMensajes(); // 🔽 Limpiar antes de empezar
     const monto = this.montoOtro ? this.montoOtro : this.montoSeleccionado;
 
     if (!this.idCuentaSeleccionada || !monto || monto <= 0) {
-      this.mensaje = '⚠️ Selecciona una cuenta y un monto válido.';
+      this.error = '⚠️ Selecciona una cuenta y un monto válido.';
       return;
     }
 
@@ -66,13 +83,15 @@ export class RetirosComponent implements OnInit {
 
     this.http.post('http://localhost:3000/api/retiros', retiroData).subscribe({
       next: (res: any) => {
-        this.mensaje = res.message || '✅ Retiro realizado correctamente.';
+        this.mensaje = res.message || '✅ Operación realizada.';
+        this.codigoGenerado = res.codigo || null; // 🔽 Captura el código
+        
         // Refrescar saldo
-        this.ngOnInit();
+        this.cargarCuentas(JSON.parse(safeLocalStorage().getItem('usuario') || 'null').id);
       },
       error: (err) => {
         console.error('❌ Error al realizar el retiro:', err);
-        this.mensaje = '❌ Error al realizar el retiro.';
+        this.error = err.error?.message || '❌ Error al realizar el retiro.';
       }
     });
   }

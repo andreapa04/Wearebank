@@ -62,6 +62,32 @@ router.post("/", async (req, res) => {
         monto,
         concepto,
       ]);
+
+      // 🔽 --- BLOQUE MODIFICADO --- 🔽
+      // Registrar movimiento y ENVIAR CORREO AL RECEPTOR
+      if (destinoID) {
+        await pool.query(
+          "INSERT INTO movimiento (idCuenta, monto, tipoMovimiento) VALUES (?, ?, 'TRANSFERENCIA_RECIBIDA')",
+          [destinoID, monto]
+        );
+        
+        // Buscar datos del receptor para el correo
+        const [receptorUser] = await pool.query(
+          `SELECT u.email, c.clabe
+           FROM usuario u
+           JOIN pertenece p ON p.idUsuario = u.idUsuario
+           JOIN cuenta c ON c.idCuenta = p.idCuenta
+           WHERE c.idCuenta = ? LIMIT 1`,
+          [destinoID]
+        );
+
+        if (receptorUser.length) {
+          // Usamos el 'monto' (sin comisión) para el receptor
+          await enviarCorreoMovimiento(receptorUser[0].email, "TRANSFERENCIA_RECIBIDA", monto, receptorUser[0].clabe);
+        }
+      }
+      // 🔼 --- FIN BLOQUE MODIFICADO --- 🔼
+
     } else {
       destinoExt = destinoExterno || cuentaDestino;
       // transferencia externa
@@ -74,20 +100,7 @@ router.post("/", async (req, res) => {
       ]);
     }
 
-    // registrar movimientos
-    await pool.query(
-      "INSERT INTO movimiento (idCuenta, monto, tipoMovimiento) VALUES (?, ?, 'TRANSFERENCIA_ENVIADA')",
-      [idCuentaOrigen, total]
-    );
-
-    if (tipo === "INTERNA" && destinoID) {
-      await pool.query(
-        "INSERT INTO movimiento (idCuenta, monto, tipoMovimiento) VALUES (?, ?, 'TRANSFERENCIA_RECIBIDA')",
-        [destinoID, monto]
-      );
-    }
-
-    // ENVIAR CORREO
+    // ENVIAR CORREO AL EMISOR (Sin cambios)
     const [user] = await pool.query(
       `SELECT u.email, c.clabe
        FROM usuario u
@@ -98,7 +111,8 @@ router.post("/", async (req, res) => {
     );
 
     if (user.length) {
-      await enviarCorreoMovimiento(user[0].email, "TRANSFERENCIA", total, user[0].clabe);
+      // 🔽 Usamos un tipo más específico y el 'total' (con comisión)
+      await enviarCorreoMovimiento(user[0].email, "TRANSFERENCIA_ENVIADA", total, user[0].clabe);
     }
 
     res.json({ message: "Transferencia completada exitosamente" });
@@ -139,6 +153,7 @@ router.post("/deposito", async (req, res) => {
       [idCuenta]
     );
 
+    // (Esta lógica ya existía y funciona)
     if (user.length) {
       await enviarCorreoMovimiento(user[0].email, "DEPÓSITO", monto, user[0].clabe);
     }

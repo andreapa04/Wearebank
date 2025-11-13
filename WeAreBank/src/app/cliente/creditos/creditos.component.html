@@ -6,20 +6,21 @@
     <select [(ngModel)]="idCuentaSeleccionada">
       <option [value]="null">Selecciona una cuenta</option>
       <option *ngFor="let c of cuentas" [value]="c.idCuenta">
-        {{ c.tipoCuenta }} - {{ c.clabe }} - ${{ c.saldo | number:'1.2-2' }}
+        {{ c.tipoCuenta }} • ****{{ c.clabe.slice(-4) }} • Saldo: {{ c.saldo | currency }}
       </option>
     </select>
 
     <label>Monto solicitado:</label>
-    <input type="number" [(ngModel)]="monto" placeholder="Ej. 20000" />
+    <input type="number" [(ngModel)]="monto" placeholder="Ej. 150000" />
 
     <label>Plazo (meses):</label>
-    <input type="text" [(ngModel)]="plazo" placeholder="Ej. 24 meses" />
+    <input type="text" [(ngModel)]="plazo" placeholder="Ej. 48 meses" />
 
     <label>Tipo de crédito:</label>
     <select [(ngModel)]="tipo">
-      <option value="PRESTAMO_PERSONAL">Préstamo personal</option>
-      <option value="CREDITO_AUTOMOTRIZ">Crédito automotriz</option>
+      <option value="CREDITO_AUTOMOTRIZ">Crédito Automotriz</option>
+      <option value="CREDITO_HIPOTECARIO">Crédito Hipotecario</option>
+      <option value="CREDITO_PYME">Crédito PyME</option>
     </select>
 
     <button (click)="solicitarCredito()">Solicitar crédito</button>
@@ -28,7 +29,7 @@
 
   <hr />
 
-  <h3>Historial de solicitudes</h3>
+  <h3>Historial de solicitudes de Crédito</h3>
   <table *ngIf="solicitudes.length > 0; else noData">
     <thead>
       <tr>
@@ -45,8 +46,8 @@
     <tbody>
       <tr *ngFor="let s of solicitudes">
         <td>{{ s.fechaSolicitud | date:'short' }}</td>
-        <td>{{ s.clabe }}</td>
-        <td>{{ s.tipo }}</td>
+        <td>****{{ s.clabe.slice(-4) }}</td>
+        <td>{{ s.tipo.replace('CREDITO_', '') }}</td>
         <td>${{ s.montoTotal | number:'1.2-2' }}</td>
         <td>{{ s.plazo }}</td>
         <td>{{ s.intereses }}%</td>
@@ -57,6 +58,6 @@
   </table>
 
   <ng-template #noData>
-    <p>No tienes solicitudes registradas aún.</p>
+    <p>No tienes solicitudes de crédito registradas aún.</p>
   </ng-template>
 </div>

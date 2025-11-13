@@ -10,7 +10,8 @@ const router = express.Router();
 router.post("/solicitar", async (req, res) => {
   const { idCuenta, montoTotal, plazo, tipo } = req.body;
 
-  if (!idCuenta || !montoTotal || montoTotal <= 0 || !plazo || !tipo) {
+  // 🔽 Validar que el TIPO sea un crédito
+  if (!idCuenta || !montoTotal || montoTotal <= 0 || !plazo || !tipo || !tipo.startsWith('CREDITO_')) {
     return res.status(400).json({ error: "Datos incompletos o inválidos" });
   }
 
@@ -118,19 +119,21 @@ router.post("/solicitar", async (req, res) => {
 });
 
 /**
+ * 🔽 RUTA MODIFICADA 🔽
  * GET /api/creditos/mis-solicitudes/:idUsuario
- * Lista todas las solicitudes del usuario
+ * Lista todas las solicitudes de CRÉDITO del usuario
  */
 router.get("/mis-solicitudes/:idUsuario", async (req, res) => {
   const { idUsuario } = req.params;
 
   try {
+    // 🔽 Se filtra por "tipo LIKE 'CREDITO_%'"
     const [solicitudes] = await pool.query(
       `SELECT s.*, c.clabe
        FROM solicitud s
        JOIN cuenta c ON s.idCuenta = c.idCuenta
        JOIN pertenece p ON c.idCuenta = p.idCuenta
-       WHERE p.idUsuario = ?
+       WHERE p.idUsuario = ? AND s.tipo LIKE 'CREDITO_%'
        ORDER BY s.fechaSolicitud DESC`,
       [idUsuario]
     );

@@ -14,6 +14,9 @@ interface Solicitud {
   estado: string;
   fechaSolicitud: string;
   clabe: string;
+  // 🔽 Campos calculados
+  totalPagado?: number;
+  saldoPendiente?: number;
 }
 
 interface Pago {
@@ -30,7 +33,7 @@ interface Pago {
   styleUrls: ['./prestamos.component.css']
 })
 export class PrestamosComponent implements OnInit {
-  tipoPrestamo = '';
+  tipoPrestamo = 'PRESTAMO_PERSONAL'; 
   monto = 0;
   plazo = 12;
   ingresosMensuales = 0;
@@ -42,6 +45,7 @@ export class PrestamosComponent implements OnInit {
   cuentas: any[] = [];
 
   solicitudSeleccionada: number | null = null;
+  mensaje: string = ''; 
 
   constructor(private http: HttpClient) {}
 
@@ -54,10 +58,14 @@ export class PrestamosComponent implements OnInit {
   }
 
   cargarSolicitudes(idUsuario: number) {
-    this.http.get<Solicitud[]>(`http://localhost:3000/api/prestamos/usuario/${idUsuario}`)
+    // 🔽 ¡SOLUCIÓN! URL corregida para apuntar al endpoint correcto
+    this.http.get<Solicitud[]>(`http://localhost:3000/api/prestamos/mis-solicitudes/${idUsuario}`)
       .subscribe({
         next: data => this.solicitudes = data,
-        error: err => console.error('❌ Error al cargar solicitudes:', err)
+        error: err => {
+          console.error('❌ Error al cargar solicitudes de préstamo:', err);
+          this.mensaje = 'Error al cargar tus préstamos.';
+        }
       });
   }
 
@@ -70,38 +78,68 @@ export class PrestamosComponent implements OnInit {
   }
 
   solicitarPrestamo() {
+    this.mensaje = '';
     const usuario = JSON.parse(safeLocalStorage().getItem('usuario') || 'null');
     if (!usuario?.id) return alert('No se encontró usuario en sesión');
-    if (!this.cuentaSeleccionada) return alert('Selecciona una cuenta.');
+    if (!this.cuentaSeleccionada) {
+      this.mensaje = '⚠️ Selecciona una cuenta.';
+      return;
+    }
+    if (!this.monto || this.monto <= 0) {
+      this.mensaje = '⚠️ Ingresa un monto válido.';
+      return;
+    }
+    if (!this.tipoPrestamo) {
+      this.mensaje = '⚠️ Selecciona un tipo de préstamo.';
+      return;
+    }
+
 
     const payload = {
       idUsuario: usuario.id,
       idCuenta: this.cuentaSeleccionada,
       montoTotal: this.monto,
       plazo: `${this.plazo} meses`,
-      tipo: this.tipoPrestamo === 'automotriz' ? 'CREDITO_AUTOMOTRIZ' : 'PRESTAMO_PERSONAL'
+      tipo: this.tipoPrestamo 
     };
 
     this.http.post('http://localhost:3000/api/prestamos/solicitar', payload)
       .subscribe({
         next: (res: any) => {
-          alert(res.message);
+          this.mensaje = res.message;
           this.cargarSolicitudes(usuario.id);
         },
-        error: err => console.error('❌ Error al solicitar préstamo:', err)
+        error: err => {
+          console.error('❌ Error al solicitar préstamo:', err);
+          this.mensaje = err.error?.error || 'Error al procesar la solicitud.';
+        }
       });
   }
 
   verPagos(idSolicitud: number) {
+    // 🔽 Cambiar el ID seleccionado, o "apagarlo" si se hace clic de nuevo
+    if (this.solicitudSeleccionada === idSolicitud) {
+      this.solicitudSeleccionada = null;
+      this.pagos = [];
+      return;
+    }
+    
     this.solicitudSeleccionada = idSolicitud;
+    
+    // 🔽 Esta llamada ahora funcionará gracias al backend
     this.http.get<Pago[]>(`http://localhost:3000/api/prestamos/pagos/${idSolicitud}`)
       .subscribe({
         next: data => this.pagos = data,
-        error: err => console.error('❌ Error al obtener pagos:', err)
+        error: err => {
+          // Este error ya no debería ser un 404
+          console.error('❌ Error al obtener pagos:', err); 
+          this.mensaje = 'Error al cargar el historial de pagos.';
+        }
       });
   }
 
   pagarSolicitud(idSolicitud: number) {
+    this.mensaje = '';
     if (!this.montoPago || this.montoPago <= 0)
       return alert('Ingrese un monto válido para el pago.');
 
@@ -112,7 +150,11 @@ export class PrestamosComponent implements OnInit {
         next: (res: any) => {
           alert(res.message);
           this.montoPago = 0;
-          this.verPagos(idSolicitud);
+          if (this.solicitudSeleccionada === idSolicitud) {
+             this.verPagos(idSolicitud); // Refrescar pagos si se está viendo
+          }
+          const usuario = JSON.parse(safeLocalStorage().getItem('usuario') || 'null');
+          this.cargarSolicitudes(usuario.id); // Refrescar saldos de solicitudes
         },
         error: err => console.error('❌ Error al registrar pago:', err)
       });

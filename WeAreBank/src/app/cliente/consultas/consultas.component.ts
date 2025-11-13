@@ -18,6 +18,18 @@ interface Movimiento {
   tipoMovimiento: string;
 }
 
+// 🔽 Interface para las tarjetas
+interface Tarjeta {
+  idTarjeta: number;
+  numeroTarjeta: string;
+  vencimiento: string;
+  tipoTarjeta: string;
+  esVirtual: boolean;
+  nombre: string;
+  apellidoP: string;
+  apellidoM: string;
+}
+
 @Component({
   selector: 'app-consultas',
   standalone: true,
@@ -27,10 +39,12 @@ interface Movimiento {
 })
 export class ConsultasComponent implements OnInit {
   cuentas: Cuenta[] = [];
+  tarjetas: Tarjeta[] = []; // 🔽 Array para almacenar tarjetas
   movimientos: Movimiento[] = [];
   idCuentaSeleccionada: number | null = null;
   cuentaSeleccionada: Cuenta | null = null;
   cargandoPDF: boolean = false;
+  usuarioNombre: string = ''; // 🔽 Para mostrar en la tarjeta
 
   constructor(private http: HttpClient) {}
 
@@ -41,17 +55,44 @@ export class ConsultasComponent implements OnInit {
       console.error('⚠️ No se encontró usuario en sesión');
       return;
     }
+    
+    this.usuarioNombre = `${usuario.nombre || ''} ${usuario.apellidoP || ''}`;
 
     // 🔹 Cargar las cuentas del usuario logueado
+    this.cargarCuentas(usuario.id);
+    
+    // 🔽 Cargar las tarjetas del usuario logueado
+    this.cargarTarjetas(usuario.id);
+  }
+
+  cargarCuentas(idUsuario: number): void {
     this.http
-      .get<Cuenta[]>(`http://localhost:3000/api/consultas/mis-cuentas/${usuario.id}`)
+      .get<Cuenta[]>(`http://localhost:3000/api/consultas/mis-cuentas/${idUsuario}`)
       .subscribe({
         next: (data) => {
           this.cuentas = data;
+          // 🔽 Seleccionar la primera cuenta por defecto
+          if (data.length > 0) {
+            this.seleccionarCuenta(data[0]);
+          }
         },
         error: (err) => {
           console.error('❌ Error al cargar cuentas:', err);
         },
+      });
+  }
+
+  // 🔽 Nueva función para cargar tarjetas
+  cargarTarjetas(idUsuario: number): void {
+    this.http
+      .get<Tarjeta[]>(`http://localhost:3000/api/consultas/mis-tarjetas/${idUsuario}`)
+      .subscribe({
+        next: (data) => {
+          this.tarjetas = data;
+        },
+        error: (err) => {
+          console.error('❌ Error al cargar tarjetas:', err);
+        }
       });
   }
 

@@ -10,6 +10,11 @@ const router = express.Router();
 router.post("/solicitar", async (req, res) => {
   const { idCuenta, montoTotal, plazo, tipo } = req.body;
 
+  // 🔽 Validar que el TIPO sea un préstamo
+  if (!tipo || !tipo.startsWith('PRESTAMO_')) {
+    return res.status(400).json({ error: "El tipo de solicitud no es un préstamo válido." });
+  }
+
   try {
     // Obtener usuario del titular
     const [[usuario]] = await pool.query(`
@@ -47,7 +52,7 @@ router.post("/solicitar", async (req, res) => {
     `, [idCuenta, montoTotal, plazo, intereses, cat, tipo]);
 
     res.json({
-      message: "Solicitud registrada con éxito, en revisión",
+      message: "Solicitud de préstamo registrada con éxito, en revisión",
       idSolicitud: result.insertId
     });
 
@@ -104,6 +109,7 @@ router.put("/aprobar/:idSolicitud", async (req, res) => {
 
 /**
  * 🔹 3. Registrar un pago de préstamo
+ * (Esta ruta ya contenía la lógica para marcar como 'LIQUIDADA')
  */
 router.post("/pago", async (req, res) => {
   const { idSolicitud, monto } = req.body;
@@ -124,7 +130,8 @@ router.post("/pago", async (req, res) => {
       [idSolicitud, monto]
     );
 
-    // Registrar movimiento en cuenta
+    // Registrar movimiento en cuenta (Esto debe mejorarse, necesita el idCuenta del pago)
+    // Por ahora, se infiere de la solicitud
     await pool.query(
       "INSERT INTO movimiento (idCuenta, monto, tipoMovimiento) VALUES (?, ?, 'PAGO_PRESTAMO')",
       [solicitud.idCuenta, -monto]
@@ -136,7 +143,7 @@ router.post("/pago", async (req, res) => {
       [idSolicitud]
     );
 
-    // Si se liquidó completamente
+    // 🔽 LÓGICA DE COMPLETADO (ya existía)
     if (totalPagado >= solicitud.montoTotal) {
       await pool.query("UPDATE solicitud SET estado = 'LIQUIDADA' WHERE idSolicitud = ?", [idSolicitud]);
     }
@@ -149,31 +156,65 @@ router.post("/pago", async (req, res) => {
 });
 
 /**
- * 🔹 4. Consultar solicitudes y sus pagos
+ * 🔹 4. Consultar solicitudes de PRÉSTAMO de un usuario
  */
-router.get("/mis-solicitudes/:idCuenta", async (req, res) => {
-  const { idCuenta } = req.params;
+router.get("/mis-solicitudes/:idUsuario", async (req, res) => {
+  const { idUsuario } = req.params;
 
   try {
     const [solicitudes] = await pool.query(
-      "SELECT * FROM solicitud WHERE idCuenta = ? ORDER BY fechaSolicitud DESC",
-      [idCuenta]
+      `SELECT s.*, c.clabe
+       FROM solicitud s
+       JOIN cuenta c ON s.idCuenta = c.idCuenta
+       JOIN pertenece p ON c.idCuenta = p.idCuenta
+       WHERE p.idUsuario = ? AND s.tipo LIKE 'PRESTAMO_%'
+       ORDER BY s.fechaSolicitud DESC`,
+      [idUsuario]
     );
 
+    // Calcular saldos pendientes para cada solicitud
     for (const solicitud of solicitudes) {
       const [[{ totalPagado }]] = await pool.query(
         "SELECT SUM(monto) AS totalPagado FROM PagosSolicitud WHERE idSolicitud = ?",
         [solicitud.idSolicitud]
       );
       solicitud.totalPagado = totalPagado || 0;
-      solicitud.saldoPendiente = solicitud.montoTotal - solicitud.totalPagado;
+      solicitud.saldoPendiente = solicitud.montoTotal - (solicitud.totalPagado || 0);
     }
 
     res.json(solicitudes);
   } catch (error) {
-    console.error("❌ Error al consultar solicitudes:", error);
+    console.error("❌ Error al consultar solicitudes de préstamo:", error);
     res.status(500).json({ error: "Error al consultar solicitudes" });
   }
 });
+
+
+// 🔽 ==== ¡SOLUCIÓN AL ERROR 404! ==== 🔽
+/**
+ * 🔹 5. Consultar pagos de una solicitud específica
+ * (Este endpoint faltaba y causaba el error 404)
+ */
+router.get("/pagos/:idSolicitud", async (req, res) => {
+  const { idSolicitud } = req.params;
+
+  if (!idSolicitud) {
+    return res.status(400).json({ error: "Se requiere un ID de solicitud" });
+  }
+
+  try {
+    const [pagos] = await pool.query(
+      "SELECT * FROM PagosSolicitud WHERE idSolicitud = ? ORDER BY fechaHora DESC",
+      [idSolicitud]
+    );
+
+    // No es un error si no hay pagos, solo regresa un array vacío
+    res.json(pagos);
+  } catch (error) {
+    console.error("❌ Error al consultar pagos:", error);
+    res.status(500).json({ error: "Error al consultar los pagos" });
+  }
+});
+// 🔼 =================================== 🔼
 
 export default router;

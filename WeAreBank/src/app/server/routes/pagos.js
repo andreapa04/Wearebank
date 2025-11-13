@@ -1,5 +1,7 @@
 import express from "express";
 import pool from "../db.js";
+// 🔽 1. Importar el mailer
+import { enviarCorreoMovimiento } from "../../utils/mailer.js";
 
 const router = express.Router();
 
@@ -9,39 +11,73 @@ const router = express.Router();
  */
 router.post("/servicio", async (req, res) => {
   const { idCuenta, monto, referencia } = req.body;
+  let connection; // Definir connection fuera del try
 
   if (!idCuenta || !monto || monto <= 0) {
     return res.status(400).json({ error: "Datos de pago inválidos" });
   }
 
   try {
-    const [cuentaRows] = await pool.query("SELECT saldo FROM cuenta WHERE idCuenta = ?", [idCuenta]);
+    connection = await pool.getConnection(); // Obtener conexión
+    await connection.beginTransaction(); // Iniciar transacción
+
+    // 🔽 2. Modificar consulta para obtener email y clabe y bloquear la fila
+    const [cuentaRows] = await connection.query(
+      `SELECT c.saldo, u.email, c.clabe 
+       FROM cuenta c
+       JOIN pertenece p ON c.idCuenta = p.idCuenta
+       JOIN usuario u ON p.idUsuario = u.idUsuario
+       WHERE c.idCuenta = ?
+       FOR UPDATE`, // Bloquear para la transacción
+      [idCuenta]
+    );
 
     if (cuentaRows.length === 0) {
+      await connection.rollback();
+      connection.release();
       return res.status(404).json({ error: "Cuenta no encontrada" });
     }
 
-    const saldoActual = cuentaRows[0].saldo;
+    const { saldo, email, clabe } = cuentaRows[0]; // 🔽 Obtener datos
 
-    if (saldoActual < monto) {
+    if (saldo < monto) {
+      await connection.rollback();
+      connection.release();
       return res.status(400).json({ error: "Saldo insuficiente" });
     }
 
     // 🔹 Actualizar saldo
-    await pool.query("UPDATE cuenta SET saldo = saldo - ? WHERE idCuenta = ?", [monto, idCuenta]);
+    await connection.query(
+      "UPDATE cuenta SET saldo = saldo - ? WHERE idCuenta = ?",
+      [monto, idCuenta]
+    );
 
     // 🔹 Registrar movimiento con fechaHora
-    await pool.query(
+    const tipoMov = `PAGO_SERVICIO: ${referencia || 'Servicio'}`; // 🔽 Usamos la referencia
+    await connection.query(
       `INSERT INTO movimiento (idCuenta, monto, tipoMovimiento, fechaHora)
        VALUES (?, ?, ?, NOW())`,
-      [idCuenta, -monto, `PAGO_SERVICIO: ${referencia}`]
+      [idCuenta, -monto, tipoMov]
     );
+
+    await connection.commit(); // Commit de la transacción
+    connection.release(); // Liberar conexión
+
+    // 🔽 3. Enviar correo (fuera de la transacción)
+    if (email) {
+      // 🔽 Usamos tipoMov dinámico
+      await enviarCorreoMovimiento(email, tipoMov, monto, clabe); 
+    }
 
     res.json({
       message: `✅ Pago de ${referencia || "servicio"} realizado correctamente.`,
-      nuevoSaldo: saldoActual - monto
+      nuevoSaldo: saldo - monto,
     });
   } catch (error) {
+    if (connection) {
+      await connection.rollback(); // Rollback en caso de error
+      connection.release();
+    }
     console.error("❌ Error en pago de servicio:", error);
     res.status(500).json({ error: "Error al procesar el pago" });
   }
@@ -53,14 +89,43 @@ router.post("/servicio", async (req, res) => {
  */
 router.post("/prestamo", async (req, res) => {
   const { idCuenta, idSolicitud, monto } = req.body;
+  let connection; // Definir connection
 
   if (!idCuenta || !idSolicitud || !monto || monto <= 0) {
     return res.status(400).json({ error: "Datos de pago de préstamo inválidos" });
   }
 
   try {
+    connection = await pool.getConnection(); // Obtener conexión
+    await connection.beginTransaction(); // Iniciar transacción
+
+    // 🔽 2. Modificar consulta para obtener email y clabe
+    const [cuentaRows] = await connection.query(
+      `SELECT c.saldo, u.email, c.clabe 
+       FROM cuenta c
+       JOIN pertenece p ON c.idCuenta = p.idCuenta
+       JOIN usuario u ON p.idUsuario = u.idUsuario
+       WHERE c.idCuenta = ?
+       FOR UPDATE`, // Bloquear para la transacción
+      [idCuenta]
+    );
+
+    if (cuentaRows.length === 0) {
+      await connection.rollback();
+      connection.release();
+      return res.status(404).json({ error: "Cuenta no encontrada" });
+    }
+
+    const { saldo, email, clabe } = cuentaRows[0]; // 🔽 Obtener datos
+
+    if (saldo < monto) {
+      await connection.rollback();
+      connection.release();
+      return res.status(400).json({ error: "Saldo insuficiente" });
+    }
+
     // Verificar que la solicitud existe y está aprobada
-    const [solicitudRows] = await pool.query(
+    const [solicitudRows] = await connection.query(
       `SELECT s.idSolicitud, s.montoTotal, s.tipo, s.estado
        FROM solicitud s
        WHERE s.idSolicitud = ? AND s.idCuenta = ?`,
@@ -68,52 +133,63 @@ router.post("/prestamo", async (req, res) => {
     );
 
     if (solicitudRows.length === 0) {
+      await connection.rollback();
+      connection.release();
       return res.status(404).json({ error: "Solicitud de préstamo no encontrada" });
     }
 
     if (solicitudRows[0].estado !== "APROBADA") {
+      await connection.rollback();
+      connection.release();
       return res.status(400).json({ error: "La solicitud no está aprobada" });
     }
 
-    // Verificar saldo
-    const [cuentaRows] = await pool.query("SELECT saldo FROM cuenta WHERE idCuenta = ?", [idCuenta]);
-
-    if (cuentaRows.length === 0) {
-      return res.status(404).json({ error: "Cuenta no encontrada" });
-    }
-
-    const saldoActual = cuentaRows[0].saldo;
-
-    if (saldoActual < monto) {
-      return res.status(400).json({ error: "Saldo insuficiente" });
-    }
-
     // Actualizar saldo
-    await pool.query("UPDATE cuenta SET saldo = saldo - ? WHERE idCuenta = ?", [monto, idCuenta]);
+    await connection.query(
+      "UPDATE cuenta SET saldo = saldo - ? WHERE idCuenta = ?",
+      [monto, idCuenta]
+    );
 
     // Registrar en PagosSolicitud
-    await pool.query(
+    await connection.query(
       `INSERT INTO PagosSolicitud (idSolicitud, monto, fechaHora)
        VALUES (?, ?, NOW())`,
       [idSolicitud, monto]
     );
 
     // Registrar movimiento
-    await pool.query(
+    const tipoMov = `PAGO_PRESTAMO: ${solicitudRows[0].tipo}`; // 🔽 Usamos el tipo de préstamo
+    await connection.query(
       `INSERT INTO movimiento (idCuenta, monto, tipoMovimiento, fechaHora)
        VALUES (?, ?, ?, NOW())`,
-      [idCuenta, -monto, `PAGO_PRESTAMO: ${solicitudRows[0].tipo}`]
+      [idCuenta, -monto, tipoMov]
     );
+
+    await connection.commit(); // Commit de la transacción
+    connection.release(); // Liberar conexión
+
+    // 🔽 3. Enviar correo (fuera de la transacción)
+    if (email) {
+      // 🔽 Usamos tipoMov dinámico
+      await enviarCorreoMovimiento(email, tipoMov, monto, clabe);
+    }
 
     res.json({
       message: `✅ Pago de préstamo realizado correctamente.`,
-      nuevoSaldo: saldoActual - monto
+      nuevoSaldo: saldo - monto,
     });
   } catch (error) {
+    if (connection) {
+      await connection.rollback(); // Rollback en caso de error
+      connection.release();
+    }
     console.error("❌ Error en pago de préstamo:", error);
     res.status(500).json({ error: "Error al procesar el pago de préstamo" });
   }
 });
+
+// ... (el resto del archivo /historial y /prestamos queda igual) ...
+// (Lo incluyo para que sea el archivo completo)
 
 /**
  * 🔹 GET /api/pagos/historial/:idUsuario

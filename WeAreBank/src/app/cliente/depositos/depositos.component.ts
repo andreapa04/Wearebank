@@ -1,8 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { safeLocalStorage } from '../../utils/storage.util';
 
 @Component({
   selector: 'app-depositos',
@@ -11,10 +10,9 @@ import { safeLocalStorage } from '../../utils/storage.util';
   templateUrl: './depositos.component.html',
   styleUrls: ['./depositos.component.css']
 })
-export class DepositosComponent implements OnInit {
-  cuentas: any[] = [];
-  idCuenta: number | null = null;
-  cuentaDestino: number | null = null;
+export class DepositosComponent {
+  // 🔽 Propiedades de cuenta origen eliminadas
+  cuentaDestino: string = ''; // 🔽 Se cambió a string para aceptar CLABE
   monto: number = 0;
   concepto: string = '';
   mensaje: string = '';
@@ -22,33 +20,46 @@ export class DepositosComponent implements OnInit {
 
   constructor(private http: HttpClient) {}
 
-  ngOnInit() {
-    const ls = safeLocalStorage();
-    const usuario = JSON.parse(ls.getItem('usuario') || 'null');
-    if (usuario && usuario.id) this.cargarCuentas(usuario.id);
-    else this.error = 'Inicia sesión para depositar';
-  }
-
-  cargarCuentas(idUsuario:number) {
-    this.http.get<any[]>(`http://localhost:3000/api/transferencias/mis-cuentas/${idUsuario}`)
-      .subscribe({ next: res => this.cuentas = res, error: err => this.error = err.error?.error || 'Error' });
-  }
+  // 🔽 ngOnInit y cargarCuentas() eliminados porque no se necesitan
 
   depositar() {
-    if (!this.idCuenta || !this.monto) { this.error = 'Selecciona cuenta y monto'; return; }
-    this.http.post('http://localhost:3000/api/transferencias/deposito', { idCuenta: this.idCuenta, monto: this.monto, concepto: this.concepto, cuentaDestino: this.cuentaDestino,})
+    this.error = '';
+    this.mensaje = '';
+
+    if (!this.cuentaDestino || !this.monto || this.monto <= 0) { 
+      this.error = 'Debes ingresar una cuenta destino y un monto válido.'; 
+      return; 
+    }
+    
+    // 🔽 Payload simplificado. El backend ya esperaba estos campos.
+    const payload = { 
+      cuentaDestino: this.cuentaDestino,
+      monto: this.monto, 
+      concepto: this.concepto
+    };
+
+    this.http.post('http://localhost:3000/api/transferencias/deposito', payload)
       .subscribe({
         next: (res:any) => {
-          this.mensaje = res.message || 'Depósito realizado';
+          this.mensaje = res.message || 'Depósito realizado exitosamente';
           alert('Depósito realizado exitosamente');
-          this.cargarCuentas(JSON.parse(safeLocalStorage().getItem('usuario') || 'null')?.id);
-          this.idCuenta = null; this.monto = 0; this.concepto = ''; 
+          // 🔽 Limpiar campos
+          this.cuentaDestino = ''; 
+          this.monto = 0; 
+          this.concepto = ''; 
         },
-        error: err => this.error = err.error?.error || 'Error en depósito'
+        error: err => {
+          this.error = err.error?.error || 'Error en depósito. Verifica la cuenta destino.';
+          this.mensaje = '';
+        }
       });
   }
 
   cancelar() {
-    this.idCuenta = null; this.monto = 0; this.concepto = ''; this.error = ''; this.mensaje = '';
+    this.cuentaDestino = ''; 
+    this.monto = 0; 
+    this.concepto = ''; 
+    this.error = ''; 
+    this.mensaje = '';
   }
 }
