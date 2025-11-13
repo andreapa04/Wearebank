@@ -2,10 +2,15 @@
 
 <div class="tabs">
   <button [class.active]="vista === 'cartera'" (click)="vista = 'cartera'">Cartera de Cuentas</button>
-  <button [class.active]="vista === 'agregar'" (click)="vista = 'agregar'">Agregar Nuevo Cliente</button>
+  
+  <button 
+    *ngIf="authService.tienePermiso('CREAR_CLIENTE')"
+    [class.active]="vista === 'agregar'" 
+    (click)="vista = 'agregar'">
+    Agregar Nuevo Cliente
+  </button>
 </div>
 
-<!-- VISTA: Cartera de Cuentas -->
 <div *ngIf="vista === 'cartera'" class="vista-container">
   <h3>Cartera de Cuentas</h3>
   <input type="text" [(ngModel)]="filtro" placeholder="Filtrar por nombre, email o CLABE..." class="filtro">
@@ -18,7 +23,7 @@
         <th>CLABE</th>
         <th>Tipo</th>
         <th>Saldo</th>
-        <th>Acciones</th>
+        <th *ngIf="authService.tienePermiso('ELIMINAR_CUENTA')">Acciones</th>
       </tr>
     </thead>
     <tbody>
@@ -28,7 +33,8 @@
         <td>{{ c.clabe }}</td>
         <td>{{ c.tipoCuenta }}</td>
         <td>{{ c.saldo | currency }}</td>
-        <td>
+        
+        <td *ngIf="authService.tienePermiso('ELIMINAR_CUENTA')">
           <button class="btn-peligro" (click)="eliminarCuenta(c.idCuenta)">Cerrar Cuenta</button>
         </td>
       </tr>
@@ -36,12 +42,10 @@
   </table>
 </div>
 
-<!-- VISTA: Agregar Cliente -->
-<div *ngIf="vista === 'agregar'" class="vista-container">
+<div *ngIf="vista === 'agregar' && authService.tienePermiso('CREAR_CLIENTE')" class="vista-container">
   <h3>Formulario de Nuevo Cliente</h3>
   <p>Al agregar un cliente, se asignará una cuenta de ahorro inicial y una tarjeta de débito asociada.</p>
   
-  <!-- Formulario idéntico al de registro -->
   <form (ngSubmit)="agregarCliente()">
     <div class="form-grid">
       <div class="form-group">
@@ -86,11 +90,11 @@
       </div>
       <div class="form-group full-width">
         <label>Dirección:</label>
-        <input [(ngModel)]="formCliente.direccion" name="direccion" required>
+        <input [(ngModel)]="formCliente.direccion" name="direccion" required placeholder="Calle, Número, Colonia, Ciudad, Estado, CP">
       </div>
       <div class="form-group">
         <label>Pregunta de Seguridad:</label>
-        <input value="¿Cuál es tu comida favorita?" disabled>
+        <input [(ngModel)]="formCliente.preguntaSeguridad" name="preguntaSeguridad" required>
       </div>
       <div class="form-group">
         <label>Respuesta de Seguridad:</label>

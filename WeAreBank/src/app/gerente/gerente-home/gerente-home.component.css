@@ -1,6 +1,8 @@
 /* Estilos cohesivos basados en el tema de ejecutivos */
 .gerente-container {
-  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .vista-container {
@@ -8,19 +10,20 @@
   padding: 1.5rem;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  margin-bottom: 2rem;
 }
 
 h2, h3 {
   color: #31296E;
   border-bottom: 2px solid #716FAF;
   padding-bottom: 0.5rem;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
 }
 
 hr {
   border: none;
   border-top: 1px solid #ddd;
-  margin: 2rem 0;
+  margin: 1rem 0;
 }
 
 /* Estilos de Formulario */
@@ -48,7 +51,7 @@ hr {
   border-radius: 6px;
   font-size: 1rem;
 }
-.form-group input:disabled {
+.form-group input:disabled, .form-group input[disabled] {
   background-color: #f4f4f4;
 }
 
@@ -56,6 +59,7 @@ hr {
   font-size: 0.9rem;
   color: #555;
   font-style: italic;
+  margin-top: -1rem;
 }
 
 /* Estilos de Tabla */
@@ -66,9 +70,10 @@ hr {
 }
 .ejecutivos-table th, 
 .ejecutivos-table td {
-  padding: 0.75rem;
+  padding: 0.75rem 1rem;
   border-bottom: 1px solid #eee;
   text-align: left;
+  vertical-align: middle;
 }
 .ejecutivos-table th {
   background-color: #f9f9f9;
@@ -109,12 +114,13 @@ button {
   font-weight: 600;
   font-size: 0.8rem;
   color: white;
+  text-transform: uppercase;
 }
 .status.activo {
   background-color: #28a745;
 }
 .status.inactivo {
-  background-color: #dc3545;
+  background-color: #777;
 }
 
 /* Mensajes */

@@ -10,22 +10,31 @@
       <th>Email</th>
       <th>Teléfono</th>
       <th>RFC</th>
-      <th>Acción</th>
+      <th>Acciones</th>
     </tr>
   </thead>
   <tbody>
     <ng-container *ngFor="let c of clientesFiltrados">
-      <tr (click)="verDetalle(c)" class="fila-cliente">
-        <td>{{ c.nombre }} {{ c.apellidoP }} {{ c.apellidoM }}</td>
-        <td>{{ c.email }}</td>
-        <td>{{ c.telefono }}</td>
-        <td>{{ c.RFC }}</td>
+      <tr class="fila-cliente">
+        <td (click)="verDetalle(c)">{{ c.nombre }} {{ c.apellidoP }} {{ c.apellidoM }}</td>
+        <td (click)="verDetalle(c)">{{ c.email }}</td>
+        <td (click)="verDetalle(c)">{{ c.telefono }}</td>
+        <td (click)="verDetalle(c)">{{ c.RFC }}</td>
         <td>
-          <button>{{ clienteSeleccionado?.idUsuario === c.idUsuario ? 'Ocultar' : 'Ver Detalle' }}</button>
+          <button (click)="verDetalle(c)">
+            {{ clienteSeleccionado?.idUsuario === c.idUsuario ? 'Ocultar' : 'Ver Detalle' }}
+          </button>
+          
+          <button 
+            *ngIf="authService.tienePermiso('MODIFICAR_DATOS_CLIENTE')" 
+            (click)="modificarCliente(c)" 
+            class="btn-secundario"
+            style="margin-left: 8px;">
+            Modificar
+          </button>
         </td>
       </tr>
       
-      <!-- Detalle desplegable -->
       <tr *ngIf="clienteSeleccionado?.idUsuario === c.idUsuario" class="fila-detalle">
         <td colspan="5">
           <div *ngIf="cargandoDetalle">Cargando...</div>
@@ -38,7 +47,7 @@
                   <th>CLABE</th>
                   <th>Tipo</th>
                   <th>Saldo</th>
-                  <th>Acción</th>
+                  <th *ngIf="authService.tienePermiso('GENERAR_ESTADO_CUENTA')">Acción</th>
                 </tr>
               </thead>
               <tbody>
@@ -46,7 +55,7 @@
                   <td>{{ cuenta.clabe }}</td>
                   <td>{{ cuenta.tipoCuenta }}</td>
                   <td>{{ cuenta.saldo | currency }}</td>
-                  <td>
+                  <td *ngIf="authService.tienePermiso('GENERAR_ESTADO_CUENTA')">
                     <button class="btn-secundario" (click)="descargarEstadoCuenta(cuenta.clabe)">
                       Descargar PDF
                     </button>

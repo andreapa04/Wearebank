@@ -68,7 +68,14 @@ router.post("/ejecutivos", async (req, res) => {
 
     const idUsuarioNuevo = result.insertId;
 
-    // Registrar en auditoría (Asumimos que el gerente es el id 1, idealmente se pasaría el ID del gerente)
+    // 🔽 ¡IMPORTANTE! Asignar por defecto todos los permisos al nuevo ejecutivo
+    await pool.query(
+      `INSERT INTO Usuario_Permiso (idUsuario, idPermiso)
+       SELECT ?, idPermiso FROM Permisos`,
+      [idUsuarioNuevo]
+    );
+
+    // Registrar en auditoría (Asumimos que el gerente es el id 1)
     await pool.query(
       `INSERT INTO Auditoria (
          idUsuarioResponsable, tipoEvento, descripcion, idEntidadAfectada, tablaAfectada
@@ -80,7 +87,7 @@ router.post("/ejecutivos", async (req, res) => {
     );
 
     res.status(201).json({ 
-      message: "Ejecutivo creado exitosamente", 
+      message: "Ejecutivo creado exitosamente y con permisos por defecto.", 
       idUsuario: idUsuarioNuevo
     });
 
@@ -95,12 +102,11 @@ router.post("/ejecutivos", async (req, res) => {
 
 /**
  * 🔹 DELETE /api/gerente/ejecutivos/:idUsuario
- * Elimina un ejecutivo (cambia estatus a 'INACTIVO' para no perder historial)
+ * Desactiva un ejecutivo
  */
 router.delete("/ejecutivos/:idUsuario", async (req, res) => {
   const { idUsuario } = req.params;
   try {
-    // Es mejor un borrado lógico (cambiar estatus) que un borrado físico
     await pool.query(
       "UPDATE usuario SET estatus = 'INACTIVO' WHERE idUsuario = ? AND idRol = 2",
       [idUsuario]
@@ -114,7 +120,8 @@ router.delete("/ejecutivos/:idUsuario", async (req, res) => {
 
 
 // =================================================================
-// GESTIÓN DE PERMISOS (PARA EL ROL 'EJECUTIVO' = 2)
+// GESTIÓN DE PERMISOS POR EJECUTIVO (idRol = 2)
+// ¡MODIFICADO!
 // =================================================================
 
 /**
@@ -134,30 +141,34 @@ router.get("/permisos/catalogo", async (req, res) => {
 });
 
 /**
- * 🔹 GET /api/gerente/permisos/rol/2
- * Obtiene los IDs de los permisos actuales del ROL Ejecutivo (idRol = 2).
+ * 🔹 GET /api/gerente/permisos/ejecutivo/:idUsuario
+ * Obtiene los IDs de los permisos actuales de un Ejecutivo específico.
+ * ¡NUEVO!
  */
-router.get("/permisos/rol/2", async (req, res) => {
+router.get("/permisos/ejecutivo/:idUsuario", async (req, res) => {
+  const { idUsuario } = req.params;
   try {
     const [permisos] = await pool.query(
-      "SELECT idPermiso FROM Rol_Permiso WHERE idRol = 2"
+      "SELECT idPermiso FROM Usuario_Permiso WHERE idUsuario = ?",
+      [idUsuario]
     );
     // Devuelve un array de IDs: [1, 3]
     res.json(permisos.map(p => p.idPermiso)); 
   } catch (error) {
-    console.error("Error al cargar permisos del rol:", error);
-    res.status(500).json({ error: "Error al cargar permisos del rol" });
+    console.error("Error al cargar permisos del usuario:", error);
+    res.status(500).json({ error: "Error al cargar permisos del usuario" });
   }
 });
 
 /**
- * 🔹 PUT /api/gerente/permisos/rol/2
- * Actualiza la lista completa de permisos para el ROL Ejecutivo (idRol = 2).
+ * 🔹 PUT /api/gerente/permisos/ejecutivo/:idUsuario
+ * Actualiza la lista completa de permisos para un Ejecutivo específico.
  * Recibe: { permisos: [1, 3, 4] }
+ * ¡MODIFICADO!
  */
-router.put("/permisos/rol/2", async (req, res) => {
+router.put("/permisos/ejecutivo/:idUsuario", async (req, res) => {
+  const { idUsuario } = req.params;
   const { permisos } = req.body; // Array de idPermiso
-  const idRol = 2;
   let connection;
 
   if (!Array.isArray(permisos)) {
@@ -168,21 +179,21 @@ router.put("/permisos/rol/2", async (req, res) => {
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
-    // 1. Borrar todos los permisos actuales del rol
-    await connection.query("DELETE FROM Rol_Permiso WHERE idRol = ?", [idRol]);
+    // 1. Borrar todos los permisos actuales del usuario
+    await connection.query("DELETE FROM Usuario_Permiso WHERE idUsuario = ?", [idUsuario]);
 
     // 2. Insertar los nuevos permisos (si hay alguno)
     if (permisos.length > 0) {
-      const values = permisos.map(idPermiso => [idRol, idPermiso]);
+      const values = permisos.map(idPermiso => [idUsuario, idPermiso]);
       await connection.query(
-        "INSERT INTO Rol_Permiso (idRol, idPermiso) VALUES ?",
+        "INSERT INTO Usuario_Permiso (idUsuario, idPermiso) VALUES ?",
         [values]
       );
     }
 
     await connection.commit();
     connection.release();
-    res.json({ message: "Permisos del rol Ejecutivo actualizados" });
+    res.json({ message: "Permisos del ejecutivo actualizados" });
 
   } catch (error) {
     if (connection) {

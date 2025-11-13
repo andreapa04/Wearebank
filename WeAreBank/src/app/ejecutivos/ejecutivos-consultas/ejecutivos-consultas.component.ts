@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-// 1. Importar Módulos
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../services/auth.service'; // 🔽 1. Importar AuthService
 
 interface Cliente {
   idUsuario: number;
@@ -30,7 +30,6 @@ interface Movimiento {
 @Component({
   selector: 'app-ejecutivos-consultas',
   standalone: true,
-  // 2. Importar NgModules
   imports: [CommonModule, HttpClientModule, FormsModule],
   templateUrl: './ejecutivos-consultas.component.html',
   styleUrls: ['./ejecutivos-consultas.component.css']
@@ -45,14 +44,16 @@ export class EjecutivosConsultasComponent implements OnInit {
   
   cargandoDetalle: boolean = false;
 
-  // 3. Inyectar Servicio
-  constructor(private http: HttpClient) {}
+  // 🔽 2. Inyectar AuthService y hacerlo PÚBLICO
+  constructor(
+    private http: HttpClient,
+    public authService: AuthService // Poner 'public'
+  ) {}
 
   ngOnInit(): void {
     this.http.get<Cliente[]>('http://localhost:3000/api/ejecutivo/clientes-consulta')
       .subscribe({
         next: (data: Cliente[]) => this.clientes = data,
-        // 4. Tipar error
         error: (err: any) => console.error('Error al cargar clientes', err)
       });
   }
@@ -84,13 +85,11 @@ export class EjecutivosConsultasComponent implements OnInit {
 
     this.http.get<any>(`http://localhost:3000/api/ejecutivo/cliente-detalle/${cliente.idUsuario}`)
       .subscribe({
-        // 5. Tipar data
         next: (data: any) => {
           this.cuentasCliente = data.cuentas;
           this.movimientosCliente = data.movimientos;
           this.cargandoDetalle = false;
         },
-        // 6. Tipar error
         error: (err: any) => {
           console.error('Error al cargar detalle', err);
           this.cargandoDetalle = false;
@@ -99,6 +98,12 @@ export class EjecutivosConsultasComponent implements OnInit {
   }
 
   descargarEstadoCuenta(clabe: string): void {
+    // 🔽 3. Validar permiso
+    if (!this.authService.tienePermiso('GENERAR_ESTADO_CUENTA')) {
+      alert('No tienes permiso para generar estados de cuenta.');
+      return;
+    }
+
     if (!clabe) return;
 
     this.http.get(`http://localhost:3000/api/consultas/estado-cuenta-pdf/${clabe}`, { responseType: 'blob' })
@@ -111,8 +116,17 @@ export class EjecutivosConsultasComponent implements OnInit {
           link.click();
           window.URL.revokeObjectURL(url);
         },
-        // 7. Tipar error
         error: (err: any) => alert('Error al generar el PDF. Es posible que la cuenta no tenga movimientos.')
       });
+  }
+  
+  // 🔽 4. (Opcional) Añadir función para modificar datos (si se implementara el modal)
+  modificarCliente(cliente: Cliente): void {
+    if (!this.authService.tienePermiso('MODIFICAR_DATOS_CLIENTE')) {
+      alert('No tienes permiso para modificar datos de clientes.');
+      return;
+    }
+    // Aquí iría la lógica para abrir un modal de edición
+    alert('Acción "Modificar Datos" permitida (lógica de modal no implementada).');
   }
 }

@@ -20,6 +20,14 @@
   border-bottom-color: #716FAF;
 }
 
+h2 {
+  color: #31296E;
+  border-bottom: 2px solid #716FAF;
+  padding-bottom: 0.5rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
 .vista-container {
   background-color: #fff;
   padding: 1.5rem;
@@ -34,9 +42,10 @@ table {
   margin-top: 1rem;
 }
 th, td {
-  padding: 0.75rem;
+  padding: 0.75rem 1rem;
   border-bottom: 1px solid #eee;
   text-align: left;
+  vertical-align: middle;
 }
 th {
   background-color: #f9f9f9;
@@ -63,11 +72,17 @@ button {
   background-color: #f8d7da;
   color: #721c24;
 }
+.btn-peligro:hover {
+  background-color: #f5c6cb;
+}
 .btn-principal {
   background-color: #716FAF;
   color: white;
   padding: 0.75rem 1.5rem;
   font-size: 1rem;
+}
+.btn-principal:hover {
+  background-color: #5D5B9D;
 }
 
 /* Estilos de Formulario */
@@ -95,7 +110,7 @@ button {
   border-radius: 6px;
   font-size: 1rem;
 }
-.form-group input:disabled {
+.form-group input:disabled, .form-group input[disabled] {
   background-color: #f4f4f4;
 }
 

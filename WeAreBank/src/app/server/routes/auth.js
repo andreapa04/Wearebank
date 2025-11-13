@@ -6,6 +6,7 @@ const router = express.Router();
 
 /**
  * LOGIN
+ * ¡MODIFICADO! Ahora incluye la carga de permisos para roles 1 y 2.
  */
 router.post("/login", async (req, res) => {
   try {
@@ -13,9 +14,8 @@ router.post("/login", async (req, res) => {
     if (!email || !contrasenia)
       return res.status(400).json({ error: "Email y contraseña son requeridos" });
 
-    // 🔹 Traemos también el estatus del usuario
     const [rows] = await pool.query(
-      "SELECT idUsuario, nombre, apellidoP, apellidoM, idRol, contrasenia, intentosFallidos, bloqueado, estatus FROM usuario WHERE email = ?",
+      "SELECT idUsuario, nombre, apellidoP, apellidoM, idRol, contrasenia, intentosFallidos, bloqueado FROM usuario WHERE email = ?",
       [email]
     );
 
@@ -24,65 +24,60 @@ router.post("/login", async (req, res) => {
 
     const user = rows[0];
 
-    // 🔹 Validar primero si el usuario está inactivo
-    if (user.estatus === "INACTIVO") {
-      return res
-        .status(403)
-        .json({
-          error: "Tu cuenta ha sido desactivada. Por favor, contacta a soporte."
-        });
-    }
-
-    // 🔹 Validar si la cuenta está bloqueada
     if (user.bloqueado)
-      return res
-        .status(403)
-        .json({ error: "Cuenta bloqueada. Acude con un ejecutivo." });
+      return res.status(403).json({ error: "Cuenta bloqueada. Acude con un ejecutivo." });
 
-    // 🔹 Validar contraseña
     const coincide = await bcrypt.compare(contrasenia, user.contrasenia);
 
     if (!coincide) {
       const nuevosIntentos = user.intentosFallidos + 1;
-
       if (nuevosIntentos >= 3) {
-        await pool.query(
-          "UPDATE usuario SET bloqueado = TRUE, intentosFallidos = ? WHERE idUsuario = ?",
-          [nuevosIntentos, user.idUsuario]
-        );
-        return res
-          .status(403)
-          .json({ error: "Cuenta bloqueada tras 3 intentos fallidos." });
+        await pool.query("UPDATE usuario SET bloqueado = TRUE, intentosFallidos = ? WHERE idUsuario = ?", [nuevosIntentos, user.idUsuario]);
+        return res.status(403).json({ error: "Cuenta bloqueada tras 3 intentos fallidos." });
       } else {
-        await pool.query(
-          "UPDATE usuario SET intentosFallidos = ? WHERE idUsuario = ?",
-          [nuevosIntentos, user.idUsuario]
-        );
-        return res
-          .status(401)
-          .json({ error: `Contraseña incorrecta. Intento ${nuevosIntentos} de 3.` });
+        await pool.query("UPDATE usuario SET intentosFallidos = ? WHERE idUsuario = ?", [nuevosIntentos, user.idUsuario]);
+        return res.status(401).json({ error: `Contraseña incorrecta. Intento ${nuevosIntentos} de 3.` });
       }
     }
 
-    // 🔹 Si la contraseña es correcta, reiniciamos los intentos fallidos
-    await pool.query(
-      "UPDATE usuario SET intentosFallidos = 0 WHERE idUsuario = ?",
-      [user.idUsuario]
-    );
+    await pool.query("UPDATE usuario SET intentosFallidos = 0 WHERE idUsuario = ?", [user.idUsuario]);
 
-    // 🔹 Respuesta exitosa
+    let permisos = [];
+    
+    // Si es Gerente (1) o Ejecutivo (2), cargamos sus permisos
+    if (user.idRol === 1 || user.idRol === 2) {
+      let queryPermisos = '';
+
+      if (user.idRol === 1) {
+        // El Gerente (Rol 1) tiene TODOS los permisos
+        queryPermisos = `SELECT nombrePermiso FROM Permisos`;
+      } else {
+        // El Ejecutivo (Rol 2) tiene permisos específicos de Usuario_Permiso
+        queryPermisos = `
+          SELECT p.nombrePermiso
+          FROM Usuario_Permiso up
+          JOIN Permisos p ON up.idPermiso = p.idPermiso
+          WHERE up.idUsuario = ?
+        `;
+      }
+
+      const [permisosRows] = await pool.query(queryPermisos, [user.idUsuario]);
+      permisos = permisosRows.map(p => p.nombrePermiso);
+    }
+
     res.json({
-      message: " Login exitoso",
+      message: "✅ Login exitoso",
       user: {
         id: user.idUsuario,
         nombre: user.nombre,
         apellidoP: user.apellidoP,
         apellidoM: user.apellidoM,
         rol: user.idRol,
+        permisos: permisos // 🔽 Array de permisos
       },
     });
   } catch (err) {
-    console.error(" Error en login:", err);
+    console.error("Error en login:", err);
     res.status(500).json({ error: "Error en el servidor" });
   }
 });
@@ -99,13 +94,10 @@ router.post("/recuperar", async (req, res) => {
   if (rows.length === 0)
     return res.status(404).json({ error: "Correo no encontrado" });
 
-  res.json({
-    preguntaSeguridad: rows[0].preguntaSeguridad,
-    bloqueado: rows[0].bloqueado
-  });
+  res.json({ preguntaSeguridad: rows[0].preguntaSeguridad, bloqueado: rows[0].bloqueado});
 });
 
-// Verificar respuesta de seguridad
+// Verificar respuesta
 router.post("/verificar-respuesta", async (req, res) => {
   const { email, respuesta } = req.body;
   const [rows] = await pool.query(
@@ -126,14 +118,14 @@ router.post("/verificar-respuesta", async (req, res) => {
 router.post("/reset-password", async (req, res) => {
   const { email, nuevaContrasenia } = req.body;
   const hash = await bcrypt.hash(nuevaContrasenia, 10);
-  await pool.query(
-    "UPDATE usuario SET contrasenia = ?, intentosFallidos = 0, bloqueado = FALSE WHERE email = ?",
-    [hash, email]
-  );
+  await pool.query("UPDATE usuario SET contrasenia = ?, intentosFallidos = 0, bloqueado = FALSE WHERE email = ?", [hash, email]);
   res.json({ message: "Contraseña actualizada correctamente" });
 });
 
-// Registro de nuevo usuario
+/**
+ * REGISTRO DE CLIENTES (Rol 3)
+ * Llama al Stored Procedure
+ */
 router.post("/register", async (req, res) => {
   try {
     const {
@@ -160,7 +152,7 @@ router.post("/register", async (req, res) => {
     });
 
   } catch (error) {
-    console.error(" Error en /register:", error);
+    console.error("❌ Error en /register:", error);
     res.status(500).json({ message: "Error al registrar el usuario." });
   }
 });

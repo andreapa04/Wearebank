@@ -1,10 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-// 1. Importar Módulos
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-// 2. Importar Servicio
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../services/auth.service'; // 🔽 1. Importar AuthService
 
 interface CarteraCuenta {
   idCuenta: number;
@@ -21,7 +19,6 @@ interface CarteraCuenta {
 @Component({
   selector: 'app-ejecutivos-cuentas',
   standalone: true,
-  // 3. Importar NgModules
   imports: [CommonModule, HttpClientModule, FormsModule],
   templateUrl: './ejecutivos-cuentas.component.html',
   styleUrls: ['./ejecutivos-cuentas.component.css']
@@ -31,7 +28,6 @@ export class EjecutivosCuentasComponent implements OnInit {
   cartera: CarteraCuenta[] = [];
   filtro: string = '';
 
-  // Formulario de nuevo cliente
   formCliente = {
     nombre: '',
     apellidoP: '',
@@ -49,10 +45,10 @@ export class EjecutivosCuentasComponent implements OnInit {
   };
   mensaje: string = '';
 
-  // 4. Inyectar Servicios (HttpClient y AuthService)
+  // 🔽 2. Inyectar AuthService y hacerlo PÚBLICO
   constructor(
     private http: HttpClient, 
-    private authService: AuthService
+    public authService: AuthService // Poner 'public'
   ) {}
 
   ngOnInit(): void {
@@ -63,7 +59,6 @@ export class EjecutivosCuentasComponent implements OnInit {
     this.http.get<CarteraCuenta[]>('http://localhost:3000/api/ejecutivo/cartera-cuentas')
       .subscribe({
         next: (data) => this.cartera = data,
-        // 5. Tipar error
         error: (err: any) => console.error('Error al cargar cartera', err)
       });
   }
@@ -89,26 +84,22 @@ export class EjecutivosCuentasComponent implements OnInit {
           this.mensaje = 'Cuenta eliminada exitosamente.';
           this.cargarCartera();
         },
-        // 6. Tipar error
         error: (err: any) => this.mensaje = 'Error al eliminar la cuenta.'
       });
   }
 
   agregarCliente(): void {
     this.mensaje = 'Procesando...';
-    // 7. Usar el servicio inyectado
+    // 🔽 3. Usar el endpoint de registro de authService
     this.authService.register(this.formCliente).subscribe({
-      // 8. Tipar respuesta
       next: (res: any) => {
-        this.mensaje = ' Cliente y cuenta creados exitosamente.';
-        // Reiniciar formulario (simple)
+        this.mensaje = '✅ Cliente y cuenta creados exitosamente.';
         this.formCliente = {
           nombre: '', apellidoP: '', apellidoM: '', direccion: '', telefono: '',
           email: '', contrasenia: '', fechaNacimiento: '', CURP: '', RFC: '',
           INE: '', preguntaSeguridad: '¿Cuál es tu comida favorita?', respuestaSeguridad: ''
         };
       },
-      // 9. Tipar error
       error: (err: any) => {
         this.mensaje = err.error?.message || 'Error al crear el cliente.';
       }

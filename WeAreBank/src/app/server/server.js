@@ -32,6 +32,7 @@ app.use("/api/gerente", gerenteRoutes);
 
 // 🔹 Endpoint de prueba (verificar servidor corriendo)
 app.get("/", (req, res) => {
+  // Corregido: espaciado normal
   res.send("Servidor corriendo correctamente 🚀");
 });
 

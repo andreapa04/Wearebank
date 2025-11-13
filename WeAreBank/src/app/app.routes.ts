@@ -12,7 +12,7 @@ import { GerenteHomeComponent } from './gerente/gerente-home/gerente-home.compon
 import { AutorizacionesComponent } from './gerente/autorizaciones/autorizaciones.component';
 import { CuentasComponent } from './gerente/cuentas/cuentas.component';
 import { GestionPermisosComponent } from './gerente/gestion-permisos/gestion-permisos.component';
-import { SolicitudesComponent } from './gerente/solicitudes/solicitudes.component';
+//import { SolicitudesComponent } from './gerente/solicitudes/solicitudes.component';
 import { EjecutivosComponent } from './ejecutivos/ejecutivos.component';
 import { AuthGuard } from './guards/auth.guard';
 import { RecuperarComponent } from './recuperar/recuperar.component';
@@ -48,7 +48,7 @@ export const routes: Routes = [
   { path: 'gerente/autorizaciones', component: AutorizacionesComponent, canActivate: [AuthGuard] },
   { path: 'gerente/cuentas', component: CuentasComponent, canActivate: [AuthGuard] },
   { path: 'gerente/gestion-permisos', component: GestionPermisosComponent, canActivate: [AuthGuard] },
-  { path: 'gerente/solicitudes', component: SolicitudesComponent, canActivate: [AuthGuard] },
+  //{ path: 'gerente/solicitudes', component: SolicitudesComponent, canActivate: [AuthGuard] },
 
   // Rutas de ejecutivo (rol = 1)
   {

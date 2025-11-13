@@ -9,9 +9,15 @@ interface Permiso {
   descripcion: string;
 }
 
+interface Ejecutivo {
+  idUsuario: number;
+  nombre: string;
+  apellidoP: string;
+  email: string;
+}
+
 @Component({
   selector: 'app-gestion-permisos',
-  // 🔽 Importar CommonModule, HttpClientModule y FormsModule
   standalone: true,
   imports: [CommonModule, HttpClientModule, FormsModule],
   templateUrl: './gestion-permisos.component.html',
@@ -19,63 +25,99 @@ interface Permiso {
 })
 export class GestionPermisosComponent implements OnInit {
   
-  todosLosPermisos: Permiso[] = [];
-  permisosRolEjecutivo: { [idPermiso: number]: boolean } = {};
+  ejecutivos: Ejecutivo[] = [];
+  catalogoPermisos: Permiso[] = [];
+  
+  ejecutivoSeleccionado: Ejecutivo | null = null;
+  permisosDelEjecutivo: { [idPermiso: number]: boolean } = {};
   
   mensaje: string = '';
   error: string = '';
+  cargando: boolean = false;
 
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.cargarPermisos();
+    this.cargarDatosIniciales();
   }
 
-  cargarPermisos(): void {
+  cargarDatosIniciales(): void {
+    this.cargando = true;
     this.limpiarMensajes();
-    // 1. Obtener el catálogo maestro de permisos
+
+    // 1. Cargar lista de ejecutivos
+    this.http.get<Ejecutivo[]>('http://localhost:3000/api/gerente/ejecutivos')
+      .subscribe({
+        next: (data) => {
+          this.ejecutivos = data;
+        },
+        error: (err) => this.error = 'Error al cargar ejecutivos'
+      });
+
+    // 2. Cargar catálogo maestro de permisos
     this.http.get<Permiso[]>('http://localhost:3000/api/gerente/permisos/catalogo')
       .subscribe({
-        next: (catalogo) => {
-          this.todosLosPermisos = catalogo;
-          
-          // 2. Obtener los permisos que SÍ tiene el rol
-          this.http.get<number[]>('http://localhost:3000/api/gerente/permisos/rol/2')
-            .subscribe({
-              next: (permisosActuales) => {
-                // 3. Poblar el objeto de checkboxes
-                this.permisosRolEjecutivo = {};
-                for (const p of catalogo) {
-                  // Si el ID del permiso está en el array 'permisosActuales', marcarlo como true
-                  this.permisosRolEjecutivo[p.idPermiso] = permisosActuales.includes(p.idPermiso);
-                }
-              },
-              error: (err) => this.error = 'Error al cargar permisos del rol'
-            });
+        next: (data) => {
+          this.catalogoPermisos = data;
+          this.cargando = false;
         },
-        error: (err) => this.error = 'Error al cargar catálogo de permisos'
+        error: (err) => {
+          this.error = 'Error al cargar catálogo de permisos';
+          this.cargando = false;
+        }
+      });
+  }
+
+  seleccionarEjecutivo(ejecutivo: Ejecutivo): void {
+    this.limpiarMensajes();
+    this.ejecutivoSeleccionado = ejecutivo;
+    this.cargando = true;
+    this.permisosDelEjecutivo = {};
+
+    // Cargar los permisos específicos de ESE ejecutivo
+    this.http.get<number[]>(`http://localhost:3000/api/gerente/permisos/ejecutivo/${ejecutivo.idUsuario}`)
+      .subscribe({
+        next: (permisosActuales) => {
+          // Poblar los checkboxes
+          this.catalogoPermisos.forEach(p => {
+            this.permisosDelEjecutivo[p.idPermiso] = permisosActuales.includes(p.idPermiso);
+          });
+          this.cargando = false;
+        },
+        error: (err) => {
+          this.error = 'Error al cargar permisos del ejecutivo';
+          this.cargando = false;
+        }
       });
   }
 
   guardarCambios(): void {
+    if (!this.ejecutivoSeleccionado) return;
+    
     this.limpiarMensajes();
+    this.cargando = true;
 
     // Convertir el objeto { 1: true, 2: false } en un array [1]
     const idsPermisosAEnviar: number[] = [];
-    for (const idPermisoStr in this.permisosRolEjecutivo) {
-      if (this.permisosRolEjecutivo.hasOwnProperty(idPermisoStr)) {
-        if (this.permisosRolEjecutivo[idPermisoStr] === true) {
-          idsPermisosAEnviar.push(Number(idPermisoStr));
-        }
+    for (const idPermisoStr in this.permisosDelEjecutivo) {
+      if (this.permisosDelEjecutivo[idPermisoStr] === true) {
+        idsPermisosAEnviar.push(Number(idPermisoStr));
       }
     }
 
-    this.http.put('http://localhost:3000/api/gerente/permisos/rol/2', { permisos: idsPermisosAEnviar })
-      .subscribe({
+    // Enviar la lista de IDs al endpoint específico del usuario
+    this.http.put(
+      `http://localhost:3000/api/gerente/permisos/ejecutivo/${this.ejecutivoSeleccionado.idUsuario}`, 
+      { permisos: idsPermisosAEnviar }
+    ).subscribe({
         next: (res: any) => {
           this.mensaje = res.message || 'Permisos actualizados correctamente';
+          this.cargando = false;
         },
-        error: (err) => this.error = err.error?.error || 'Error al guardar permisos'
+        error: (err) => {
+          this.error = err.error?.error || 'Error al guardar permisos';
+          this.cargando = false;
+        }
       });
   }
 
