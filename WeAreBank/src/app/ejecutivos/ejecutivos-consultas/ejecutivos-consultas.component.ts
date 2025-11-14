@@ -13,6 +13,7 @@ interface Cliente {
   telefono: string;
   RFC: string;
   CURP: string;
+  direccion: string; // 🔽 Añadido
 }
 interface Cuenta {
   idCuenta: number;
@@ -44,13 +45,18 @@ export class EjecutivosConsultasComponent implements OnInit {
   
   cargandoDetalle: boolean = false;
 
-  // 🔽 2. Inyectar AuthService y hacerlo PÚBLICO
+  // 🔽 --- Nuevas propiedades para edición --- 🔽
+  clienteEnEdicion: Cliente | null = null;
+  mensajeExito: string = '';
+  mensajeError: string = '';
+
   constructor(
     private http: HttpClient,
     public authService: AuthService // Poner 'public'
   ) {}
 
   ngOnInit(): void {
+    // 🔽 Usamos la ruta actualizada que trae la dirección
     this.http.get<Cliente[]>('http://localhost:3000/api/ejecutivo/clientes-consulta')
       .subscribe({
         next: (data: Cliente[]) => this.clientes = data,
@@ -70,7 +76,15 @@ export class EjecutivosConsultasComponent implements OnInit {
     );
   }
 
+  limpiarMensajes() {
+    this.mensajeError = '';
+    this.mensajeExito = '';
+  }
+
   verDetalle(cliente: Cliente): void {
+    this.limpiarMensajes();
+    this.clienteEnEdicion = null; // 🔽 Salir del modo edición al ver otro detalle
+
     if (this.clienteSeleccionado?.idUsuario === cliente.idUsuario) {
       this.clienteSeleccionado = null; // Ocultar si se vuelve a presionar
       this.cuentasCliente = [];
@@ -93,6 +107,7 @@ export class EjecutivosConsultasComponent implements OnInit {
         error: (err: any) => {
           console.error('Error al cargar detalle', err);
           this.cargandoDetalle = false;
+          this.mensajeError = 'Error al cargar detalles de la cuenta.';
         }
       });
   }
@@ -120,13 +135,58 @@ export class EjecutivosConsultasComponent implements OnInit {
       });
   }
   
-  // 🔽 4. (Opcional) Añadir función para modificar datos (si se implementara el modal)
+  // 🔽 --- FUNCIONES DE EDICIÓN MODIFICADAS/AÑADIDAS --- 🔽
+
   modificarCliente(cliente: Cliente): void {
     if (!this.authService.tienePermiso('MODIFICAR_DATOS_CLIENTE')) {
       alert('No tienes permiso para modificar datos de clientes.');
       return;
     }
-    // Aquí iría la lógica para abrir un modal de edición
-    alert('Acción "Modificar Datos" permitida (lógica de modal no implementada).');
+    this.limpiarMensajes();
+    // 🔽 FIX: Usar Object.assign para clonar explícitamente y evitar error de tipo
+    this.clienteEnEdicion = Object.assign({}, cliente);
+  }
+
+  cancelarEdicion(): void {
+    this.clienteEnEdicion = null;
+    this.limpiarMensajes();
+  }
+
+  guardarCambios(): void {
+    // 🔽 FIX: Añadido '!' (non-null assertion) porque el guard de arriba lo asegura
+    // O mejor, un guard explícito
+    if (!this.clienteEnEdicion) {
+      return;
+    }
+    this.limpiarMensajes();
+    
+    // Usamos el endpoint de EJECUTIVO
+    this.http.put(`http://localhost:3000/api/ejecutivo/cliente-detalle/${this.clienteEnEdicion.idUsuario}`, this.clienteEnEdicion)
+      .subscribe({
+        next: (res: any) => {
+          this.mensajeExito = res.message || 'Cliente actualizado';
+          
+          // 🔽 FIX: Usar '!' (non-null assertion) o el guard de arriba ya protege
+          const idUsuarioEditado = this.clienteEnEdicion!.idUsuario;
+
+          // Actualizar el cliente en la lista principal
+          const index = this.clientes.findIndex(c => c.idUsuario === idUsuarioEditado);
+          if (index !== -1) {
+            // 🔽 FIX: Usar Object.assign para clonar
+            this.clientes[index] = Object.assign({}, this.clienteEnEdicion!);
+          }
+          
+          // Actualizar el cliente seleccionado
+          if (this.clienteSeleccionado?.idUsuario === idUsuarioEditado) {
+            // 🔽 FIX: Usar Object.assign para clonar
+            this.clienteSeleccionado = Object.assign({}, this.clienteEnEdicion!);
+          }
+          
+          this.clienteEnEdicion = null;
+        },
+        error: (err: any) => {
+          this.mensajeError = err.error?.error || 'Error al guardar los cambios';
+        }
+      });
   }
 }

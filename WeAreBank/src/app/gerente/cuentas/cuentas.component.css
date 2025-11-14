@@ -85,6 +85,16 @@ button {
   background-color: #5D5B9D;
 }
 
+/* 🔽 Estilos de Botones Secundarios y Mensajes 🔽 */
+.btn-secundario {
+  background-color: #e4e4f2;
+  color: #333;
+  margin-right: 5px;
+}
+.btn-secundario:hover {
+  background-color: #d2d2ec;
+}
+
 /* Estilos de Formulario */
 .form-grid {
   display: grid;
@@ -116,9 +126,51 @@ button {
 
 .mensaje {
   margin-top: 1rem;
+  margin-bottom: 1rem; /* 🔽 Añadido */
   padding: 1rem;
   border-radius: 6px;
+  font-weight: 600;
+}
+
+/* 🔽 Clases específicas para mensajes 🔽 */
+.mensaje.success {
   background-color: #e6f7ec;
   color: #155724;
-  font-weight: 600;
+}
+.mensaje.error {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* 🔽 --- ESTILOS PARA EDICIÓN EN LÍNEA --- 🔽 */
+.fila-edicion {
+  background-color: #f4f3f8;
+}
+.fila-edicion td {
+  vertical-align: top;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+.form-edit-input {
+  width: 95%;
+  max-width: 200px; /* 🔽 Ancho máximo */
+  padding: 6px;
+  margin-bottom: 4px;
+  border: 1px solid #716FAF;
+  border-radius: 4px;
+  display: block; /* 🔽 Para que se apilen */
+}
+.form-edit-input.large {
+  max-width: 98%; /* Permitir que la dirección sea más ancha */
+  min-width: 250px;
+}
+.form-edit-input:disabled {
+  background-color: #eee;
+  border-color: #ccc;
+  color: #777;
+}
+
+.fila-edicion button {
+  margin-top: 4px;
+  margin-right: 4px;
 }

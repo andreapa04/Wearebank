@@ -1,6 +1,5 @@
 import express from "express";
 import pool from "../db.js";
-// 🔽 --- 1. Importar el nuevo mailer --- 🔽
 import { enviarCorreoCierreCuenta } from "../../utils/mailer.js";
 
 const router = express.Router();
@@ -30,13 +29,15 @@ router.get("/stats", async (req, res) => {
 /**
  * 🔹 GET /api/ejecutivo/cartera-cuentas
  * Obtiene la lista de todos los clientes (rol 3) con sus cuentas principales
+ * ¡MODIFICADO!
  */
 router.get("/cartera-cuentas", async (req, res) => {
   try {
     const [cartera] = await pool.query(`
       SELECT 
         c.idCuenta, c.clabe, c.tipoCuenta, c.saldo,
-        u.idUsuario, u.nombre, u.apellidoP, u.apellidoM, u.email
+        u.idUsuario, u.nombre, u.apellidoP, u.apellidoM, u.email,
+        u.telefono, u.direccion, u.RFC, u.CURP -- 🔽 Campos añadidos
       FROM cuenta c
       JOIN pertenece p ON c.idCuenta = p.idCuenta
       JOIN usuario u ON p.idUsuario = u.idUsuario
@@ -195,7 +196,7 @@ router.post("/procesar-prestamo", async (req, res) => {
         [solicitud.montoTotal, solicitud.idCuenta]
       );
       await connection.query(
-        "INSERT INTO movimiento (idCuenta, monto, tipoMovimiento) VALUES (?, ?, ?)",
+        "INSERT INTO movimiento (idCuenta, monto, tipoMovimiento) VALUES (?, ?, 'ABONO_PRESTAMO')",
         [solicitud.idCuenta, solicitud.montoTotal, "ABONO_PRESTAMO"]
       );
     }
@@ -367,12 +368,12 @@ router.post("/procesar-cierre", async (req, res) => {
 
 /**
  * 🔹 GET /api/ejecutivo/clientes-consulta
- * (Sin cambios en esta ruta)
+ * ¡MODIFICADO!
  */
 router.get("/clientes-consulta", async (req, res) => {
   try {
     const [clientes] = await pool.query(
-      `SELECT idUsuario, nombre, apellidoP, apellidoM, email, telefono, RFC, CURP
+      `SELECT idUsuario, nombre, apellidoP, apellidoM, email, telefono, RFC, CURP, direccion 
        FROM usuario WHERE idRol = 3
        ORDER BY apellidoP, nombre`
     );
@@ -413,6 +414,51 @@ router.get("/cliente-detalle/:idUsuario", async (req, res) => {
   } catch (error) {
     console.error("Error al cargar detalle de cliente:", error);
     res.status(500).json({ message: "Error al cargar detalle" });
+  }
+});
+
+/**
+ * 🔹 PUT /api/ejecutivo/cliente-detalle/:idUsuario
+ * Ejecutivo actualiza datos de un cliente (Rol 3)
+ * ¡NUEVO!
+ */
+router.put("/cliente-detalle/:idUsuario", async (req, res) => {
+  const { idUsuario } = req.params;
+  // El ID del ejecutivo se saca del token (en un futuro), por ahora usamos ID 2
+  const idEjecutivoResponsable = 2; 
+  
+  const { nombre, apellidoP, apellidoM, direccion, telefono, email } = req.body;
+
+  if (!nombre || !apellidoP || !apellidoM || !direccion || !telefono || !email) {
+    return res.status(400).json({ error: "Todos los campos editables son requeridos." });
+  }
+
+  try {
+    const [result] = await pool.query(
+      `UPDATE usuario 
+       SET nombre = ?, apellidoP = ?, apellidoM = ?, direccion = ?, telefono = ?, email = ?
+       WHERE idUsuario = ? AND idRol = 3`,
+      [nombre, apellidoP, apellidoM, direccion, telefono, email, idUsuario]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Cliente no encontrado o sin cambios." });
+    }
+
+    // Registrar en auditoría
+    await pool.query(
+      `INSERT INTO Auditoria (idUsuarioResponsable, tipoEvento, descripcion, idEntidadAfectada, tablaAfectada) 
+       VALUES (?, 'MODIFICACION_CLIENTE', ?, ?, 'usuario')`,
+      [idEjecutivoResponsable, `Ejecutivo modificó datos del cliente ID: ${idUsuario}`, idUsuario]
+    );
+
+    res.json({ message: "Datos del cliente actualizados correctamente" });
+  } catch (error) {
+    console.error("Error al actualizar cliente:", error);
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ error: "El email ya está en uso por otra cuenta." });
+    }
+    res.status(500).json({ error: "Error interno al actualizar cliente." });
   }
 });
 

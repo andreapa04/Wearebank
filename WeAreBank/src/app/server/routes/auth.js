@@ -15,7 +15,7 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Email y contraseña son requeridos" });
 
     const [rows] = await pool.query(
-      "SELECT idUsuario, nombre, apellidoP, apellidoM, idRol, contrasenia, intentosFallidos, bloqueado FROM usuario WHERE email = ?",
+      "SELECT idUsuario, nombre, apellidoP, apellidoM, idRol, contrasenia, intentosFallidos, bloqueado, estatus FROM usuario WHERE email = ?",
       [email]
     );
 
@@ -24,8 +24,12 @@ router.post("/login", async (req, res) => {
 
     const user = rows[0];
 
-    if (user.bloqueado)
+    if (user.estatus != "ACTIVO")
       return res.status(403).json({ error: "Cuenta bloqueada. Acude con un ejecutivo." });
+
+
+    if (user.bloqueado)
+      return res.status(403).json({ error: "Cuenta cerrada, en caso de error acude con un ejecutivo." });
 
     const coincide = await bcrypt.compare(contrasenia, user.contrasenia);
 
@@ -45,7 +49,7 @@ router.post("/login", async (req, res) => {
     let permisos = [];
     
     // Si es Gerente (1) o Ejecutivo (2), cargamos sus permisos
-    if (user.idRol === 1 || user.idRol === 2) {
+    if (user.idRol === 2) {
       let queryPermisos = '';
 
       if (user.idRol === 1) {

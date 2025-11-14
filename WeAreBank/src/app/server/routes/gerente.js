@@ -205,4 +205,47 @@ router.put("/permisos/ejecutivo/:idUsuario", async (req, res) => {
   }
 });
 
+/**
+ * 🔹 PUT /api/gerente/cliente-detalle/:idUsuario
+ * Gerente actualiza datos de un cliente (Rol 3)
+ * ¡NUEVO!
+ */
+router.put("/cliente-detalle/:idUsuario", async (req, res) => {
+  const { idUsuario } = req.params;
+  // Solo permitimos campos modificables
+  const { nombre, apellidoP, apellidoM, direccion, telefono, email } = req.body;
+
+  if (!nombre || !apellidoP || !apellidoM || !direccion || !telefono || !email) {
+    return res.status(400).json({ error: "Todos los campos editables son requeridos." });
+  }
+
+  try {
+    const [result] = await pool.query(
+      `UPDATE usuario 
+       SET nombre = ?, apellidoP = ?, apellidoM = ?, direccion = ?, telefono = ?, email = ?
+       WHERE idUsuario = ? AND idRol = 3`, // Aseguramos que solo se modifiquen clientes
+      [nombre, apellidoP, apellidoM, direccion, telefono, email, idUsuario]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Cliente no encontrado o sin cambios." });
+    }
+
+    // Registrar en auditoría (Asumimos que el gerente es el id 1)
+    await pool.query(
+      `INSERT INTO Auditoria (idUsuarioResponsable, tipoEvento, descripcion, idEntidadAfectada, tablaAfectada) 
+       VALUES (1, 'MODIFICACION_CLIENTE', ?, ?, 'usuario')`,
+      [`Gerente modificó datos del cliente ID: ${idUsuario}`, idUsuario]
+    );
+
+    res.json({ message: "Datos del cliente actualizados correctamente" });
+  } catch (error) {
+    console.error("Error al actualizar cliente:", error);
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ error: "El email ya está en uso por otra cuenta." });
+    }
+    res.status(500).json({ error: "Error interno al actualizar cliente." });
+  }
+});
+
 export default router;

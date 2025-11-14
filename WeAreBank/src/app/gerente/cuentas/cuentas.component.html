@@ -5,32 +5,79 @@
   <button [class.active]="vista === 'agregar'" (click)="vista = 'agregar'">Agregar Nuevo Cliente</button>
 </div>
 
+<!-- 🔽 Mensajes de Feedback 🔽 -->
+<div *ngIf="mensajeExito" class="mensaje success">{{ mensajeExito }}</div>
+<div *ngIf="error" class="mensaje error">{{ error }}</div>
+
+
 <div *ngIf="vista === 'cartera'" class="vista-container">
   <h3>Cartera de Cuentas</h3>
-  <input type="text" [(ngModel)]="filtro" placeholder="Filtrar por nombre, email o CLABE..." class="filtro">
+  <input type="text" [(ngModel)]="filtro" placeholder="Filtrar por nombre, email, CLABE o CURP..." class="filtro">
   
   <table>
     <thead>
       <tr>
         <th>Cliente</th>
-        <th>Email</th>
+        <th>Contacto (Email / Tel)</th>
+        <th>Documentos (RFC / CURP)</th>
+        <th>Dirección</th>
         <th>CLABE</th>
-        <th>Tipo</th>
         <th>Saldo</th>
         <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let c of carteraFiltrada">
-        <td>{{ c.nombre }} {{ c.apellidoP }}</td>
-        <td>{{ c.email }}</td>
-        <td>{{ c.clabe }}</td>
-        <td>{{ c.tipoCuenta }}</td>
-        <td>{{ c.saldo | currency }}</td>
-        <td>
-          <button class="btn-peligro" (click)="eliminarCuenta(c.idCuenta)">Cerrar Cuenta</button>
-        </td>
-      </tr>
+      <ng-container *ngFor="let c of carteraFiltrada">
+        <!-- MODO VISTA (Default) -->
+        <!-- 🔽 FIX: Cambiado el *ngIf para que la fila de edición se muestre correctamente -->
+        <tr *ngIf="!clienteEnEdicion || clienteEnEdicion.idUsuario !== c.idUsuario">
+          <td>{{ c.nombre }} {{ c.apellidoP }} {{ c.apellidoM }}</td>
+          <td>
+            <div>{{ c.email }}</div>
+            <div>{{ c.telefono }}</div>
+          </td>
+          <td>
+            <div><strong>RFC:</strong> {{ c.RFC }}</div>
+            <div><strong>CURP:</strong> {{ c.CURP }}</div>
+          </td>
+          <td>{{ c.direccion }}</td>
+          <td>{{ c.clabe }}</td>
+          <td>{{ c.saldo | currency }}</td>
+          <td>
+            <button class="btn-secundario" (click)="iniciarEdicion(c)">Modificar</button>
+            <button class="btn-peligro" (click)="eliminarCuenta(c.idCuenta)">Cerrar Cuenta</button>
+          </td>
+        </tr>
+        
+        <!-- MODO EDICIÓN (Inline) -->
+        <!-- 🔽 FIX: El *ngIf ahora comprueba que clienteEnEdicion NO sea null Y que el ID coincida -->
+        <!-- Esto corrige el error 'Object is possibly 'null'' en los ngModel de adentro -->
+        <tr *ngIf="clienteEnEdicion && clienteEnEdicion.idUsuario === c.idUsuario" class="fila-edicion">
+          <td>
+            <input [(ngModel)]="clienteEnEdicion.nombre" placeholder="Nombre" class="form-edit-input">
+            <input [(ngModel)]="clienteEnEdicion.apellidoP" placeholder="Apellido P." class="form-edit-input">
+            <input [(ngModel)]="clienteEnEdicion.apellidoM" placeholder="Apellido M." class="form-edit-input">
+          </td>
+          <td>
+            <input type="email" [(ngModel)]="clienteEnEdicion.email" placeholder="Email" class="form-edit-input">
+            <input type="tel" [(ngModel)]="clienteEnEdicion.telefono" placeholder="Teléfono" class="form-edit-input">
+          </td>
+          <td>
+            <!-- RFC y CURP no deben ser editables -->
+            <input [(ngModel)]="clienteEnEdicion.RFC" class="form-edit-input" disabled>
+            <input [(ngModel)]="clienteEnEdicion.CURP" class="form-edit-input" disabled>
+          </td>
+          <td>
+            <input [(ngModel)]="clienteEnEdicion.direccion" placeholder="Dirección Completa" class="form-edit-input large">
+          </td>
+          <td>{{ c.clabe }}</td>
+          <td>{{ c.saldo | currency }}</td>
+          <td>
+            <button class="btn-principal" (click)="guardarCambios()">Guardar</button>
+            <button class="btn-secundario" (click)="cancelarEdicion()">Cancelar</button>
+          </td>
+        </tr>
+      </ng-container>
     </tbody>
   </table>
 </div>
@@ -97,5 +144,4 @@
     <button type="submit" class="btn-principal">Registrar Cliente</button>
   </form>
   
-  <div *ngIf="mensaje" class="mensaje">{{ mensaje }}</div>
 </div>
