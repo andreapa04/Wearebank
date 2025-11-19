@@ -48,14 +48,23 @@ router.post("/", async (req, res) => {
 
     if (tipo === "INTERNA") {
       const destino = idCuentaDestino || cuentaDestino;
+      
+      // Buscar la cuenta destino por CLABE o ID
       const [dest] = await pool.query(
         "SELECT idCuenta FROM cuenta WHERE clabe = ? OR idCuenta = ?",
         [destino, destino]
       );
+      
       if (!dest.length) throw new Error("Cuenta interna no encontrada");
       destinoID = dest[0].idCuenta;
 
-      // transferencia interna
+      // VALIDACIÓN AGREGADA: Evitar auto-transferencia
+      // Comparamos == para manejar diferencias entre string (req.body) y number (db)
+      if (destinoID == idCuentaOrigen) {
+        return res.status(400).json({ error: "No puedes realizar una transferencia a la misma cuenta de origen." });
+      }
+
+      // Transferencia interna (Procedimiento almacenado)
       await pool.query("CALL sp_transferencia_interna(?, ?, ?, ?)", [
         idCuentaOrigen,
         destinoID,
@@ -63,7 +72,6 @@ router.post("/", async (req, res) => {
         concepto,
       ]);
 
-      // 🔽 --- BLOQUE MODIFICADO --- 🔽
       // Registrar movimiento y ENVIAR CORREO AL RECEPTOR
       if (destinoID) {
         await pool.query(
@@ -82,15 +90,13 @@ router.post("/", async (req, res) => {
         );
 
         if (receptorUser.length) {
-          // Usamos el 'monto' (sin comisión) para el receptor
           await enviarCorreoMovimiento(receptorUser[0].email, "TRANSFERENCIA_RECIBIDA", monto, receptorUser[0].clabe);
         }
       }
-      // 🔼 --- FIN BLOQUE MODIFICADO --- 🔼
 
     } else {
       destinoExt = destinoExterno || cuentaDestino;
-      // transferencia externa
+      // Transferencia externa
       await pool.query("CALL sp_transferencia_externa(?, ?, ?, ?, ?)", [
         idCuentaOrigen,
         destinoExt,
@@ -100,7 +106,7 @@ router.post("/", async (req, res) => {
       ]);
     }
 
-    // ENVIAR CORREO AL EMISOR (Sin cambios)
+    // ENVIAR CORREO AL EMISOR
     const [user] = await pool.query(
       `SELECT u.email, c.clabe
        FROM usuario u
@@ -111,7 +117,6 @@ router.post("/", async (req, res) => {
     );
 
     if (user.length) {
-      // 🔽 Usamos un tipo más específico y el 'total' (con comisión)
       await enviarCorreoMovimiento(user[0].email, "TRANSFERENCIA_ENVIADA", total, user[0].clabe);
     }
 
@@ -153,7 +158,6 @@ router.post("/deposito", async (req, res) => {
       [idCuenta]
     );
 
-    // (Esta lógica ya existía y funciona)
     if (user.length) {
       await enviarCorreoMovimiento(user[0].email, "DEPÓSITO", monto, user[0].clabe);
     }
