@@ -1,10 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-// 🔽 HttpClientModule es necesario para que HttpClient funcione en modo standalone
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { safeLocalStorage } from '../../utils/storage.util';
 
-// 🔽 --- Interfaces (re-añadidas) --- 🔽
 interface Cuenta {
   idCuenta: number;
   clabe: string;
@@ -22,6 +20,7 @@ interface Movimiento {
 
 interface Tarjeta {
   idTarjeta: number;
+  idCuenta: number;
   numeroTarjeta: string;
   vencimiento: string;
   tipoTarjeta: string;
@@ -29,26 +28,29 @@ interface Tarjeta {
   nombre: string;
   apellidoP: string;
   apellidoM: string;
+  limiteCredito?: number;
+  estado?: string;
 }
-// 🔼 -------------------------------- 🔼
 
 @Component({
   selector: 'app-consultas',
   standalone: true,
-  imports: [CommonModule, HttpClientModule], // 🔽 HttpClientModule añadido
+  imports: [CommonModule, HttpClientModule],
   templateUrl: './consultas.component.html',
   styleUrls: ['./consultas.component.css']
 })
 export class ConsultasComponent implements OnInit {
-  // --- Propiedades Originales ---
   cuentas: Cuenta[] = [];
   tarjetas: Tarjeta[] = [];
   movimientos: Movimiento[] = [];
+  
   idCuentaSeleccionada: number | null = null;
   cuentaSeleccionada: Cuenta | null = null;
+  tarjetaSeleccionada: Tarjeta | null = null; // Para el detalle de tarjeta
+  
   cargandoPDF: boolean = false;
   
-  // --- Propiedades para Cierre ---
+  // Propiedades para Cierre de Cuenta
   usuarioNombre: string = '';
   idUsuario: number | null = null; 
   cierreMensaje: string = '';
@@ -60,7 +62,7 @@ export class ConsultasComponent implements OnInit {
     const usuario = JSON.parse(safeLocalStorage().getItem('usuario') || 'null');
 
     if (!usuario || !usuario.id) {
-      console.error(' No se encontró usuario en sesión');
+      console.error('No se encontró usuario en sesión');
       return;
     }
     
@@ -70,8 +72,6 @@ export class ConsultasComponent implements OnInit {
     this.cargarCuentas(usuario.id);
     this.cargarTarjetas(usuario.id);
   }
-
-  // --- Métodos Originales (re-añadidos) ---
 
   cargarCuentas(idUsuario: number): void {
     this.http
@@ -83,7 +83,7 @@ export class ConsultasComponent implements OnInit {
             this.seleccionarCuenta(data[0]);
           }
         },
-        error: (err) => console.error(' Error al cargar cuentas:', err),
+        error: (err) => console.error('Error al cargar cuentas:', err),
       });
   }
 
@@ -92,14 +92,31 @@ export class ConsultasComponent implements OnInit {
       .get<Tarjeta[]>(`http://localhost:3000/api/consultas/mis-tarjetas/${idUsuario}`)
       .subscribe({
         next: (data) => this.tarjetas = data,
-        error: (err) => console.error(' Error al cargar tarjetas:', err)
+        error: (err) => console.error('Error al cargar tarjetas:', err)
       });
   }
 
   seleccionarCuenta(cuenta: Cuenta): void {
     this.idCuentaSeleccionada = cuenta.idCuenta;
     this.cuentaSeleccionada = cuenta;
+    this.tarjetaSeleccionada = null; // Limpiar selección de tarjeta al cambiar de cuenta
     this.cargarMovimientos(cuenta.idCuenta);
+  }
+
+  seleccionarTarjeta(tarjeta: Tarjeta): void {
+    this.tarjetaSeleccionada = tarjeta;
+  }
+
+  // 🔹 Lógica para mostrar saldos correctos
+  obtenerSaldoTarjeta(tarjeta: Tarjeta): number {
+    if (tarjeta.tipoTarjeta === 'CREDITO') {
+      // Si es crédito, mostramos el límite de crédito (o lo que venga de la BD como disponible)
+      return tarjeta.limiteCredito || 0;
+    } else {
+      // Si es débito, mostramos el saldo de la CUENTA CLABE asociada
+      const cuentaAsociada = this.cuentas.find(c => c.idCuenta === tarjeta.idCuenta);
+      return cuentaAsociada ? cuentaAsociada.saldo : 0;
+    }
   }
 
   cargarMovimientos(idCuenta: number): void {
@@ -109,7 +126,6 @@ export class ConsultasComponent implements OnInit {
       .get<Movimiento[]>(`http://localhost:3000/api/consultas/movimientos/${idCuenta}`)
       .subscribe({
         next: (data) => {
-          // Convertir fecha de MySQL a formato válido
           this.movimientos = data.map((mov) => {
             const rawFecha = (mov.fecha || mov.fechaHora) as string | undefined;
             let fechaValida: Date;
@@ -118,7 +134,7 @@ export class ConsultasComponent implements OnInit {
               const fixedDate = rawFecha.replace(' ', 'T');
               fechaValida = new Date(fixedDate);
             } else {
-              fechaValida = new Date(); // fallback
+              fechaValida = new Date();
             }
 
             if (isNaN(fechaValida.getTime())) {
@@ -137,14 +153,14 @@ export class ConsultasComponent implements OnInit {
           );
         },
         error: (err) => {
-          console.error(' Error al cargar movimientos:', err);
+          console.error('Error al cargar movimientos:', err);
         },
       });
   }
 
   descargarEstadoCuentaPDF(): void {
     if (!this.cuentaSeleccionada) {
-      alert(' Por favor selecciona una cuenta primero');
+      alert('Por favor selecciona una cuenta primero');
       return;
     }
 
@@ -153,9 +169,7 @@ export class ConsultasComponent implements OnInit {
     this.http
       .get(
         `http://localhost:3000/api/consultas/estado-cuenta-pdf/${this.cuentaSeleccionada.clabe}`,
-        {
-          responseType: 'blob'
-        }
+        { responseType: 'blob' }
       )
       .subscribe({
         next: (blob: Blob) => {
@@ -173,22 +187,21 @@ export class ConsultasComponent implements OnInit {
           window.URL.revokeObjectURL(url);
 
           this.cargandoPDF = false;
-          alert(' Estado de cuenta descargado correctamente');
+          alert('Estado de cuenta descargado correctamente');
         },
-        error: (error: any) => { // Tipado como any
-          console.error(' Error al descargar el PDF:', error);
+        error: (error: any) => {
+          console.error('Error al descargar el PDF:', error);
           this.cargandoPDF = false;
           
           if (error.status === 404) {
-            alert(' No se encontró la cuenta o no tiene movimientos');
+            alert('No se encontró la cuenta o no tiene movimientos');
           } else {
-            alert(' Error al generar el estado de cuenta. Intenta nuevamente.');
+            alert('Error al generar el estado de cuenta. Intenta nuevamente.');
           }
         }
       });
   }
 
-  // --- NUEVA FUNCIÓN PARA SOLICITAR CIERRE ---
   solicitarCierreCuenta(): void {
     if (!this.idUsuario) {
       this.cierreError = "No se pudo identificar al usuario.";

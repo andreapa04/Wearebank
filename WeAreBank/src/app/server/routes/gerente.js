@@ -1,37 +1,26 @@
 import express from "express";
 import pool from "../db.js";
 import bcrypt from "bcryptjs";
+import { enviarCorreoCierreCuenta } from "../../utils/mailer.js"; // Importante importar el mailer
 
 const router = express.Router();
 
 // =================================================================
-// GESTIÓN DE EJECUTIVOS (USUARIOS CON ROL 2)
+// GESTIÓN DE EJECUTIVOS
 // =================================================================
 
-/**
- * 🔹 GET /api/gerente/ejecutivos
- * Obtiene la lista de todos los ejecutivos (Rol 2).
- */
 router.get("/ejecutivos", async (req, res) => {
   try {
     const [ejecutivos] = await pool.query(
       `SELECT idUsuario, nombre, apellidoP, apellidoM, email, estatus 
-       FROM usuario 
-       WHERE idRol = 2 
-       ORDER BY apellidoP, nombre`,
+       FROM usuario WHERE idRol = 2 ORDER BY apellidoP, nombre`
     );
     res.json(ejecutivos);
   } catch (error) {
-    console.error("Error al cargar ejecutivos:", error);
     res.status(500).json({ error: "Error al cargar ejecutivos" });
   }
 });
 
-/**
- * 🔹 POST /api/gerente/ejecutivos
- * Crea un nuevo ejecutivo con todos los campos (Rol 2).
- * ¡MODIFICADO!
- */
 router.post("/ejecutivos", async (req, res) => {
   const {
     nombre, apellidoP, apellidoM, direccion, telefono, email,
@@ -39,212 +28,164 @@ router.post("/ejecutivos", async (req, res) => {
     preguntaSeguridad, respuestaSeguridad
   } = req.body;
 
-  // Validación de campos NOT NULL de la BD
-  if (
-    !nombre || !apellidoP || !apellidoM || !direccion || !telefono || !email ||
-    !contrasenia || !fechaNacimiento || !CURP || !RFC || !INE ||
-    !preguntaSeguridad || !respuestaSeguridad
-  ) {
-    return res.status(400).json({ error: "Faltan campos obligatorios para el registro completo." });
-  }
-
   try {
     const hash = await bcrypt.hash(contrasenia, 10);
-    const idRolEjecutivo = 2; // Hardcodeado para Ejecutivo
-
-    // Insertar usuario completo
     const [result] = await pool.query(
       `INSERT INTO usuario (
          idRol, nombre, apellidoP, apellidoM, direccion, telefono,
          email, contrasenia, fechaNacimiento, CURP, RFC, INE,
          preguntaSeguridad, respuestaSeguridad, estatus, bloqueado, intentosFallidos
-       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVO', FALSE, 0)`,
-      [
-        idRolEjecutivo, nombre, apellidoP, apellidoM, direccion, telefono,
-        email, hash, fechaNacimiento, CURP, RFC, INE,
-        preguntaSeguridad, respuestaSeguridad
-      ]
+       ) VALUES (2, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVO', FALSE, 0)`,
+      [nombre, apellidoP, apellidoM, direccion, telefono, email, hash, fechaNacimiento, CURP, RFC, INE, preguntaSeguridad, respuestaSeguridad]
     );
 
-    const idUsuarioNuevo = result.insertId;
+    const idUsuario = result.insertId;
+    await pool.query(`INSERT INTO Usuario_Permiso (idUsuario, idPermiso) SELECT ?, idPermiso FROM Permisos`, [idUsuario]);
 
-    // 🔽 ¡IMPORTANTE! Asignar por defecto todos los permisos al nuevo ejecutivo
-    await pool.query(
-      `INSERT INTO Usuario_Permiso (idUsuario, idPermiso)
-       SELECT ?, idPermiso FROM Permisos`,
-      [idUsuarioNuevo]
-    );
-
-    // Registrar en auditoría (Asumimos que el gerente es el id 1)
-    await pool.query(
-      `INSERT INTO Auditoria (
-         idUsuarioResponsable, tipoEvento, descripcion, idEntidadAfectada, tablaAfectada
-       ) VALUES (1, 'CREACION_EJECUTIVO', ?, ?, 'usuario')`,
-      [
-        `Gerente registró al ejecutivo: ${nombre} ${apellidoP}`,
-        idUsuarioNuevo
-      ]
-    );
-
-    res.status(201).json({ 
-      message: "Ejecutivo creado exitosamente y con permisos por defecto.", 
-      idUsuario: idUsuarioNuevo
-    });
-
+    res.status(201).json({ message: "Ejecutivo creado", idUsuario });
   } catch (error) {
-    console.error("Error al crear ejecutivo:", error);
-    if (error.code === 'ER_DUP_ENTRY') {
-      return res.status(400).json({ error: "El email, CURP o RFC ya existe." });
-    }
-    res.status(500).json({ error: "Error al crear ejecutivo." });
+    console.error(error);
+    res.status(500).json({ error: "Error al crear ejecutivo" });
   }
 });
 
-/**
- * 🔹 DELETE /api/gerente/ejecutivos/:idUsuario
- * Desactiva un ejecutivo
- */
 router.delete("/ejecutivos/:idUsuario", async (req, res) => {
   const { idUsuario } = req.params;
   try {
-    await pool.query(
-      "UPDATE usuario SET estatus = 'INACTIVO' WHERE idUsuario = ? AND idRol = 2",
-      [idUsuario]
-    );
-    res.json({ message: "Ejecutivo desactivado correctamente" });
+    await pool.query("UPDATE usuario SET estatus = 'INACTIVO' WHERE idUsuario = ? AND idRol = 2", [idUsuario]);
+    res.json({ message: "Ejecutivo desactivado" });
   } catch (error) {
-    console.error("Error al desactivar ejecutivo:", error);
     res.status(500).json({ error: "Error al desactivar ejecutivo" });
   }
 });
 
-
 // =================================================================
-// GESTIÓN DE PERMISOS POR EJECUTIVO (idRol = 2)
-// ¡MODIFICADO!
+// GESTIÓN DE PERMISOS
 // =================================================================
 
-/**
- * 🔹 GET /api/gerente/permisos/catalogo
- * Obtiene la lista maestra de todos los permisos disponibles.
- */
 router.get("/permisos/catalogo", async (req, res) => {
-  try {
-    const [permisos] = await pool.query(
-      "SELECT * FROM Permisos ORDER BY nombrePermiso"
-    );
-    res.json(permisos);
-  } catch (error) {
-    console.error("Error al cargar catálogo de permisos:", error);
-    res.status(500).json({ error: "Error al cargar catálogo de permisos" });
-  }
+  const [permisos] = await pool.query("SELECT * FROM Permisos ORDER BY nombrePermiso");
+  res.json(permisos);
 });
 
-/**
- * 🔹 GET /api/gerente/permisos/ejecutivo/:idUsuario
- * Obtiene los IDs de los permisos actuales de un Ejecutivo específico.
- * ¡NUEVO!
- */
 router.get("/permisos/ejecutivo/:idUsuario", async (req, res) => {
   const { idUsuario } = req.params;
+  const [permisos] = await pool.query("SELECT idPermiso FROM Usuario_Permiso WHERE idUsuario = ?", [idUsuario]);
+  res.json(permisos.map(p => p.idPermiso));
+});
+
+router.put("/permisos/ejecutivo/:idUsuario", async (req, res) => {
+  const { idUsuario } = req.params;
+  const { permisos } = req.body;
+  let connection;
   try {
-    const [permisos] = await pool.query(
-      "SELECT idPermiso FROM Usuario_Permiso WHERE idUsuario = ?",
-      [idUsuario]
-    );
-    // Devuelve un array de IDs: [1, 3]
-    res.json(permisos.map(p => p.idPermiso)); 
-  } catch (error) {
-    console.error("Error al cargar permisos del usuario:", error);
-    res.status(500).json({ error: "Error al cargar permisos del usuario" });
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+    await connection.query("DELETE FROM Usuario_Permiso WHERE idUsuario = ?", [idUsuario]);
+    if (permisos.length > 0) {
+      const values = permisos.map(id => [idUsuario, id]);
+      await connection.query("INSERT INTO Usuario_Permiso (idUsuario, idPermiso) VALUES ?", [values]);
+    }
+    await connection.commit(); connection.release();
+    res.json({ message: "Permisos actualizados" });
+  } catch (e) {
+    if(connection) await connection.rollback();
+    res.status(500).json({ error: "Error" });
   }
 });
 
-/**
- * 🔹 PUT /api/gerente/permisos/ejecutivo/:idUsuario
- * Actualiza la lista completa de permisos para un Ejecutivo específico.
- * Recibe: { permisos: [1, 3, 4] }
- * ¡MODIFICADO!
- */
-router.put("/permisos/ejecutivo/:idUsuario", async (req, res) => {
+// =================================================================
+// GESTIÓN DE CLIENTES (Lógica de Ejecutivo agregada para Gerente)
+// =================================================================
+
+router.put("/cliente-detalle/:idUsuario", async (req, res) => {
   const { idUsuario } = req.params;
-  const { permisos } = req.body; // Array de idPermiso
+  const { nombre, apellidoP, apellidoM, direccion, telefono, email } = req.body;
+  try {
+    await pool.query(
+      "UPDATE usuario SET nombre=?, apellidoP=?, apellidoM=?, direccion=?, telefono=?, email=? WHERE idUsuario=? AND idRol=3",
+      [nombre, apellidoP, apellidoM, direccion, telefono, email, idUsuario]
+    );
+    res.json({ message: "Cliente actualizado" });
+  } catch (e) { res.status(500).json({ error: "Error" }); }
+});
+
+// ⚠️ LOGICA DE CIERRE DE CUENTA (Copiada de ejecutivo.js)
+
+// 1. Eliminar/Cerrar cuenta directamente
+router.delete("/eliminar-cuenta/:idCuenta", async (req, res) => {
+  const { idCuenta } = req.params;
   let connection;
-
-  if (!Array.isArray(permisos)) {
-    return res.status(400).json({ error: "El body debe ser un array de IDs de permisos." });
-  }
-
   try {
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
-    // 1. Borrar todos los permisos actuales del usuario
-    await connection.query("DELETE FROM Usuario_Permiso WHERE idUsuario = ?", [idUsuario]);
+    const [p] = await connection.query("SELECT p.idUsuario, u.email, u.nombre FROM pertenece p JOIN usuario u ON p.idUsuario=u.idUsuario WHERE p.idCuenta=?", [idCuenta]);
+    if (!p.length) throw new Error("Usuario no encontrado");
+    const { idUsuario, email, nombre } = p[0];
 
-    // 2. Insertar los nuevos permisos (si hay alguno)
-    if (permisos.length > 0) {
-      const values = permisos.map(idPermiso => [idUsuario, idPermiso]);
-      await connection.query(
-        "INSERT INTO Usuario_Permiso (idUsuario, idPermiso) VALUES ?",
-        [values]
-      );
+    // Validar APROBADA
+    const [s] = await connection.query("SELECT COUNT(*) as activos FROM solicitud s JOIN pertenece p ON s.idCuenta=p.idCuenta WHERE p.idUsuario=? AND s.estado='APROBADA'", [idUsuario]);
+    
+    if (s[0].activos > 0) {
+      await connection.rollback(); connection.release();
+      return res.status(400).json({ message: "Cliente tiene préstamos activos." });
     }
 
-    await connection.commit();
-    connection.release();
-    res.json({ message: "Permisos del ejecutivo actualizados" });
+    await connection.query("UPDATE usuario SET estatus='INACTIVO' WHERE idUsuario=?", [idUsuario]);
+    await connection.commit(); connection.release();
+    await enviarCorreoCierreCuenta(email, nombre);
+    res.json({ message: "Cuenta cerrada exitosamente." });
 
-  } catch (error) {
-    if (connection) {
-      await connection.rollback();
-      connection.release();
-    }
-    console.error("Error al actualizar permisos:", error);
-    res.status(500).json({ error: "Error al actualizar permisos" });
+  } catch (e) {
+    if(connection) await connection.rollback();
+    res.status(500).json({ message: "Error al cerrar cuenta" });
   }
 });
 
-/**
- * 🔹 PUT /api/gerente/cliente-detalle/:idUsuario
- * Gerente actualiza datos de un cliente (Rol 3)
- * ¡NUEVO!
- */
-router.put("/cliente-detalle/:idUsuario", async (req, res) => {
-  const { idUsuario } = req.params;
-  // Solo permitimos campos modificables
-  const { nombre, apellidoP, apellidoM, direccion, telefono, email } = req.body;
-
-  if (!nombre || !apellidoP || !apellidoM || !direccion || !telefono || !email) {
-    return res.status(400).json({ error: "Todos los campos editables son requeridos." });
-  }
-
+// 2. Listar solicitudes de cierre
+router.get("/solicitudes-cierre", async (req, res) => {
   try {
-    const [result] = await pool.query(
-      `UPDATE usuario 
-       SET nombre = ?, apellidoP = ?, apellidoM = ?, direccion = ?, telefono = ?, email = ?
-       WHERE idUsuario = ? AND idRol = 3`, // Aseguramos que solo se modifiquen clientes
-      [nombre, apellidoP, apellidoM, direccion, telefono, email, idUsuario]
-    );
+    const [rows] = await pool.query(`
+      SELECT sc.idSolicitudCierre, sc.fechaSolicitud, u.idUsuario, u.nombre, u.apellidoP, u.email
+      FROM solicitud_cierre sc JOIN usuario u ON sc.idUsuario = u.idUsuario
+      WHERE sc.estado = 'PENDIENTE' ORDER BY sc.fechaSolicitud ASC
+    `);
+    res.json(rows);
+  } catch (e) { res.status(500).json({ error: "Error al cargar solicitudes" }); }
+});
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Cliente no encontrado o sin cambios." });
+// 3. Procesar solicitud de cierre
+router.post("/procesar-cierre", async (req, res) => {
+  const { idSolicitudCierre, aprobado, razon_rechazo } = req.body;
+  let connection;
+  try {
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    const [sol] = await connection.query("SELECT idUsuario FROM solicitud_cierre WHERE idSolicitudCierre=?", [idSolicitudCierre]);
+    if (!sol.length) throw new Error("Solicitud no encontrada");
+    const idUsuario = sol[0].idUsuario;
+
+    if (aprobado) {
+      const [check] = await connection.query("SELECT COUNT(*) as activos FROM solicitud s JOIN pertenece p ON s.idCuenta=p.idCuenta WHERE p.idUsuario=? AND s.estado='APROBADA'", [idUsuario]);
+      if (check[0].activos > 0) {
+        await connection.rollback(); connection.release();
+        return res.status(400).json({ message: "Préstamos activos, no se puede cerrar." });
+      }
+      await connection.query("UPDATE usuario SET estatus='INACTIVO' WHERE idUsuario=?", [idUsuario]);
+      await connection.query("UPDATE solicitud_cierre SET estado='APROBADA' WHERE idSolicitudCierre=?", [idSolicitudCierre]);
+      const [u] = await connection.query("SELECT email, nombre FROM usuario WHERE idUsuario=?", [idUsuario]);
+      await enviarCorreoCierreCuenta(u[0].email, u[0].nombre);
+    } else {
+      await connection.query("UPDATE solicitud_cierre SET estado='RECHAZADA', razon_rechazo=? WHERE idSolicitudCierre=?", [razon_rechazo, idSolicitudCierre]);
     }
 
-    // Registrar en auditoría (Asumimos que el gerente es el id 1)
-    await pool.query(
-      `INSERT INTO Auditoria (idUsuarioResponsable, tipoEvento, descripcion, idEntidadAfectada, tablaAfectada) 
-       VALUES (1, 'MODIFICACION_CLIENTE', ?, ?, 'usuario')`,
-      [`Gerente modificó datos del cliente ID: ${idUsuario}`, idUsuario]
-    );
-
-    res.json({ message: "Datos del cliente actualizados correctamente" });
-  } catch (error) {
-    console.error("Error al actualizar cliente:", error);
-    if (error.code === 'ER_DUP_ENTRY') {
-      return res.status(400).json({ error: "El email ya está en uso por otra cuenta." });
-    }
-    res.status(500).json({ error: "Error interno al actualizar cliente." });
+    await connection.commit(); connection.release();
+    res.json({ message: aprobado ? "Cuenta cerrada." : "Rechazada." });
+  } catch (e) {
+    if(connection) await connection.rollback();
+    res.status(500).json({ message: "Error procesando cierre" });
   }
 });
 

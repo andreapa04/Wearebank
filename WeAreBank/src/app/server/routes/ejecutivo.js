@@ -29,7 +29,6 @@ router.get("/stats", async (req, res) => {
 /**
  * 🔹 GET /api/ejecutivo/cartera-cuentas
  * Obtiene la lista de todos los clientes (rol 3) con sus cuentas principales
- * ¡MODIFICADO!
  */
 router.get("/cartera-cuentas", async (req, res) => {
   try {
@@ -37,7 +36,7 @@ router.get("/cartera-cuentas", async (req, res) => {
       SELECT 
         c.idCuenta, c.clabe, c.tipoCuenta, c.saldo,
         u.idUsuario, u.nombre, u.apellidoP, u.apellidoM, u.email,
-        u.telefono, u.direccion, u.RFC, u.CURP -- 🔽 Campos añadidos
+        u.telefono, u.direccion, u.RFC, u.CURP
       FROM cuenta c
       JOIN pertenece p ON c.idCuenta = p.idCuenta
       JOIN usuario u ON p.idUsuario = u.idUsuario
@@ -63,7 +62,7 @@ router.delete("/eliminar-cuenta/:idCuenta", async (req, res) => {
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
-    // 1. Obtener el idUsuario, email y nombre (MODIFICADO)
+    // 1. Obtener el idUsuario, email y nombre
     const [perteneceRows] = await connection.query(
       `SELECT p.idUsuario, u.email, u.nombre 
        FROM pertenece p
@@ -72,17 +71,17 @@ router.delete("/eliminar-cuenta/:idCuenta", async (req, res) => {
       [idCuenta]
     );
     if (perteneceRows.length === 0) {
-      throw new Error("Relación cuenta-usuario no encontrada");
+      throw new Error("Usuario no encontrado");
     }
-    // 🔽 --- 2. Obtener datos para el correo --- 🔽
     const { idUsuario, email, nombre } = perteneceRows[0];
 
-    // 2. Validar que no tenga préstamos o créditos activos
+    // 2. Validar que no tenga préstamos o créditos activos (APROBADA)
+    // ⚠️ CAMBIO: Si el estado es FINALIZADO, RECHAZADA o PAGADO, no cuenta como activo. Solo APROBADA bloquea el cierre.
     const [solicitudRows] = await connection.query(
       `SELECT COUNT(*) AS activos 
        FROM solicitud s
        JOIN pertenece p ON s.idCuenta = p.idCuenta
-       WHERE p.idUsuario = ? AND s.estado = 'APROBADA'`, // APROBADA = Activo
+       WHERE p.idUsuario = ? AND s.estado = 'APROBADA'`, 
       [idUsuario]
     );
 
@@ -90,12 +89,11 @@ router.delete("/eliminar-cuenta/:idCuenta", async (req, res) => {
       await connection.rollback();
       connection.release();
       return res.status(400).json({
-        message:
-          "Acción denegada: El cliente tiene préstamos o créditos activos.",
+        message: "No se puede cerrar: Cliente tiene préstamos activos pendientes de pago.",
       });
     }
 
-    // 3. Si no hay deudas, marcar al usuario como INACTIVO
+    // 3. Si no hay deudas activas, marcar al usuario como INACTIVO
     await connection.query(
       "UPDATE usuario SET estatus = 'INACTIVO' WHERE idUsuario = ?",
       [idUsuario]
@@ -104,12 +102,10 @@ router.delete("/eliminar-cuenta/:idCuenta", async (req, res) => {
     await connection.commit();
     connection.release();
 
-    // 🔽 --- 3. Enviar correo de notificación --- 🔽
+    // Enviar correo de notificación
     await enviarCorreoCierreCuenta(email, nombre);
 
-    res
-      .status(200)
-      .json({
+    res.status(200).json({
         message: `El usuario (ID: ${idUsuario}) ha sido marcado como INACTIVO.`,
       });
   } catch (error) {
@@ -118,15 +114,12 @@ router.delete("/eliminar-cuenta/:idCuenta", async (req, res) => {
       connection.release();
     }
     console.error("Error al cerrar cuenta:", error);
-    res
-      .status(500)
-      .json({ message: "Error al procesar el cierre de la cuenta." });
+    res.status(500).json({ message: "Error al procesar el cierre de la cuenta." });
   }
 });
 
 /**
  * 🔹 GET /api/ejecutivo/solicitudes-prestamo
- * (Sin cambios en esta ruta)
  */
 router.get("/solicitudes-prestamo", async (req, res) => {
   try {
@@ -161,7 +154,9 @@ router.get("/solicitudes-prestamo", async (req, res) => {
 
 /**
  * 🔹 POST /api/ejecutivo/procesar-prestamo
- * (Sin cambios en esta ruta)
+ * Aprobación de crédito/préstamo.
+ * - PRÉSTAMO: Suma saldo a la cuenta.
+ * - CRÉDITO: Crea tarjeta de crédito o aumenta límite (NO suma saldo a cuenta).
  */
 router.post("/procesar-prestamo", async (req, res) => {
   const { idSolicitud, aprobado } = req.body;
@@ -171,13 +166,10 @@ router.post("/procesar-prestamo", async (req, res) => {
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
-    const [solicitudRows] = await connection.query(
-      "SELECT * FROM solicitud WHERE idSolicitud = ?",
-      [idSolicitud]
-    );
-    if (solicitudRows.length === 0) throw new Error("Solicitud no encontrada");
-
-    const solicitud = solicitudRows[0];
+    const [rows] = await connection.query("SELECT * FROM solicitud WHERE idSolicitud = ?", [idSolicitud]);
+    if (rows.length === 0) throw new Error("Solicitud no encontrada");
+    
+    const solicitud = rows[0];
     if (solicitud.estado !== "EN_REVISION")
       throw new Error("La solicitud ya fue procesada");
 
@@ -188,57 +180,59 @@ router.post("/procesar-prestamo", async (req, res) => {
       [nuevoEstado, idSolicitud]
     );
 
-    // CASO 1: PRÉSTAMO -> Depositar dinero
-    if (aprobado && solicitud.tipo.startsWith("PRESTAMO_")) {
-      await connection.query(
-        "UPDATE cuenta SET saldo = saldo + ? WHERE idCuenta = ?",
-        [solicitud.montoTotal, solicitud.idCuenta]
-      );
-      await connection.query(
-        "INSERT INTO movimiento (idCuenta, monto, tipoMovimiento) VALUES (?, ?, 'ABONO_PRESTAMO')",
-        [solicitud.idCuenta, solicitud.montoTotal]
-      );
-    }
-
-    // CASO 2: CRÉDITO -> Crear tarjeta o Aumentar Límite
-    if (aprobado && solicitud.tipo.startsWith("CREDITO_")) {
-      
-      // Verificar si ya tiene tarjeta de crédito en esa cuenta
-      const [tarjetas] = await connection.query(
-        "SELECT * FROM tarjeta WHERE idCuenta = ? AND tipoTarjeta = 'CREDITO'",
-        [solicitud.idCuenta]
-      );
-
-      if (tarjetas.length > 0) {
-        // ⚠️ YA TIENE TARJETA: Aumentar el límite (Anexar crédito)
-        const tarjetaExistente = tarjetas[0];
-        const nuevoLimite = parseFloat(tarjetaExistente.limiteCredito) + parseFloat(solicitud.montoTotal);
-        
+    if (aprobado) {
+      // CASO 1: PRÉSTAMO (Dinero líquido a la cuenta)
+      if (solicitud.tipo.startsWith("PRESTAMO_")) {
         await connection.query(
-          "UPDATE tarjeta SET limiteCredito = ? WHERE idTarjeta = ?",
-          [nuevoLimite, tarjetaExistente.idTarjeta]
+          "UPDATE cuenta SET saldo = saldo + ? WHERE idCuenta = ?",
+          [solicitud.montoTotal, solicitud.idCuenta]
         );
-      } else {
-        // ⚠️ NO TIENE TARJETA: Crear una nueva
-        const numeroTarjeta =
-          "5500" + Math.floor(100000000000 + Math.random() * 900000000000).toString().substring(0, 12);
-        const cvv = Math.floor(100 + Math.random() * 900);
-        const vencimiento = new Date();
-        vencimiento.setFullYear(vencimiento.getFullYear() + 5);
-
         await connection.query(
-          `INSERT INTO tarjeta (idCuenta, numeroTarjeta, vencimiento, cvv, tipoTarjeta, estado, limiteCredito, intereses, anualidad)
-           VALUES (?, ?, ?, ?, 'CREDITO', 'ACTIVA', ?, ?, ?)`,
-          [
-            solicitud.idCuenta,
-            numeroTarjeta,
-            vencimiento,
-            cvv,
-            solicitud.montoTotal,
-            solicitud.intereses,
-            800, // Anualidad ejemplo
-          ]
+          "INSERT INTO movimiento (idCuenta, monto, tipoMovimiento) VALUES (?, ?, 'ABONO_PRESTAMO')",
+          [solicitud.idCuenta, solicitud.montoTotal]
         );
+      }
+
+      // CASO 2: CRÉDITO (Aumentar límite de tarjeta, NO tocar saldo de cuenta)
+      if (solicitud.tipo.startsWith("CREDITO_")) {
+        // Verificar si ya tiene tarjeta de crédito en esa cuenta
+        const [tarjetas] = await connection.query(
+          "SELECT * FROM tarjeta WHERE idCuenta = ? AND tipoTarjeta = 'CREDITO'",
+          [solicitud.idCuenta]
+        );
+
+        if (tarjetas.length > 0) {
+          // Ya tiene tarjeta: Aumentar el límite
+          const tarjetaExistente = tarjetas[0];
+          const nuevoLimite = parseFloat(tarjetaExistente.limiteCredito) + parseFloat(solicitud.montoTotal);
+          
+          await connection.query(
+            "UPDATE tarjeta SET limiteCredito = ? WHERE idTarjeta = ?",
+            [nuevoLimite, tarjetaExistente.idTarjeta]
+          );
+        } else {
+          // No tiene tarjeta de crédito: Crear una nueva
+          const numeroTarjeta =
+            "5500" + Math.floor(100000000000 + Math.random() * 900000000000).toString().substring(0, 12);
+          const cvv = Math.floor(100 + Math.random() * 900);
+          const vencimiento = new Date();
+          vencimiento.setFullYear(vencimiento.getFullYear() + 5);
+
+          await connection.query(
+            `INSERT INTO tarjeta (idCuenta, numeroTarjeta, vencimiento, cvv, tipoTarjeta, estado, limiteCredito, intereses, anualidad)
+             VALUES (?, ?, ?, ?, 'CREDITO', 'ACTIVA', ?, ?, ?)`,
+            [
+              solicitud.idCuenta,
+              numeroTarjeta,
+              vencimiento,
+              cvv,
+              solicitud.montoTotal,
+              solicitud.intereses,
+              800, // Anualidad de ejemplo
+            ]
+          );
+        }
+        // NOTA: Para créditos NO insertamos movimiento en la cuenta de débito.
       }
     }
 
@@ -255,12 +249,8 @@ router.post("/procesar-prestamo", async (req, res) => {
   }
 });
 
-
-// 🔽 --- RUTAS DE CIERRE DE CUENTA MODIFICADAS --- 🔽
-
 /**
  * 🔹 GET /api/ejecutivo/solicitudes-cierre
- * (Sin cambios en esta ruta)
  */
 router.get("/solicitudes-cierre", async (req, res) => {
   try {
@@ -284,7 +274,7 @@ router.get("/solicitudes-cierre", async (req, res) => {
  */
 router.post("/procesar-cierre", async (req, res) => {
   const { idSolicitudCierre, aprobado, razon_rechazo } = req.body;
-  const idEjecutivo = 2; // ID de ejecutivo de prueba
+  const idEjecutivo = 2; // ID de ejecutivo (puede venir del token)
   let connection;
 
   try {
@@ -302,7 +292,7 @@ router.post("/procesar-cierre", async (req, res) => {
     const idUsuario = solRows[0].idUsuario;
 
     if (aprobado) {
-      // 2. Validar que no tenga préstamos o créditos activos
+      // 2. Validar que no tenga préstamos o créditos activos (APROBADA)
       const [solicitudRows] = await connection.query(
         `SELECT COUNT(*) AS activos 
          FROM solicitud s
@@ -320,7 +310,7 @@ router.post("/procesar-cierre", async (req, res) => {
         });
       }
 
-      // 3. Si no hay deudas, marcar al usuario como INACTIVO
+      // 3. Si no hay deudas activas, marcar al usuario como INACTIVO
       await connection.query(
         "UPDATE usuario SET estatus = 'INACTIVO' WHERE idUsuario = ?",
         [idUsuario]
@@ -332,20 +322,20 @@ router.post("/procesar-cierre", async (req, res) => {
         [idEjecutivo, idSolicitudCierre]
       );
       
-      // 🔽 --- 5. Obtener datos para correo --- 🔽
+      // 5. Obtener datos para correo
       const [userRows] = await connection.query("SELECT nombre, email FROM usuario WHERE idUsuario = ?", [idUsuario]);
       const { nombre, email } = userRows[0];
       
       await connection.commit();
       connection.release();
 
-      // 🔽 --- 6. Enviar correo --- 🔽
+      // 6. Enviar correo
       await enviarCorreoCierreCuenta(email, nombre);
       
       res.json({ message: "Solicitud de cierre aprobada. El usuario ha sido desactivado." });
 
     } else {
-      // 5. Rechazar la solicitud
+      // Rechazar la solicitud
       if (!razon_rechazo) {
         return res.status(400).json({ message: "Se requiere una razón para el rechazo." });
       }
@@ -372,7 +362,6 @@ router.post("/procesar-cierre", async (req, res) => {
 
 /**
  * 🔹 GET /api/ejecutivo/clientes-consulta
- * ¡MODIFICADO!
  */
 router.get("/clientes-consulta", async (req, res) => {
   try {
@@ -390,7 +379,6 @@ router.get("/clientes-consulta", async (req, res) => {
 
 /**
  * 🔹 GET /api/ejecutivo/cliente-detalle/:idUsuario
- * (Sin cambios en esta ruta)
  */
 router.get("/cliente-detalle/:idUsuario", async (req, res) => {
   const { idUsuario } = req.params;
@@ -403,14 +391,14 @@ router.get("/cliente-detalle/:idUsuario", async (req, res) => {
       [idUsuario]
     );
 
-    // Obtener movimientos de TODAS las cuentas de ese usuario
+    // Obtener movimientos
     const [movimientos] = await pool.query(
       `SELECT m.idMovimiento, m.fechaHora, m.tipoMovimiento, m.monto
        FROM movimiento m
        JOIN pertenece p ON m.idCuenta = p.idCuenta
        WHERE p.idUsuario = ?
        ORDER BY m.fechaHora DESC
-       LIMIT 50`, // Limitar a los últimos 50 movimientos
+       LIMIT 50`,
       [idUsuario]
     );
 
@@ -424,13 +412,9 @@ router.get("/cliente-detalle/:idUsuario", async (req, res) => {
 /**
  * 🔹 PUT /api/ejecutivo/cliente-detalle/:idUsuario
  * Ejecutivo actualiza datos de un cliente (Rol 3)
- * ¡NUEVO!
  */
 router.put("/cliente-detalle/:idUsuario", async (req, res) => {
   const { idUsuario } = req.params;
-  // El ID del ejecutivo se saca del token (en un futuro), por ahora usamos ID 2
-  const idEjecutivoResponsable = 2; 
-  
   const { nombre, apellidoP, apellidoM, direccion, telefono, email } = req.body;
 
   if (!nombre || !apellidoP || !apellidoM || !direccion || !telefono || !email) {
@@ -449,11 +433,11 @@ router.put("/cliente-detalle/:idUsuario", async (req, res) => {
       return res.status(404).json({ error: "Cliente no encontrado o sin cambios." });
     }
 
-    // Registrar en auditoría
+    // Auditoría
     await pool.query(
       `INSERT INTO Auditoria (idUsuarioResponsable, tipoEvento, descripcion, idEntidadAfectada, tablaAfectada) 
-       VALUES (?, 'MODIFICACION_CLIENTE', ?, ?, 'usuario')`,
-      [idEjecutivoResponsable, `Ejecutivo modificó datos del cliente ID: ${idUsuario}`, idUsuario]
+       VALUES (2, 'MODIFICACION_CLIENTE', ?, ?, 'usuario')`, // ID ejecutivo hardcodeado a 2 por ahora
+      [`Ejecutivo modificó datos del cliente ID: ${idUsuario}`, idUsuario]
     );
 
     res.json({ message: "Datos del cliente actualizados correctamente" });
@@ -465,6 +449,5 @@ router.put("/cliente-detalle/:idUsuario", async (req, res) => {
     res.status(500).json({ error: "Error interno al actualizar cliente." });
   }
 });
-
 
 export default router;

@@ -142,7 +142,7 @@ th {
   text-transform: capitalize;
 }
 .status.aprobada { background-color: #28a745; }
-.status.liquidada { background-color: #17a2b8; }
+.status.finalizada { background-color: #17a2b8; }
 .status.rechazada { background-color: #dc3545; }
 .status.en_revision { 
   background-color: #ffc107; 

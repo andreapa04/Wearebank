@@ -109,7 +109,7 @@ router.put("/aprobar/:idSolicitud", async (req, res) => {
 
 /**
  * 🔹 3. Registrar un pago de préstamo
- * (Esta ruta ya contenía la lógica para marcar como 'LIQUIDADA')
+ * (Esta ruta ya contenía la lógica para marcar como 'FINALIZADO')
  */
 router.post("/pago", async (req, res) => {
   const { idSolicitud, monto } = req.body;
@@ -145,7 +145,7 @@ router.post("/pago", async (req, res) => {
 
     // 🔽 LÓGICA DE COMPLETADO (ya existía)
     if (totalPagado >= solicitud.montoTotal) {
-      await pool.query("UPDATE solicitud SET estado = 'LIQUIDADA' WHERE idSolicitud = ?", [idSolicitud]);
+      await pool.query("UPDATE solicitud SET estado = 'FINALIZADO' WHERE idSolicitud = ?", [idSolicitud]);
     }
 
     res.json({ message: "Pago registrado con éxito", totalPagado });
