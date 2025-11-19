@@ -5,12 +5,11 @@ const router = express.Router();
 
 /**
  * POST /api/creditos/solicitar
- * Crea una nueva solicitud de crédito
+ * Crea una nueva solicitud de crédito (SIEMPRE EN REVISIÓN)
  */
 router.post("/solicitar", async (req, res) => {
   const { idCuenta, montoTotal, plazo, tipo } = req.body;
 
-  // 🔽 Validar que el TIPO sea un crédito
   if (!idCuenta || !montoTotal || montoTotal <= 0 || !plazo || !tipo || !tipo.startsWith('CREDITO_')) {
     return res.status(400).json({ error: "Datos incompletos o inválidos" });
   }
@@ -38,9 +37,7 @@ router.post("/solicitar", async (req, res) => {
     );
 
     if (buroRows.length === 0) {
-      return res
-        .status(400)
-        .json({ error: "No se encontró historial de buró de crédito" });
+      return res.status(400).json({ error: "No se encontró historial de buró de crédito" });
     }
 
     const puntaje = buroRows[0].puntaje;
@@ -58,19 +55,19 @@ router.post("/solicitar", async (req, res) => {
       });
     }
 
-    // 4️⃣ Calcular tasas según puntaje
+    // 4️⃣ Calcular tasas (Solo informativo, el estado inicial siempre es EN_REVISION)
     let intereses = 0;
     let cat = 0;
-    let estado = "EN_REVISION";
+    let estado = "EN_REVISION"; // ⚠️ CAMBIO: Siempre pasa a revisión primero
 
     if (puntaje >= 750) {
       intereses = 10.5;
       cat = 13.5;
-      estado = "APROBADA";
     } else if (puntaje >= 650) {
       intereses = 14.0;
       cat = 17.5;
     } else {
+      // Si el puntaje es muy bajo, se rechaza automáticamente
       estado = "RECHAZADA";
       intereses = 0;
       cat = 0;
@@ -85,27 +82,10 @@ router.post("/solicitar", async (req, res) => {
 
     const idSolicitud = result.insertId;
 
-    // 6️⃣ Si fue aprobada, registrar línea de crédito y auditoría
-    if (estado === "APROBADA") {
-      await pool.query(
-        `INSERT INTO linea_credito (idUsuario, montoAprobado, fechaAprobacion, estado, ingresoMensual, tasaInteres)
-         VALUES (?, ?, CURDATE(), 'APROBADA', ?, ?)`,
-        [usuario.idUsuario, montoTotal, montoTotal / 12, intereses]
-      );
-
-      await pool.query(
-        `INSERT INTO Auditoria (idUsuarioResponsable, tipoEvento, descripcion, idEntidadAfectada, tablaAfectada)
-         VALUES (?, 'AUTORIZACION_PRESTAMO', ?, ?, 'solicitud')`,
-        [
-          usuario.idUsuario,
-          `Solicitud de crédito aprobada automáticamente (puntaje ${puntaje})`,
-          idSolicitud,
-        ]
-      );
-    }
-
     res.json({
-      message: `Solicitud ${estado.toLowerCase()} correctamente.`,
+      message: estado === "RECHAZADA" 
+        ? "Tu solicitud ha sido rechazada debido al historial crediticio."
+        : "Solicitud enviada exitosamente. Un ejecutivo la revisará pronto.",
       estado,
       idSolicitud,
       puntaje,
@@ -119,15 +99,12 @@ router.post("/solicitar", async (req, res) => {
 });
 
 /**
- * 🔽 RUTA MODIFICADA 🔽
  * GET /api/creditos/mis-solicitudes/:idUsuario
- * Lista todas las solicitudes de CRÉDITO del usuario
  */
 router.get("/mis-solicitudes/:idUsuario", async (req, res) => {
   const { idUsuario } = req.params;
 
   try {
-    // 🔽 Se filtra por "tipo LIKE 'CREDITO_%'"
     const [solicitudes] = await pool.query(
       `SELECT s.*, c.clabe
        FROM solicitud s

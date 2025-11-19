@@ -5,10 +5,8 @@
   <button [class.active]="vista === 'agregar'" (click)="vista = 'agregar'">Agregar Nuevo Cliente</button>
 </div>
 
-<!-- 🔽 Mensajes de Feedback 🔽 -->
 <div *ngIf="mensajeExito" class="mensaje success">{{ mensajeExito }}</div>
 <div *ngIf="error" class="mensaje error">{{ error }}</div>
-
 
 <div *ngIf="vista === 'cartera'" class="vista-container">
   <h3>Cartera de Cuentas</h3>
@@ -18,9 +16,8 @@
     <thead>
       <tr>
         <th>Cliente</th>
-        <th>Contacto (Email / Tel)</th>
-        <th>Documentos (RFC / CURP)</th>
-        <th>Dirección</th>
+        <th>Contacto</th>
+        <th>Documentos</th>
         <th>CLABE</th>
         <th>Saldo</th>
         <th>Acciones</th>
@@ -28,30 +25,27 @@
     </thead>
     <tbody>
       <ng-container *ngFor="let c of carteraFiltrada">
-        <!-- MODO VISTA (Default) -->
-        <!-- 🔽 FIX: Cambiado el *ngIf para que la fila de edición se muestre correctamente -->
         <tr *ngIf="!clienteEnEdicion || clienteEnEdicion.idUsuario !== c.idUsuario">
           <td>{{ c.nombre }} {{ c.apellidoP }} {{ c.apellidoM }}</td>
           <td>
             <div>{{ c.email }}</div>
-            <div>{{ c.telefono }}</div>
+            <div style="font-size:0.85em; color:#666">{{ c.telefono }}</div>
           </td>
           <td>
-            <div><strong>RFC:</strong> {{ c.RFC }}</div>
-            <div><strong>CURP:</strong> {{ c.CURP }}</div>
+            <div style="font-size:0.85em"><strong>RFC:</strong> {{ c.RFC }}</div>
+            <div style="font-size:0.85em"><strong>CURP:</strong> {{ c.CURP }}</div>
           </td>
-          <td>{{ c.direccion }}</td>
           <td>{{ c.clabe }}</td>
           <td>{{ c.saldo | currency }}</td>
           <td>
-            <button class="btn-secundario" (click)="iniciarEdicion(c)">Modificar</button>
-            <button class="btn-peligro" (click)="eliminarCuenta(c.idCuenta)">Cerrar Cuenta</button>
+            <button class="btn-secundario" (click)="descargarPDF(c.clabe)" title="Descargar Estado de Cuenta">
+              📄 PDF
+            </button>
+            <button class="btn-secundario" (click)="iniciarEdicion(c)">Editar</button>
+            <button class="btn-peligro" (click)="eliminarCuenta(c.idCuenta)">Cerrar</button>
           </td>
         </tr>
         
-        <!-- MODO EDICIÓN (Inline) -->
-        <!-- 🔽 FIX: El *ngIf ahora comprueba que clienteEnEdicion NO sea null Y que el ID coincida -->
-        <!-- Esto corrige el error 'Object is possibly 'null'' en los ngModel de adentro -->
         <tr *ngIf="clienteEnEdicion && clienteEnEdicion.idUsuario === c.idUsuario" class="fila-edicion">
           <td>
             <input [(ngModel)]="clienteEnEdicion.nombre" placeholder="Nombre" class="form-edit-input">
@@ -63,15 +57,12 @@
             <input type="tel" [(ngModel)]="clienteEnEdicion.telefono" placeholder="Teléfono" class="form-edit-input">
           </td>
           <td>
-            <!-- RFC y CURP no deben ser editables -->
-            <input [(ngModel)]="clienteEnEdicion.RFC" class="form-edit-input" disabled>
-            <input [(ngModel)]="clienteEnEdicion.CURP" class="form-edit-input" disabled>
+            <input [(ngModel)]="clienteEnEdicion.RFC" class="form-edit-input" disabled title="No editable">
+            <input [(ngModel)]="clienteEnEdicion.CURP" class="form-edit-input" disabled title="No editable">
           </td>
-          <td>
+          <td colspan="2">
             <input [(ngModel)]="clienteEnEdicion.direccion" placeholder="Dirección Completa" class="form-edit-input large">
           </td>
-          <td>{{ c.clabe }}</td>
-          <td>{{ c.saldo | currency }}</td>
           <td>
             <button class="btn-principal" (click)="guardarCambios()">Guardar</button>
             <button class="btn-secundario" (click)="cancelarEdicion()">Cancelar</button>
@@ -84,8 +75,6 @@
 
 <div *ngIf="vista === 'agregar'" class="vista-container">
   <h3>Formulario de Nuevo Cliente</h3>
-  <p>Al agregar un cliente, se asignará una cuenta de ahorro inicial y una tarjeta de débito asociada.</p>
-  
   <form (ngSubmit)="agregarCliente()">
     <div class="form-grid">
       <div class="form-group">
@@ -143,5 +132,4 @@
     </div>
     <button type="submit" class="btn-principal">Registrar Cliente</button>
   </form>
-  
 </div>

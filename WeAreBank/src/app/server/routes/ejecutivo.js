@@ -165,7 +165,6 @@ router.get("/solicitudes-prestamo", async (req, res) => {
  */
 router.post("/procesar-prestamo", async (req, res) => {
   const { idSolicitud, aprobado } = req.body;
-  const idEjecutivo = 2; // ID de ejecutivo de prueba
   let connection;
 
   try {
@@ -189,7 +188,7 @@ router.post("/procesar-prestamo", async (req, res) => {
       [nuevoEstado, idSolicitud]
     );
 
-    // Si es un PRÉSTAMO y se aprueba, depositar el dinero
+    // CASO 1: PRÉSTAMO -> Depositar dinero
     if (aprobado && solicitud.tipo.startsWith("PRESTAMO_")) {
       await connection.query(
         "UPDATE cuenta SET saldo = saldo + ? WHERE idCuenta = ?",
@@ -197,25 +196,30 @@ router.post("/procesar-prestamo", async (req, res) => {
       );
       await connection.query(
         "INSERT INTO movimiento (idCuenta, monto, tipoMovimiento) VALUES (?, ?, 'ABONO_PRESTAMO')",
-        [solicitud.idCuenta, solicitud.montoTotal, "ABONO_PRESTAMO"]
+        [solicitud.idCuenta, solicitud.montoTotal]
       );
     }
 
-    // Si es un CRÉDITO y se aprueba, crear la tarjeta
+    // CASO 2: CRÉDITO -> Crear tarjeta o Aumentar Límite
     if (aprobado && solicitud.tipo.startsWith("CREDITO_")) {
-      const [usuarioRows] = await connection.query(
-        "SELECT idUsuario FROM pertenece WHERE idCuenta = ?",
-        [solicitud.idCuenta]
-      );
-      const idUsuario = usuarioRows[0].idUsuario;
-
+      
+      // Verificar si ya tiene tarjeta de crédito en esa cuenta
       const [tarjetas] = await connection.query(
         "SELECT * FROM tarjeta WHERE idCuenta = ? AND tipoTarjeta = 'CREDITO'",
         [solicitud.idCuenta]
       );
 
-      if (tarjetas.length === 0) {
-        // No tiene tarjeta de crédito, crear una nueva
+      if (tarjetas.length > 0) {
+        // ⚠️ YA TIENE TARJETA: Aumentar el límite (Anexar crédito)
+        const tarjetaExistente = tarjetas[0];
+        const nuevoLimite = parseFloat(tarjetaExistente.limiteCredito) + parseFloat(solicitud.montoTotal);
+        
+        await connection.query(
+          "UPDATE tarjeta SET limiteCredito = ? WHERE idTarjeta = ?",
+          [nuevoLimite, tarjetaExistente.idTarjeta]
+        );
+      } else {
+        // ⚠️ NO TIENE TARJETA: Crear una nueva
         const numeroTarjeta =
           "5500" + Math.floor(100000000000 + Math.random() * 900000000000).toString().substring(0, 12);
         const cvv = Math.floor(100 + Math.random() * 900);
@@ -232,7 +236,7 @@ router.post("/procesar-prestamo", async (req, res) => {
             cvv,
             solicitud.montoTotal,
             solicitud.intereses,
-            800, // Anualidad de ejemplo
+            800, // Anualidad ejemplo
           ]
         );
       }

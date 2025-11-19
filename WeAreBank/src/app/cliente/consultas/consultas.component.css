@@ -193,3 +193,49 @@ tbody tr:hover {
   margin-top: 0;
   border-bottom: none;
 }
+
+.danger-zone {
+  border: 1px solid #f5c6cb;
+  background-color: #fff5f5;
+  padding: 1.5rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.warning-text {
+  color: #721c24;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+/* Estilo unificado para el botón de peligro */
+.btn-danger {
+  background-color: #dc3545; /* Rojo */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 6px; /* Mismo radio que btn-pdf */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.btn-danger:disabled {
+  background-color: #e2e6ea;
+  color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+}

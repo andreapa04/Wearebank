@@ -1,12 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-// 1. Importar Módulos
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-// 2. Importar Servicio
 import { AuthService } from '../../services/auth.service';
 
-// 🔽 Interfaz actualizada
+// Interfaz actualizada
 interface CarteraCuenta {
   idCuenta: number;
   clabe: string;
@@ -15,18 +13,17 @@ interface CarteraCuenta {
   idUsuario: number;
   nombre: string;
   apellidoP: string;
-  apellidoM: string; // añadido
+  apellidoM: string;
   email: string;
-  telefono: string;  // añadido
-  direccion: string; // añadido
-  RFC: string;       // añadido
-  CURP: string;      // añadido
+  telefono: string;
+  direccion: string;
+  RFC: string;
+  CURP: string;
 }
 
 @Component({
   selector: 'app-cuentas',
   standalone: true,
-  // 3. Importar NgModules
   imports: [CommonModule, HttpClientModule, FormsModule],
   templateUrl: './cuentas.component.html',
   styleUrl: './cuentas.component.css'
@@ -38,30 +35,18 @@ export class CuentasComponent implements OnInit {
 
   // Formulario de nuevo cliente
   formCliente = {
-    nombre: '',
-    apellidoP: '',
-    apellidoM: '',
-    direccion: '',
-    telefono: '',
-    email: '',
-    contrasenia: '',
-    fechaNacimiento: '',
-    CURP: '',
-    RFC: '',
-    INE: '',
-    preguntaSeguridad: '¿Cuál es tu comida favorita?',
-    respuestaSeguridad: ''
+    nombre: '', apellidoP: '', apellidoM: '', direccion: '',
+    telefono: '', email: '', contrasenia: '', fechaNacimiento: '',
+    CURP: '', RFC: '', INE: '', preguntaSeguridad: '¿Cuál es tu comida favorita?', respuestaSeguridad: ''
   };
   
-  // 🔽 Propiedades para edición y mensajes
   mensajeExito: string = '';
   error: string = '';
   clienteEnEdicion: CarteraCuenta | null = null;
-  // Propiedad 'mensaje' original renombrada a 'mensajeExito' o 'error'
 
   constructor(
     private http: HttpClient, 
-    private authService: AuthService
+    public authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -75,6 +60,7 @@ export class CuentasComponent implements OnInit {
 
   cargarCartera(): void {
     this.limpiarMensajes();
+    // Usa el mismo endpoint que ejecutivo, trae toda la data necesaria
     this.http.get<CarteraCuenta[]>('http://localhost:3000/api/ejecutivo/cartera-cuentas')
       .subscribe({
         next: (data) => this.cartera = data,
@@ -103,7 +89,7 @@ export class CuentasComponent implements OnInit {
     this.http.delete(`http://localhost:3000/api/ejecutivo/eliminar-cuenta/${idCuenta}`)
       .subscribe({
         next: () => {
-          this.mensajeExito = 'Cuenta eliminada exitosamente.';
+          this.mensajeExito = 'Cuenta eliminada y usuario desactivado exitosamente.';
           this.cargarCartera();
         },
         error: (err: any) => this.error = err.error?.message || 'Error al eliminar la cuenta.'
@@ -112,31 +98,28 @@ export class CuentasComponent implements OnInit {
 
   agregarCliente(): void {
     this.limpiarMensajes();
-    this.mensajeExito = 'Procesando...'; // Usar mensajeExito
+    this.mensajeExito = 'Procesando...';
     
     this.authService.register(this.formCliente).subscribe({
       next: (res: any) => {
         this.mensajeExito = 'Cliente y cuenta creados exitosamente.';
-        this.formCliente = { // Resetear formulario
+        this.formCliente = { 
           nombre: '', apellidoP: '', apellidoM: '', direccion: '', telefono: '',
           email: '', contrasenia: '', fechaNacimiento: '', CURP: '', RFC: '',
           INE: '', preguntaSeguridad: '¿Cuál es tu comida favorita?', respuestaSeguridad: ''
         };
-        this.vista = 'cartera'; // Volver a la cartera
-        this.cargarCartera(); // Recargar
+        this.vista = 'cartera';
+        this.cargarCartera();
       },
       error: (err: any) => {
         this.error = err.error?.message || 'Error al crear el cliente.';
-        this.mensajeExito = ''; // Limpiar mensaje de "procesando"
+        this.mensajeExito = '';
       }
     });
   }
 
-  // 🔽 --- NUEVAS FUNCIONES PARA EDITAR --- 🔽
-
   iniciarEdicion(cliente: CarteraCuenta): void {
     this.limpiarMensajes();
-    // 🔽 FIX: Usar Object.assign para clonar explícitamente y evitar error de tipo
     this.clienteEnEdicion = Object.assign({}, cliente);
   }
 
@@ -146,22 +129,40 @@ export class CuentasComponent implements OnInit {
   }
 
   guardarCambios(): void {
-    if (!this.clienteEnEdicion) return; // Guard para 'null'
+    if (!this.clienteEnEdicion) return;
     this.limpiarMensajes();
 
     const idUsuario = this.clienteEnEdicion.idUsuario;
     
-    // Usamos el endpoint del GERENTE
-    // El guard 'if' anterior asegura que this.clienteEnEdicion no es null aquí
     this.http.put(`http://localhost:3000/api/gerente/cliente-detalle/${idUsuario}`, this.clienteEnEdicion)
       .subscribe({
         next: (res: any) => {
           this.mensajeExito = res.message || 'Cliente actualizado';
           this.clienteEnEdicion = null;
-          this.cargarCartera(); // Recargar los datos de la tabla
+          this.cargarCartera();
         },
         error: (err: any) => {
           this.error = err.error?.error || 'Error al guardar los cambios';
+        }
+      });
+  }
+
+  // --- NUEVA FUNCIÓN: Descargar PDF ---
+  descargarPDF(clabe: string): void {
+    if (!clabe) return;
+    
+    this.http.get(`http://localhost:3000/api/consultas/estado-cuenta-pdf/${clabe}`, { responseType: 'blob' })
+      .subscribe({
+        next: (blob: Blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `estado-cuenta-${clabe}.pdf`;
+          link.click();
+          window.URL.revokeObjectURL(url);
+        },
+        error: (err) => {
+          this.error = 'Error al generar el PDF. Puede que no haya movimientos.';
         }
       });
   }
